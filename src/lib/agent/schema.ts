@@ -18,19 +18,34 @@ export const AGENT_STEPS = [
 ] as const;
 export type AgentStep = (typeof AGENT_STEPS)[number];
 
+const ScenarioLabel = z.string().regex(/^[a-z0-9_-]{1,40}$/);
+
 export const AgentRequestSchema = z.object({
   intent: IntentSchema,
   profile: ProfileSchema,
   lang: z.enum(LANGUAGES),
   jury: z.boolean().default(false),
   /** Label for saved runs ("istanbul", "paris"); null for a free run. */
-  scenario: z
-    .string()
-    .regex(/^[a-z0-9_-]{1,40}$/)
-    .nullable()
-    .default(null),
+  scenario: ScenarioLabel.nullable().default(null),
+  replay: z.literal(false).optional(),
 });
 export type AgentRequest = z.input<typeof AgentRequestSchema>;
+
+/** Replays the latest valid saved run of a scenario: no model or MCP call. */
+export const AgentReplayRequestSchema = z.object({
+  replay: z.literal(true),
+  scenario: ScenarioLabel,
+});
+export type AgentReplayRequest = z.input<typeof AgentReplayRequestSchema>;
+
+/** Codes of the final `error` event (step failures use their own codes). */
+export type AgentErrorCode =
+  | "intent_incomplete"
+  | "origin_missing"
+  | "timeout"
+  | "agent_invalid_output"
+  | "agent_failed"
+  | "replay_unavailable";
 
 const Trilingual = z.object({
   darija: z.string().min(1).max(280),
@@ -147,7 +162,15 @@ export type StepPhase = "start" | "progress" | "done" | "error";
 
 /** Server-sent events of POST /api/agent, one JSON object per `data:` line. */
 export type AgentStreamEvent =
-  | { type: "run"; run_id: string; started_at: string; fx: FxRate }
+  | {
+      type: "run";
+      run_id: string;
+      started_at: string;
+      fx: FxRate;
+      replay: boolean;
+      /** Replay only: when the replayed prices were fetched (prices_captured_at). */
+      captured_at?: string;
+    }
   | {
       type: "step";
       step: AgentStep;
@@ -160,5 +183,16 @@ export type AgentStreamEvent =
   | { type: "offers"; offers: Offer[] }
   | { type: "result"; package: AgentPackage }
   | { type: "saved"; run_id: string; ok: boolean }
-  | { type: "error"; code: string; detail?: string }
-  | { type: "end"; total_ms: number; cost_usd: number };
+  | { type: "error"; code: AgentErrorCode; detail?: string }
+  | {
+      type: "end";
+      total_ms: number;
+      /** Spent by this request: always 0 for a replay. */
+      cost_usd: number;
+      replay: boolean;
+      /** Replay only: what the recorded live run measured. */
+      recorded?: { total_ms: number; cost_usd: number };
+    };
+
+/** One SSE event of a live run with its offset from the run start, as saved for replays. */
+export type RecordedFrame = { ms: number; event: AgentStreamEvent };

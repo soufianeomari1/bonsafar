@@ -137,6 +137,11 @@ create index if not exists runs_scenario_created_at_idx
 alter table public.runs enable row level security;
 -- No policy: only the server, with SUPABASE_SECRET_KEY, reads and writes runs.
 
+-- migration add_runs_stream
+alter table public.runs add column if not exists stream jsonb;
+comment on column public.runs.stream is
+  'SSE events of the live run with their offset in ms, replayed by POST /api/agent with replay: true.';
+
 -- ---------------------------------------------------------------------------
 -- A profile row is created at sign-up, with the Google first name
 -- ---------------------------------------------------------------------------

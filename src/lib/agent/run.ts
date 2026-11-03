@@ -11,6 +11,7 @@ import { flightDelta, packageTotals, passengerCount, totalStops } from "@/lib/pr
 import { wonderContext, WONDER_SYSTEM_PROMPT } from "./prompt";
 import {
   WonderOutputSchema,
+  type AgentErrorCode,
   type AgentNotice,
   type AgentPackage,
   type AgentRequestSchema,
@@ -24,7 +25,7 @@ import { AgentContext, WONDER_TOOLS } from "./tools";
 
 export class AgentError extends Error {
   constructor(
-    readonly code: string,
+    readonly code: AgentErrorCode,
     detail?: string,
   ) {
     super(detail ?? code);
@@ -168,7 +169,7 @@ export async function runAgent({
 
   const fx = eurMadRate();
   const store = new PriceStore(fx);
-  emit({ type: "run", run_id: log.runId, started_at: new Date().toISOString(), fx });
+  emit({ type: "run", run_id: log.runId, started_at: new Date().toISOString(), fx, replay: false });
 
   const ctx = new AgentContext(dated, profile, lang, jury, origin, store, log, emit);
   ctx.prefetch(destination);

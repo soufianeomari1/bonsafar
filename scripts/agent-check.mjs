@@ -1,12 +1,31 @@
 // Runs the Istanbul and Paris scenarios against POST /api/agent of a running
 // server and prints total time, total measured cost and the recommended
-// package. Usage: npm run agent:check [-- http://localhost:3001] [-- istanbul]
+// package. With --replay, streams the latest saved run instead and checks it
+// is the same event sequence as the live run, every event marked replay.
+// Usage: npm run agent:check -- [http://localhost:3001] [istanbul] [--replay paris]
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { FATIMA, SCENARIOS } from "../src/lib/agent/scenarios.ts";
 
 const args = process.argv.slice(2);
 const urlArg = args.find((a) => /^https?:\/\//.test(a));
-const only = args.filter((a) => a in SCENARIOS);
-const names = only.length ? only : Object.keys(SCENARIOS);
+const replays = args.flatMap((a, i) => (args[i - 1] === "--replay" && a in SCENARIOS ? [a] : []));
+const live = args.filter((a, i) => a in SCENARIOS && args[i - 1] !== "--replay");
+const jobs = [
+  ...(live.length || !replays.length ? (live.length ? live : Object.keys(SCENARIOS)) : []).map((name) => ({
+    name,
+    replay: false,
+  })),
+  ...replays.map((name) => ({ name, replay: true })),
+];
+
+const REQUIRED_TYPES = ["run", "step", "log", "offers", "result", "saved", "end"];
+const REPLAY_MAX_S = 12;
+// The live event sequence of each scenario, kept between runs of this script.
+const sequenceDir = join(tmpdir(), "bonsafar-agent-check");
+const sequenceFile = (name) => join(sequenceDir, `${name}.json`);
+const describeEvent = (e) => (e.type === "step" ? `step:${e.step}:${e.phase}:${e.destination ?? ""}` : e.type);
 
 async function pickBase() {
   if (urlArg) return urlArg.replace(/\/$/, "");
@@ -27,16 +46,23 @@ const mad = (n) => `${new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).
 const dh = (n) => `${new Intl.NumberFormat("en").format(n)} DH`;
 const usd = (n) => `$${n.toFixed(4)}`;
 
-async function run(base, name) {
+async function run(base, name, replay) {
   const started = performance.now();
   const response = await fetch(`${base}/api/agent`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ intent: SCENARIOS[name], profile: FATIMA, lang: "en", jury: true, scenario: name }),
+    body: JSON.stringify(
+      replay
+        ? { replay: true, scenario: name }
+        : { intent: SCENARIOS[name], profile: FATIMA, lang: "en", jury: true, scenario: name },
+    ),
   });
   if (!response.ok || !response.body) throw new Error(`${name}: HTTP ${response.status}`);
 
   const offers = new Map();
+  const sequence = [];
+  const replayProblems = [];
+  let runEvent = null;
   let result = null;
   let end = null;
   let error = null;
@@ -52,6 +78,11 @@ async function run(base, name) {
       const data = frame.split("\n").find((line) => line.startsWith("data: "));
       if (!data) continue;
       const event = JSON.parse(data.slice(6));
+      sequence.push(describeEvent(event));
+      if (event.type === "run") runEvent = event;
+      if (event.type === "log" && event.event.replay !== replay) {
+        replayProblems.push(`log ${event.event.step} has replay=${event.event.replay}`);
+      }
       if (event.type === "offers") for (const offer of event.offers) offers.set(offer.id, offer);
       else if (event.type === "result") result = event.package;
       else if (event.type === "end") end = event;
@@ -64,8 +95,45 @@ async function run(base, name) {
     }
   }
 
+  const wallSeconds = (performance.now() - started) / 1000;
   const seconds = ((end?.total_ms ?? performance.now() - started) / 1000).toFixed(1);
-  console.log(`\n${name.toUpperCase()}: ${seconds} s, cost ${usd(end?.cost_usd ?? 0)}, saved: ${saved}`);
+  const label = `${name.toUpperCase()}${replay ? " (REPLAY)" : ""}`;
+  console.log(`\n${label}: ${seconds} s, cost ${usd(end?.cost_usd ?? 0)}, saved: ${saved}`);
+  if (replay && end?.recorded) {
+    console.log(`  recorded live run: ${(end.recorded.total_ms / 1000).toFixed(1)} s, ${usd(end.recorded.cost_usd)}`);
+  }
+
+  if (replay) {
+    if (runEvent?.replay !== true || !runEvent?.captured_at) replayProblems.push("run event lacks replay or captured_at");
+    if (end?.replay !== true || end?.cost_usd !== 0) replayProblems.push("end event is not replay with cost 0");
+    if (wallSeconds > REPLAY_MAX_S + 0.5) replayProblems.push(`replay took ${wallSeconds.toFixed(1)} s`);
+    const types = new Set(sequence.map((s) => s.split(":")[0]));
+    const missing = REQUIRED_TYPES.filter((t) => !types.has(t));
+    if (missing.length && !error) replayProblems.push(`missing event types: ${missing.join(", ")}`);
+    let recorded = null;
+    try {
+      recorded = JSON.parse(readFileSync(sequenceFile(name), "utf8"));
+    } catch {
+      // no live run of this scenario recorded by this script
+    }
+    if (recorded?.run_id === runEvent?.run_id) {
+      const same = recorded.sequence.length === sequence.length && recorded.sequence.every((s, i) => s === sequence[i]);
+      if (!same) replayProblems.push("event sequence differs from the live run");
+      else console.log(`  replay check: same ${sequence.length} events in the same order as live run ${recorded.run_id}`);
+    } else if (recorded) {
+      const liveTypes = [...new Set(recorded.sequence.map((s) => s.split(":")[0]))].sort().join(",");
+      if (liveTypes !== [...types].sort().join(",")) replayProblems.push("event types differ from the last live run");
+      else console.log(`  replay check: same event types as the last live run (a different run, ${recorded.run_id})`);
+    }
+  } else if (result && saved) {
+    mkdirSync(sequenceDir, { recursive: true });
+    writeFileSync(sequenceFile(name), JSON.stringify({ run_id: runEvent?.run_id, sequence }));
+  }
+  if (replayProblems.length) {
+    console.log(`  REPLAY CHECK FAILED:\n    ${replayProblems.join("\n    ")}`);
+    return { ok: false, ms: end?.total_ms ?? 0, cost: end?.cost_usd ?? 0 };
+  }
+  if (replay && !error) console.log(`  replay check: ${sequence.length} events, all marked replay, cost 0, ${wallSeconds.toFixed(1)} s`);
   if (error || !result) {
     console.log(`  FAILED: ${error?.code ?? "no result"} ${error?.detail ?? ""}`);
     return { ok: false, ms: end?.total_ms ?? 0, cost: end?.cost_usd ?? 0 };
@@ -136,9 +204,9 @@ async function run(base, name) {
 const base = await pickBase();
 console.log(`Agent check against ${base}\n`);
 const results = [];
-for (const name of names) {
-  console.log(`> ${name}`);
-  results.push(await run(base, name));
+for (const job of jobs) {
+  console.log(`> ${job.name}${job.replay ? " (replay)" : ""}`);
+  results.push(await run(base, job.name, job.replay));
   console.log("");
 }
 const totalMs = results.reduce((s, r) => s + r.ms, 0);
