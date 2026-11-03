@@ -1,0 +1,54 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
+import { cn } from "@/lib/utils";
+
+/** Three layers, slower the further away, as in docs section 3 (A9). */
+const LAYERS = [
+  { top: 70, width: 90, opacity: 1, duration: 38, delay: 0 },
+  { top: 118, width: 60, opacity: 0.8, duration: 26, delay: -12 },
+  { top: 168, width: 44, opacity: 0.6, duration: 54, delay: -30 },
+];
+
+export type CloudsProps = {
+  className?: string;
+};
+
+/** A9: small white clouds drifting behind a header while something loads. */
+export function Clouds({ className }: CloudsProps) {
+  const reduced = useReducedMotion();
+
+  return (
+    <div
+      aria-hidden
+      className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
+    >
+      {LAYERS.map((layer, index) => (
+        <motion.svg
+          key={index}
+          viewBox="0 0 90 34"
+          width={layer.width}
+          height={(layer.width * 34) / 90}
+          className="absolute left-0 text-card"
+          style={{ top: layer.top, opacity: layer.opacity }}
+          animate={reduced ? { x: "60%" } : { x: ["-120%", "640%"] }}
+          transition={
+            reduced
+              ? { duration: 0.2 }
+              : {
+                  duration: layer.duration,
+                  delay: layer.delay,
+                  ease: "linear",
+                  repeat: Infinity,
+                }
+          }
+        >
+          <path
+            d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z"
+            fill="currentColor"
+          />
+        </motion.svg>
+      ))}
+    </div>
+  );
+}
