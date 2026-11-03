@@ -24,6 +24,19 @@
   --color-blue-soft: #eaf2ff;
   --color-violet: #a855f7;
 
+  /* Budget and breakfast chips of mockup 04-Compris */
+  --color-yellow-soft: #fff6cc;
+  --color-yellow-ink: #8a6100;
+  --color-rust: #c2410c;
+
+  /* Radar rings of mockups 02-Main and 03-Vocal */
+  --color-radar: #d6e4ff;
+  --color-radar-dash: #c4d7fb;
+  --color-radar-axis: #e3ecfc;
+  --color-listen: #f5f9ff;
+  --color-line-strong: #d1d1d6;
+  --color-knob-off: #c7c7cc;
+
   /* Stylised map and header sky */
   --color-sea: #d4e8f6;
   --color-land: #eef1e6;
@@ -84,6 +97,71 @@
   );
 }
 
+/* Home and trust sheet backdrop, mockups 02-Main and 01c-Confiance */
+@utility bg-home-gradient {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-blue-soft) 0%,
+    var(--color-card) 38%
+  );
+}
+
+/* Listening screen, mockup 03-Vocal */
+@utility bg-listen-gradient {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-card) 0%,
+    var(--color-listen) 100%
+  );
+}
+
+/* "1 to 3 s" loading label of docs section 8 */
+@utility shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    var(--color-line) 50%,
+    var(--color-muted) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: bs-shimmer 1.6s linear infinite;
+}
+
+@keyframes bs-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes bs-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bs-rec {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Scroll areas inside the phone frame: no desktop scrollbar over the design */
+@utility scroll-quiet {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Numbers that must stay aligned: times, prices, counters */
 @utility tabular {
   font-variant-numeric: tabular-nums;
@@ -92,7 +170,8 @@
 /* Opt-in marker for CSS keyframe animations we author, so one rule can stop
    them all when the user asks for reduced motion. */
 @media (prefers-reduced-motion: reduce) {
-  .bs-motion {
+  .bs-motion,
+  .shimmer {
     animation: none !important;
   }
 }

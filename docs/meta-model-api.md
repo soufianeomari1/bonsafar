@@ -32,7 +32,16 @@ Never use `-contributor` models (inputs used for training, 100 RPM limit). "Muse
 
 Reasoning tokens are billed as output tokens. Count them in cost.
 
-## Muse Spark 1.3 (reported)
+## Muse Spark 1.3
+
+Verified on 2026-11-03 (block 2, `src/app/api/intent`):
+- `reasoning_effort: "minimal"` on Chat Completions works and cuts reasoning tokens (189 reasoning tokens out of 445 output tokens for the Istanbul intent).
+- `completion_tokens` already includes the reasoning tokens (`completion_tokens_details.reasoning_tokens`): do not add them twice in cost.
+- `response_format: { type: "json_schema", ... }` is honoured; we still validate with zod.
+- Measured intent extraction (darija Istanbul sentence, 1,361 tokens in): 5.3 s, $0.0022. Typical range 5 to 10 s, above the 5 s target.
+- Audio input works through `{ type: "input_audio", input_audio: { data: <base64>, format: "wav" } }`. With `"minimal"` it repeated phrases in our tests, so the fallback transcription uses `"low"`.
+
+Reported:
 
 - 1,048,576-token context.
 - Function calling with `tools` and `tool_choice`.
@@ -41,8 +50,20 @@ Reasoning tokens are billed as output tokens. Count them in cost.
 - Web search grounding is available, billed $2.50 per 1,000 searches. Check in the live docs how to enable it (built-in tool name and parameters) before coding `check_entry_requirements`.
 - Audio input exists but is reported as not fully supported, quality may be degraded. Fallback only.
 
-## Muse Voice Transcribe 1.0 (reported, confirm in live docs)
+## Muse Voice Transcribe 1.0: verified on 2026-11-03 (block 2)
 
+Implementation: `src/lib/ai/transcribe.ts`.
+
+- URL: `wss://api.meta.ai/v1/asr/realtime?sessionId=<id>`. The `Authorization` header on the HTTP upgrade is not enough: auth goes in the first JSON message after `open`.
+- First message: `{ authorization: { accessToken: "Bearer <key>" }, audioEncoding: "PCM_24KHZ" | "PCM_16KHZ", model, mode: "PUSH_TO_TALK", partialMode: "CUMULATIVE", emitAudioProgress: true, keywords: [...], languageBias: ["Arabic", "French"] }`.
+- The server acknowledges with a JSON object that has `sessionId` and no `type`. Only then send audio: raw PCM16 binary frames (we send 80 ms frames).
+- Pacing: audio more than about 5 s ahead of `audioProcessedMs` is rejected, and so is audio sent slower than real time. We keep a 4 s lead.
+- End of audio: send `{ "type": "endStream" }`. Events have `type: "transcript"` with `final: false` (cumulative partials, each replaces the previous one) then `final: true`. The server closes with 1000 after the final transcript; we close ourselves after 1.5 s otherwise.
+- A batch endpoint `/v1/asr/transcribe` also exists (not used: the realtime path gives live partial words).
+- Measured: 9.0 s of clean French speech gave a near-perfect transcript in 3.7 s server-side, $0.00045 ($0.18 per hour). Silence returns an empty final transcript, which the app shows as "nothing heard".
+- Darija is not one of the supported languages: the Arabic and French bias works, but noisy starts can come out as Arabic-script words.
+
+Earlier notes from third-party docs, kept for reference:
 - Served on Meta Model API as realtime only: `wss://api.meta.ai/v1/asr/realtime`. No `/v1/audio/transcriptions` batch endpoint.
 - Audio: PCM 16-bit, mono, 16 kHz or 24 kHz, sent as binary frames.
 - Emits speech start, partial transcript deltas, speech stop and completed transcript events. Trailing audio after the last completed event is billed when the session closes.

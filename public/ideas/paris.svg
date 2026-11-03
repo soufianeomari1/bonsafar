@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="192" viewBox="0 0 150 96">
+  <!-- PROVISIONAL placeholder drawn for BonSafar, to be replaced by a Muse Image illustration. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.55" y2="1">
+      <stop offset="0" stop-color="#BFE3FF"/>
+      <stop offset="1" stop-color="#E9F3FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="150" height="96" fill="url(#sky)"/>
+  <path d="M0 96V80h50V74h8l8-50 8 50h8v6h68v16z" fill="#FFFFFF" opacity="0.75"/>
+  <path d="M60 60h12M58 70h16" stroke="#BFE3FF" stroke-width="2"/>
+</svg>

@@ -60,7 +60,7 @@ export function Sheet({
             aria-modal="true"
             aria-label={title}
             className={cn(
-              "relative max-h-[88%] overflow-y-auto rounded-t-sheet bg-card px-5 pb-6 pt-4",
+              "relative max-h-[88%] scroll-quiet overflow-y-auto rounded-t-sheet bg-card px-5 pb-6 pt-4",
               className
             )}
             initial={reduced ? { opacity: 0 } : { y: "100%" }}

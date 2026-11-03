@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safar mascot states (motion reference)</title>
+<!-- Motion reference for Cursor. Open in a browser to watch the loops. All timings and keyframes below are the spec. -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B0B0F}a:hover{color:#0A6CFF}
+@keyframes mFloat{0%,100%{transform:translateY(0) rotate(-12deg)}50%{transform:translateY(-8px) rotate(-8deg)}}
+@keyframes mFlap{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-18deg)}}
+@keyframes mBlink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(0.15)}}
+@keyframes mWave{0%,100%{opacity:0.15}50%{opacity:1}}
+@keyframes mDot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-9px)}}
+@keyframes mJump{0%,55%,100%{transform:translateY(0) rotate(-10deg) scale(1)}20%{transform:translateY(-22px) rotate(-4deg) scale(1.04)}40%{transform:translateY(0) rotate(-10deg) scale(1.06,0.94)}}
+@keyframes mShake{0%,60%,100%{transform:translateX(0) rotate(-8deg)}10%,30%,50%{transform:translateX(-4px) rotate(-11deg)}20%,40%{transform:translateX(4px) rotate(-5deg)}}
+@keyframes mFly{0%{transform:translate(-26px,14px) rotate(-18deg)}50%{transform:translate(18px,-12px) rotate(-6deg)}100%{transform:translate(-26px,14px) rotate(-18deg)}}
+@keyframes mTwinkle{0%,100%{transform:scale(0.7) rotate(0deg);opacity:0.4}50%{transform:scale(1.25) rotate(25deg);opacity:1}}
+@keyframes mMarch{from{stroke-dashoffset:0}to{stroke-dashoffset:-30}}
+@keyframes mSleep{0%{transform:translate(0,0);opacity:0}30%{opacity:1}100%{transform:translate(14px,-26px);opacity:0}}
+.m-float{animation:mFloat 3.2s ease-in-out infinite}
+.m-wing{animation:mFlap 0.9s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 50%}
+.m-wing-fast{animation:mFlap 0.26s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 50%}
+.m-wing-slow{animation:mFlap 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 50%}
+.m-eyes{animation:mBlink 4.5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+.m-wave1{animation:mWave 0.9s ease-in-out infinite}
+.m-wave2{animation:mWave 0.9s ease-in-out infinite;animation-delay:0.3s}
+.m-dot1{animation:mDot 1.2s ease-in-out infinite}
+.m-dot2{animation:mDot 1.2s ease-in-out infinite;animation-delay:0.15s}
+.m-dot3{animation:mDot 1.2s ease-in-out infinite;animation-delay:0.3s}
+.m-jump{animation:mJump 1.6s cubic-bezier(0.23,1,0.32,1) infinite}
+.m-shake{animation:mShake 2.2s ease-in-out infinite}
+.m-fly{animation:mFly 3s ease-in-out infinite}
+.m-twinkle{animation:mTwinkle 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+.m-twinkle2{animation:mTwinkle 1.4s ease-in-out infinite;animation-delay:0.5s;transform-box:fill-box;transform-origin:50% 50%}
+.m-march{animation:mMarch 1.2s linear infinite}
+.m-tilt{transform:rotate(-10deg)}
+@media (prefers-reduced-motion: reduce){.m-float,.m-wing,.m-wing-fast,.m-wing-slow,.m-eyes,.m-wave1,.m-wave2,.m-dot1,.m-dot2,.m-dot3,.m-jump,.m-shake,.m-fly,.m-twinkle,.m-twinkle2,.m-march{animation:none!important}}
+</style>
+<style>html,body{background:#E5E5EA} body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}</style>
+</head>
+<body>
+<div style="width: 1360px; height: 560px; box-sizing: border-box; padding: 32px 30px; background: #F2F2F7; color: #0B0B0F; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column; gap: 24px">
+  <div style="display: flex; align-items: flex-end; justify-content: space-between">
+    <div>
+      <h1 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.02em">Safar, la mascotte vivante</h1>
+      <p style="margin: 6px 0 0 0; font-size: 16px; color: #6B6B76">6 états animés en code (SVG + Motion), branchés sur les moments clés du parcours et sur l'haptique.</p>
+    </div>
+    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #0B0B0F; background: #FFC800; padding: 6px 10px; border-radius: 8px">LÉGER · NET · SYNCHRONISÉ</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px">
+
+    <article style="background: #FFFFFF; border-radius: 22px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)">
+      <div style="height: 210px; background: linear-gradient(180deg, #DCEBFF, #F2F2F7); display: flex; align-items: center; justify-content: center">
+        <div class="m-float" style="width: 140px; height: 140px">
+          <svg role="img" aria-label="Safar au repos, les yeux plissés de bonheur" width="140" height="140" viewBox="0 0 200 200">
+            <g transform="translate(200,-10) scale(-1,1)"><path class="m-wing" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+            <path class="m-wing" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <g class="m-eyes"><path d="M74,89 Q82,78 90,89 M108,89 Q116,78 124,89" fill="none" stroke="#0B0B0F" stroke-width="6" stroke-linecap="round"></path></g>
+            <path d="M88,104 Q99,116 110,104" fill="none" stroke="#0B0B0F" stroke-width="6" stroke-linecap="round"></path>
+          </svg>
+        </div>
+      </div>
+      <div style="padding: 16px">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 800">Repos</h2>
+        <p style="margin: 6px 0 0 0; font-size: 14px; line-height: 1.4; color: #6B6B76">Bienvenue et accueil. Il attend que tu parles.</p>
+        <p style="margin: 10px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 11px; line-height: 1.5; color: #0A6CFF">flotte 3 s · ailes lentes · clignement</p>
+      </div>
+    </article>
+
+    <article style="background: #FFFFFF; border-radius: 22px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)">
+      <div style="height: 210px; background: linear-gradient(180deg, #DCEBFF, #F2F2F7); display: flex; align-items: center; justify-content: center">
+        <div class="m-tilt" style="width: 140px; height: 140px">
+          <svg role="img" aria-label="Safar qui écoute, les yeux grands ouverts, les ailes qui battent vite" width="140" height="140" viewBox="0 0 200 200">
+            <path class="m-wave1" d="M162,74 Q174,92 162,110" fill="none" stroke="#0A6CFF" stroke-width="6" stroke-linecap="round"></path>
+            <path class="m-wave2" d="M176,62 Q196,92 176,122" fill="none" stroke="#0A6CFF" stroke-width="6" stroke-linecap="round"></path>
+            <g transform="translate(200,-10) scale(-1,1)"><path class="m-wing-fast" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+            <path class="m-wing-fast" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <circle cx="82" cy="86" r="6.5" fill="#0B0B0F"></circle>
+            <circle cx="116" cy="86" r="6.5" fill="#0B0B0F"></circle>
+            <circle cx="84" cy="84" r="2" fill="#FFFFFF"></circle>
+            <circle cx="118" cy="84" r="2" fill="#FFFFFF"></circle>
+            <ellipse cx="99" cy="108" rx="6" ry="7" fill="#0B0B0F"></ellipse>
+          </svg>
+        </div>
+      </div>
+      <div style="padding: 16px">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 800">Écoute</h2>
+        <p style="margin: 6px 0 0 0; font-size: 14px; line-height: 1.4; color: #6B6B76">Pendant la note vocale, à côté du radar.</p>
+        <p style="margin: 10px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 11px; line-height: 1.5; color: #0A6CFF">ailes rapides · ondes au volume de la voix</p>
+      </div>
+    </article>
+
+    <article style="background: #FFFFFF; border-radius: 22px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)">
+      <div style="height: 210px; background: linear-gradient(180deg, #DCEBFF, #F2F2F7); display: flex; align-items: center; justify-content: center">
+        <div class="m-tilt" style="width: 140px; height: 140px">
+          <svg role="img" aria-label="Safar qui réfléchit, le regard vers le haut, trois points au-dessus de lui" width="140" height="140" viewBox="0 0 200 200">
+            <circle class="m-dot1" cx="128" cy="26" r="7" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="3"></circle>
+            <circle class="m-dot2" cx="150" cy="22" r="7" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="3"></circle>
+            <circle class="m-dot3" cx="172" cy="18" r="7" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="3"></circle>
+            <g transform="translate(200,-10) scale(-1,1)"><path class="m-wing-slow" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+            <path class="m-wing-slow" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <circle cx="88" cy="80" r="6" fill="#0B0B0F"></circle>
+            <circle cx="122" cy="80" r="6" fill="#0B0B0F"></circle>
+            <path d="M90,108 Q100,104 110,108" fill="none" stroke="#0B0B0F" stroke-width="6" stroke-linecap="round"></path>
+          </svg>
+        </div>
+      </div>
+      <div style="padding: 16px">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 800">Réfléchit</h2>
+        <p style="margin: 6px 0 0 0; font-size: 14px; line-height: 1.4; color: #6B6B76">Plan de vol de l'agent, à chaque escale.</p>
+        <p style="margin: 10px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 11px; line-height: 1.5; color: #0A6CFF">regard en l'air · 3 points qui rebondissent</p>
+      </div>
+    </article>
+
+    <article style="background: #FFFFFF; border-radius: 22px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)">
+      <div style="height: 210px; background: linear-gradient(180deg, #DCEBFF, #F2F2F7); display: flex; align-items: center; justify-content: center; position: relative">
+        <svg aria-hidden="true" width="200" height="210" viewBox="0 0 200 210" style="position: absolute; left: 0; top: 0">
+          <path class="m-twinkle" d="M34,46 C36,54 39,57 47,59 C39,61 36,64 34,72 C32,64 29,61 21,59 C29,57 32,54 34,46 Z" fill="#FFC800" stroke="#0B0B0F" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path class="m-twinkle2" d="M168,34 C170,41 172,43 179,45 C172,47 170,49 168,56 C166,49 164,47 157,45 C164,43 166,41 168,34 Z" fill="#FFC800" stroke="#0B0B0F" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path class="m-twinkle2" d="M172,150 C173,155 175,157 180,158 C175,159 173,161 172,166 C171,161 169,159 164,158 C169,157 171,155 172,150 Z" fill="#FFC800" stroke="#0B0B0F" stroke-width="2.5" stroke-linejoin="round"></path>
+        </svg>
+        <div class="m-jump" style="width: 140px; height: 140px">
+          <svg role="img" aria-label="Safar ravi, qui saute de joie, la bouche grande ouverte" width="140" height="140" viewBox="0 0 200 200">
+            <g transform="translate(200,-10) scale(-1,1)"><path class="m-wing-fast" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+            <path class="m-wing-fast" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <path d="M74,89 Q82,77 90,89 M108,89 Q116,77 124,89" fill="none" stroke="#0B0B0F" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M86,101 Q99,124 112,101 Z" fill="#0B0B0F" stroke="#0B0B0F" stroke-width="5" stroke-linejoin="round"></path>
+            <path d="M92,110 Q99,116 106,110" fill="#FF8FA3"></path>
+          </svg>
+        </div>
+      </div>
+      <div style="padding: 16px">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 800">Trouvé !</h2>
+        <p style="margin: 6px 0 0 0; font-size: 14px; line-height: 1.4; color: #6B6B76">Forfait prêt, atterrissage, tampon posé.</p>
+        <p style="margin: 10px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 11px; line-height: 1.5; color: #0A6CFF">saut · étincelles · vibration success</p>
+      </div>
+    </article>
+
+    <article style="background: #FFFFFF; border-radius: 22px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)">
+      <div style="height: 210px; background: linear-gradient(180deg, #FFF4E0, #F2F2F7); display: flex; align-items: center; justify-content: center">
+        <div class="m-shake" style="width: 140px; height: 140px">
+          <svg role="img" aria-label="Safar embêté, sourcils inquiets et goutte de sueur" width="140" height="140" viewBox="0 0 200 200">
+            <path d="M162,50 Q172,66 162,74 Q152,66 162,50 Z" fill="#EAF2FF" stroke="#0B0B0F" stroke-width="4" stroke-linejoin="round"></path>
+            <g transform="translate(200,6) scale(-1,1) rotate(18 54 94)"><path d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+            <g transform="translate(0,16) rotate(18 54 94)"><path d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+            <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <path d="M72,78 L90,72 M108,72 L126,78" fill="none" stroke="#0B0B0F" stroke-width="5" stroke-linecap="round"></path>
+            <circle cx="82" cy="88" r="5.5" fill="#0B0B0F"></circle>
+            <circle cx="116" cy="88" r="5.5" fill="#0B0B0F"></circle>
+            <path d="M86,110 Q92,103 98,110 Q104,117 110,110" fill="none" stroke="#0B0B0F" stroke-width="5.5" stroke-linecap="round"></path>
+          </svg>
+        </div>
+      </div>
+      <div style="padding: 16px">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 800">Oups</h2>
+        <p style="margin: 6px 0 0 0; font-size: 14px; line-height: 1.4; color: #6B6B76">Micro refusé, réseau coupé, passage en replay.</p>
+        <p style="margin: 10px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 11px; line-height: 1.5; color: #B45309">petit tremblement · ailes basses · vibration warn</p>
+      </div>
+    </article>
+
+    <article style="background: #FFFFFF; border-radius: 22px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)">
+      <div style="height: 210px; background: linear-gradient(180deg, #DCEBFF, #F2F2F7); display: flex; align-items: center; justify-content: center; position: relative">
+        <svg aria-hidden="true" width="200" height="210" viewBox="0 0 200 210" style="position: absolute; left: 0; top: 0">
+          <path class="m-march" d="M8,180 C40,170 60,150 84,128" fill="none" stroke="#0B0B0F" stroke-opacity="0.55" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 15"></path>
+        </svg>
+        <div class="m-fly" style="width: 130px; height: 130px">
+          <svg role="img" aria-label="Safar qui fait un clin d'œil et s'envole : trik slama" width="130" height="130" viewBox="0 0 200 200">
+            <g transform="translate(200,-10) scale(-1,1)"><path class="m-wing" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+            <path class="m-wing" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+            <path d="M74,89 Q82,78 90,89" fill="none" stroke="#0B0B0F" stroke-width="6" stroke-linecap="round"></path>
+            <circle cx="116" cy="86" r="6.5" fill="#0B0B0F"></circle>
+            <path d="M86,102 Q99,118 114,102" fill="none" stroke="#0B0B0F" stroke-width="6" stroke-linecap="round"></path>
+          </svg>
+        </div>
+      </div>
+      <div style="padding: 16px">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 800">Trik slama</h2>
+        <p style="margin: 6px 0 0 0; font-size: 14px; line-height: 1.4; color: #6B6B76">Dossier de voyage et affiche Rihla.</p>
+        <p style="margin: 10px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 11px; line-height: 1.5; color: #0A6CFF">clin d'œil · s'envole avec sa traînée</p>
+      </div>
+    </article>
+
+  </div>
+</div>
+</body>
+</html>

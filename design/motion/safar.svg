@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="512" height="512" role="img" aria-label="Safar, the BonSafar mascot">
+  <g transform="rotate(-12 100 100)">
+    <g transform="translate(200,-10) scale(-1,1)">
+      <path d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"/>
+    </g>
+    <path d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M74,89 Q82,78 90,89 M108,89 Q116,78 124,89 M88,104 Q99,116 110,104" fill="none" stroke="#0B0B0F" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

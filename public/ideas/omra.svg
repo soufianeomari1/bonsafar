@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="192" viewBox="0 0 150 96">
+  <!-- PROVISIONAL placeholder drawn for BonSafar, to be replaced by a Muse Image illustration. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.55" y2="1">
+      <stop offset="0" stop-color="#FFE7B8"/>
+      <stop offset="1" stop-color="#F7C873"/>
+    </linearGradient>
+  </defs>
+  <rect width="150" height="96" fill="url(#sky)"/>
+  <circle cx="34" cy="28" r="9" fill="#FFFFFF" opacity="0.55"/>
+  <path d="M0 96V76h40V60h70v16h40v20z" fill="#FFFFFF" opacity="0.55"/>
+  <path d="M40 66h70" stroke="#F7C873" stroke-width="3"/>
+</svg>
