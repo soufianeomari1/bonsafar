@@ -117,6 +117,27 @@ alter table public.usage enable row level security;
 -- The "RLS enabled, no policy" advisor notice is expected and wanted here.
 
 -- ---------------------------------------------------------------------------
+-- runs: successful agent runs, saved for the honest replay (migration add_runs)
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.runs (
+  id text primary key,
+  created_at timestamptz not null default now(),
+  scenario text,
+  intent jsonb not null,
+  events jsonb not null,
+  offers jsonb not null,
+  package jsonb not null,
+  prices_captured_at timestamptz not null
+);
+
+create index if not exists runs_scenario_created_at_idx
+  on public.runs (scenario, created_at desc);
+
+alter table public.runs enable row level security;
+-- No policy: only the server, with SUPABASE_SECRET_KEY, reads and writes runs.
+
+-- ---------------------------------------------------------------------------
 -- A profile row is created at sign-up, with the Google first name
 -- ---------------------------------------------------------------------------
 
