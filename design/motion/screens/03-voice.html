@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BonSafar, note vocale (motion reference)</title>
+<!-- Motion reference for Cursor. Open in a browser to watch the loops. Layout, copy, timings and keyframes are the spec. -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B0B0F}a:hover{color:#0A6CFF}
+@keyframes sFlap{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-18deg)}}
+@keyframes sWave{0%,100%{opacity:0.15}50%{opacity:1}}
+@keyframes sBob{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-5px) rotate(-7deg)}}
+@keyframes sRing{0%{transform:scale(1);opacity:0.5}100%{transform:scale(2.3);opacity:0}}
+@keyframes sBar{0%,100%{transform:scaleY(0.25)}50%{transform:scaleY(1)}}
+@keyframes sWord{0%{opacity:0;transform:translateY(6px);filter:blur(3px)}100%{opacity:1;transform:none;filter:none}}
+@keyframes sCaret{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes sRec{0%,100%{opacity:1}50%{opacity:0.25}}
+@keyframes sHint{0%,100%{transform:translateX(0)}50%{transform:translateX(-6px)}}
+.s-wing-fast{animation:sFlap 0.26s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 50%}
+.s-wave1{animation:sWave 0.9s ease-in-out infinite}
+.s-wave2{animation:sWave 0.9s ease-in-out infinite;animation-delay:0.3s}
+.s-bob{animation:sBob 1.2s ease-in-out infinite}
+.s-ring{animation:sRing 1.6s cubic-bezier(0.23,1,0.32,1) infinite}
+.s-bar{animation:sBar 0.7s ease-in-out infinite;transform-origin:50% 50%}
+.s-word{display:inline-block;animation:sWord 0.45s cubic-bezier(0.23,1,0.32,1) both}
+.s-caret{animation:sCaret 1s steps(1) infinite}
+.s-rec{animation:sRec 1.2s ease-in-out infinite}
+.s-hint{animation:sHint 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.s-wing-fast,.s-wave1,.s-wave2,.s-bob,.s-ring,.s-bar,.s-word,.s-caret,.s-rec,.s-hint{animation:none!important}}
+</style>
+<style>html,body{background:#E5E5EA} body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: linear-gradient(180deg, #DCEBFF 0%, #EAF2FF 50%, #F2F2F7 100%); color: #0B0B0F; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column">
+
+  <div style="display: flex; align-items: center; justify-content: center; padding: 22px 20px 0 20px">
+    <span style="display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 999px; background: #FFFFFF; font-size: 13px; font-weight: 700">
+      <span class="s-rec" style="width: 8px; height: 8px; border-radius: 999px; background: #DC2626"></span>
+      Safar t'écoute
+    </span>
+  </div>
+
+  <section aria-label="Safar écoute" style="position: relative; height: 340px; display: flex; align-items: center; justify-content: center">
+    <div aria-hidden="true" style="position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; margin: -75px 0 0 -75px">
+      <span class="s-ring" style="position: absolute; inset: 0; border-radius: 999px; border: 2px solid #0A6CFF"></span>
+      <span class="s-ring" style="position: absolute; inset: 0; border-radius: 999px; border: 2px solid #0A6CFF; animation-delay: 0.53s"></span>
+      <span class="s-ring" style="position: absolute; inset: 0; border-radius: 999px; border: 2px solid #0A6CFF; animation-delay: 1.06s"></span>
+    </div>
+    <div class="s-bob" style="position: relative; width: 170px; height: 170px">
+      <svg role="img" aria-label="Safar écoute, les ailes qui battent vite" width="170" height="170" viewBox="0 0 200 200">
+        <path class="s-wave1" d="M162,74 Q174,92 162,110" fill="none" stroke="#0A6CFF" stroke-width="6" stroke-linecap="round"></path>
+        <path class="s-wave2" d="M176,62 Q196,92 176,122" fill="none" stroke="#0A6CFF" stroke-width="6" stroke-linecap="round"></path>
+        <g transform="translate(200,-10) scale(-1,1)"><path class="s-wing-fast" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+        <path class="s-wing-fast" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+        <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+        <circle cx="82" cy="86" r="6.5" fill="#0B0B0F"></circle>
+        <circle cx="116" cy="86" r="6.5" fill="#0B0B0F"></circle>
+        <circle cx="84" cy="84" r="2" fill="#FFFFFF"></circle>
+        <circle cx="118" cy="84" r="2" fill="#FFFFFF"></circle>
+        <ellipse cx="99" cy="108" rx="6" ry="7" fill="#0B0B0F"></ellipse>
+      </svg>
+    </div>
+  </section>
+
+  <section aria-live="polite" style="padding: 0 28px; min-height: 120px">
+    <p style="margin: 0; font-size: 24px; line-height: 1.35; font-weight: 700; letter-spacing: -0.01em; text-align: center">
+      <span class="s-word">Bghit</span> <span class="s-word" style="animation-delay: 0.3s">nsafer</span> <span class="s-word" style="animation-delay: 0.6s">l'Istanbul</span> <span class="s-word" style="animation-delay: 0.9s">m3a</span> <span class="s-word" style="animation-delay: 1.2s">rajli</span> <span class="s-word" style="animation-delay: 1.5s; color: #6B6B76">f nouss</span><span class="s-caret" style="display: inline-block; width: 3px; height: 26px; margin-left: 3px; vertical-align: -4px; background: #0A6CFF; border-radius: 2px"></span>
+    </p>
+    <p style="margin: 10px 0 0 0; text-align: center; font-size: 13px; color: #6B6B76">Transcription en direct par Muse Voice Transcribe</p>
+  </section>
+
+  <div aria-hidden="true" style="display: flex; align-items: center; justify-content: center; gap: 4px; height: 48px; padding: 0 28px; margin-top: 12px">
+    <span class="s-bar" style="width: 4px; height: 18px; border-radius: 2px; background: #0B0B0F"></span>
+    <span class="s-bar" style="width: 4px; height: 34px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.1s"></span>
+    <span class="s-bar" style="width: 4px; height: 44px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.3s"></span>
+    <span class="s-bar" style="width: 4px; height: 26px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.5s"></span>
+    <span class="s-bar" style="width: 4px; height: 40px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.2s"></span>
+    <span class="s-bar" style="width: 4px; height: 20px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.6s"></span>
+    <span class="s-bar" style="width: 4px; height: 46px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.35s"></span>
+    <span class="s-bar" style="width: 4px; height: 30px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.15s"></span>
+    <span class="s-bar" style="width: 4px; height: 38px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.45s"></span>
+    <span class="s-bar" style="width: 4px; height: 16px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.25s"></span>
+    <span class="s-bar" style="width: 4px; height: 42px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.55s"></span>
+    <span class="s-bar" style="width: 4px; height: 24px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.05s"></span>
+    <span class="s-bar" style="width: 4px; height: 36px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.4s"></span>
+    <span class="s-bar" style="width: 4px; height: 14px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.65s"></span>
+    <span class="s-bar" style="width: 4px; height: 32px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.2s"></span>
+    <span class="s-bar" style="width: 4px; height: 22px; border-radius: 2px; background: #0B0B0F; animation-delay: -0.5s"></span>
+  </div>
+
+  <div style="flex: 1"></div>
+
+  <div style="padding: 0 20px 22px 20px; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: #6B6B76">
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B76" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+      Verrouillé : tu peux lâcher l'écran
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; height: 68px; padding: 0 10px; background: #FFFFFF; border-radius: 999px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.08)">
+      <button type="button" aria-label="Supprimer la note vocale" style="width: 48px; height: 48px; border-radius: 999px; border: 0; background: #FEECEC; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg>
+      </button>
+      <div style="flex: 1; display: flex; align-items: center; gap: 8px; padding-left: 4px">
+        <span class="s-rec" style="width: 10px; height: 10px; border-radius: 999px; background: #DC2626"></span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 16px; font-weight: 600">0:07</span>
+        <span class="s-hint" style="font-size: 12px; color: #6B6B76">max 1:00</span>
+      </div>
+      <button type="button" aria-label="Pause" style="width: 48px; height: 48px; border-radius: 999px; border: 0; background: #EFEFF4; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="#0B0B0F"></rect><rect x="14" y="5" width="4" height="14" rx="1.5" fill="#0B0B0F"></rect></svg>
+      </button>
+      <button type="button" aria-label="Envoyer la note vocale" style="width: 52px; height: 52px; border-radius: 999px; border: 0; background: #0B0B0F; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2-7z"></path></svg>
+      </button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

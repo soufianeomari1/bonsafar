@@ -8,6 +8,40 @@ The two HTML files are **living references**: open them in a browser to watch ev
 | `welcome-v2.html` | Screen 0, the welcome screen, with its 10-second demo loop |
 | `safar-states.html` | The 6 mascot states side by side |
 | `safar.svg` | The mascot at rest, static (base geometry, app icon source) |
+| `screens/*.html` | The new art direction for screens 01a, 02, 03, 04, 05, 07, 08 and 10, with Safar alive on each |
+
+The `screens/` files replace the old mockups in `design/maquettes/` for the look of those screens. Keep the old mockups for the other screens (01b, 01c, 06, 09, 10b, J1, J2) and add Safar to them following the table "Safar across the app" below.
+
+## Safar across the app
+
+Safar is present on almost every screen, always doing something meaningful, never decorative noise. One Safar per screen, never more.
+
+| Screen | Reference | Safar | What he does |
+|---|---|---|---|
+| 00 Welcome | `welcome-v2.html` | `idle`, 112 px, hero | Floats above the demo loop |
+| 01a Profile, language | `screens/01a-onboarding.html` | `idle`, 96 px | Asks the question in a speech bubble, like a host |
+| 01b, 01c Profile steps, trust card | old mockups | `idle`, 64 px, top left | Same bubble pattern; on the trust card he switches to `found` when the user taps "Mfhoum" |
+| 02 Home | `screens/02-home.html` | `idle`, 84 px, next to the mic | Bubble "Brek w hder"; switches to `listening` the moment the mic is pressed |
+| 03 Voice | `screens/03-voice.html` | `listening`, 170 px, center | Wings and sound arcs follow the real volume (`level`); words appear live under him |
+| 04 Understood | `screens/04-understood.html` | `found`, 64 px, agent row | Small hop and sparkle, says "Mfhoum ! Hadchi li fhemt"; if a question is needed he switches to `thinking` next to the question card |
+| 05 Flight plan | `screens/05-flight-plan.html` | `thinking`, 62 px | **He replaces the plane of A3**: he flies down the route from stop to stop, the blue trail follows him, each landing ticks |
+| 06 Result | old mockup | `idle` flying along the arc (A5) | Same move as on screen 07's map |
+| 07 Package | `screens/07-package.html` | flying along the map arc, then wink in the smart tip card | The smart tip is signed "Le conseil de Safar"; the plane icon in "Ana mwafeq" takes off (A7) |
+| 08 Ready to go | `screens/08-ready.html` | `found`, 110 px | Jumps with sparkles when the tiles land (success haptic) |
+| 09 Check and continue | old mockup | `idle`, 48 px near the shield line | Calm, reassuring: "BonSafar never sees your card" |
+| 10 Travel file | `screens/10-travel-file.html` | `bye`, 84 px, top right | Winks and flies off with his dotted trail while the boarding pass prints (A8) and the stamp lands |
+| 10b Poster | old mockup | `bye`, small, on the boarding pass corner | Signature "MADE WITH BONSAFAR" |
+| Errors anywhere | none | `oops` | Mic denied, network down, replay switch: shake, warn haptic, then a clear message |
+| J1 Jury, J2 Desktop | old mockups | `idle` in the header, `thinking` in the phone during the run, `found` on the end card | In the Under the hood panel he stays out of the way |
+
+Rules: Safar never covers content or a button, never blocks a tap, and respects `prefers-reduced-motion`. Darija lines in his bubbles go through i18n like every string.
+
+## What changed in the art direction
+
+- Sky gradient `#DCEBFF` to `#F2F2F7` on the top of most screens, with slow clouds (A9).
+- White speech bubbles with a 6 px corner on the side of the speaker (Safar's bubbles point to him, the user's voice bubble is blue).
+- Status words stay in Geist Mono split-flap (A4). Colored soft tiles only for statuses (green ok, orange to do).
+- Prices are never written by hand in the UI: `[TOTAL DU STORE]` in the mockups marks where the price store value goes.
 
 ## Build rules
 

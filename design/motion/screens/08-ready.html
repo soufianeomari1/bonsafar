@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BonSafar, prêt à partir (motion reference)</title>
+<!-- Motion reference for Cursor. Open in a browser to watch the loops. Layout, copy, timings and keyframes are the spec. -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B0B0F}a:hover{color:#0A6CFF}
+@keyframes sFlap{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-18deg)}}
+@keyframes sJump{0%,55%,100%{transform:translateY(0) rotate(-10deg) scale(1)}20%{transform:translateY(-20px) rotate(-4deg) scale(1.04)}40%{transform:translateY(0) rotate(-10deg) scale(1.06,0.94)}}
+@keyframes sTwinkle{0%,100%{transform:scale(0.7) rotate(0deg);opacity:0.4}50%{transform:scale(1.25) rotate(25deg);opacity:1}}
+@keyframes sFlip{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+@keyframes sTile{from{opacity:0;transform:translateY(10px) scale(0.96)}to{opacity:1;transform:none}}
+@keyframes sDot{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.5)}50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+.s-wing-fast{animation:sFlap 0.3s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 50%}
+.s-jump{animation:sJump 1.8s cubic-bezier(0.23,1,0.32,1) infinite}
+.s-twinkle{animation:sTwinkle 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+.s-twinkle2{animation:sTwinkle 1.4s ease-in-out infinite;animation-delay:0.5s;transform-box:fill-box;transform-origin:50% 50%}
+.s-flip{display:inline-block;animation:sFlip 0.5s cubic-bezier(0.23,1,0.32,1) both;transform-origin:50% 50%}
+.s-tile{animation:sTile 0.5s cubic-bezier(0.23,1,0.32,1) both}
+.s-dot{animation:sDot 1.6s ease-out infinite}
+@media (prefers-reduced-motion: reduce){.s-wing-fast,.s-jump,.s-twinkle,.s-twinkle2,.s-flip,.s-tile,.s-dot{animation:none!important}}
+</style>
+<style>html,body{background:#E5E5EA} body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: linear-gradient(180deg, #E8F7EE 0%, #F2F2F7 34%); color: #0B0B0F; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column">
+
+  <div style="display: flex; align-items: center; gap: 12px; padding: 18px 20px 0 20px">
+    <button type="button" aria-label="Retour" style="width: 44px; height: 44px; border-radius: 999px; border: 0; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B0B0F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </button>
+    <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700"><span class="s-dot" style="width: 10px; height: 10px; border-radius: 999px; background: #22C55E"></span>Presque prêt : 1 chose à faire</span>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; padding: 14px 20px 0 16px">
+    <div style="position: relative; width: 110px; height: 110px; flex-shrink: 0">
+      <svg aria-hidden="true" width="110" height="110" viewBox="0 0 110 110" style="position: absolute; left: 0; top: 0">
+        <path class="s-twinkle" d="M12,20 C13,25 15,27 20,28 C15,29 13,31 12,36 C11,31 9,29 4,28 C9,27 11,25 12,20 Z" fill="#FFC800" stroke="#0B0B0F" stroke-width="1.8" stroke-linejoin="round"></path>
+        <path class="s-twinkle2" d="M98,8 C99,12 100,13 104,14 C100,15 99,16 98,20 C97,16 96,15 92,14 C96,13 97,12 98,8 Z" fill="#FFC800" stroke="#0B0B0F" stroke-width="1.8" stroke-linejoin="round"></path>
+      </svg>
+      <div class="s-jump" style="width: 110px; height: 110px">
+        <svg role="img" aria-label="Safar saute de joie : presque tout est prêt" width="110" height="110" viewBox="0 0 200 200">
+          <g transform="translate(200,-10) scale(-1,1)"><path class="s-wing-fast" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path></g>
+          <path class="s-wing-fast" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+          <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"></path>
+          <path d="M74,89 Q82,77 90,89 M108,89 Q116,77 124,89" fill="none" stroke="#0B0B0F" stroke-width="6" stroke-linecap="round"></path>
+          <path d="M86,101 Q99,124 112,101 Z" fill="#0B0B0F" stroke="#0B0B0F" stroke-width="5" stroke-linejoin="round"></path>
+          <path d="M92,110 Q99,116 106,110" fill="#FF8FA3"></path>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <h1 style="margin: 0; font-size: 30px; line-height: 1.08; font-weight: 800; letter-spacing: -0.02em">Wajed tqriban !</h1>
+      <p style="margin: 6px 0 0 0; font-size: 15px; line-height: 1.4; color: #6B6B76">Voilà ce qu'il te faut pour Istanbul, vérifié pour ton passeport.</p>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 18px 20px 0 20px">
+    <div class="s-tile" style="background: #FFFFFF; border-radius: 22px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)">
+      <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 999px; background: #E8F7EE; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3" fill="#15803D"></rect><circle cx="12" cy="10" r="3" fill="#FFFFFF"></circle><rect x="8" y="16" width="8" height="1.8" rx="0.9" fill="#FFFFFF"></rect></svg></span>
+      <p style="margin: 10px 0 0 0; font-size: 13px; color: #6B6B76">Visa</p>
+      <p class="s-flip" style="margin: 2px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 15px; font-weight: 600; color: #15803D; animation-delay: 0.3s">PAS BESOIN</p>
+      <p style="margin: 4px 0 0 0; font-size: 12px; color: #6B6B76">Jusqu'à 90 jours</p>
+    </div>
+    <div class="s-tile" style="background: #FFFFFF; border-radius: 22px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06); animation-delay: 0.1s">
+      <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 999px; background: #E8F7EE; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3" fill="#15803D"></rect><circle cx="9" cy="12" r="2.4" fill="#FFFFFF"></circle><rect x="13" y="10" width="5" height="1.6" rx="0.8" fill="#FFFFFF"></rect><rect x="13" y="13" width="4" height="1.6" rx="0.8" fill="#FFFFFF"></rect></svg></span>
+      <p style="margin: 10px 0 0 0; font-size: 13px; color: #6B6B76">Passeport</p>
+      <p class="s-flip" style="margin: 2px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 15px; font-weight: 600; color: #15803D; animation-delay: 0.45s">150 JOURS MIN.</p>
+      <p style="margin: 4px 0 0 0; font-size: 12px; color: #6B6B76">Valide après l'arrivée</p>
+    </div>
+    <div class="s-tile" style="background: #FFF4E0; border-radius: 22px; padding: 14px; border: 1.5px solid #F5C77E; animation-delay: 0.2s">
+      <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="13" rx="3" fill="#B45309"></rect><rect x="9" y="3" width="6" height="4" rx="1.5" fill="none" stroke="#B45309" stroke-width="2"></rect><circle cx="8" cy="21.5" r="1.3" fill="#B45309"></circle><circle cx="16" cy="21.5" r="1.3" fill="#B45309"></circle></svg></span>
+      <p style="margin: 10px 0 0 0; font-size: 13px; color: #6B6B76">Bagage</p>
+      <p class="s-flip" style="margin: 2px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 15px; font-weight: 600; color: #B45309; animation-delay: 0.6s">PETIT SAC SEUL</p>
+      <p style="margin: 4px 0 0 0; font-size: 12px; font-weight: 600; color: #B45309">Ajoute une valise chez le partenaire</p>
+    </div>
+    <div class="s-tile" style="background: #FFFFFF; border-radius: 22px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06); animation-delay: 0.3s">
+      <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 999px; background: #E8F7EE; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="13" rx="3" fill="#15803D"></rect><circle cx="12" cy="12.5" r="3" fill="#FFFFFF"></circle></svg></span>
+      <p style="margin: 10px 0 0 0; font-size: 13px; color: #6B6B76">Argent</p>
+      <p class="s-flip" style="margin: 2px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 15px; font-weight: 600; color: #15803D; animation-delay: 0.75s">7 % DOTATION</p>
+      <p style="margin: 4px 0 0 0; font-size: 12px; color: #6B6B76">De ta dotation 2026</p>
+    </div>
+  </div>
+
+  <section style="margin: 14px 20px 0 20px; background: #FFFFFF; border-radius: 22px; padding: 14px 16px">
+    <p style="margin: 0 0 8px 0; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #6B6B76">BON À SAVOIR</p>
+    <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+      <li style="display: flex; gap: 10px"><span style="width: 22px; text-align: center; font-weight: 700; color: #0A6CFF">+2</span>Istanbul a 2 h d'avance sur le Maroc</li>
+      <li style="display: flex; gap: 10px"><span style="width: 22px; text-align: center; font-weight: 700; color: #0A6CFF">₺</span>On paie en livre turque</li>
+      <li style="display: flex; gap: 10px"><span aria-hidden="true" style="width: 22px; display: flex; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"></path></svg></span>Tes prises marocaines entrent sans adaptateur</li>
+    </ul>
+  </section>
+
+  <p style="margin: 10px 20px 0 20px; font-size: 12px; color: #6B6B76">Vérifié par Muse sur 2 sources officielles · 3 nov.</p>
+
+  <div style="flex: 1"></div>
+  <div style="padding: 0 20px 22px 20px">
+    <button type="button" style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: #0B0B0F; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700">Suivant</button>
+  </div>
+</div>
+</body>
+</html>

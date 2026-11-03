@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BonSafar, plan de vol de l'agent (motion reference)</title>
+<!-- Motion reference for Cursor. Open in a browser to watch the loops. Layout, copy, timings and keyframes are the spec. -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B0B0F}a:hover{color:#0A6CFF}
+@keyframes sFlap{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-18deg)}}
+@keyframes sDot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-9px)}}
+@keyframes sDescend{0%,12%{transform:translateY(0) rotate(-16deg)}65%,100%{transform:translateY(204px) rotate(-8deg)}}
+@keyframes sTrail{0%,12%{height:0px}65%,100%{height:204px}}
+@keyframes sShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes sRow{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes sPulse{0%{box-shadow:0 0 0 0 rgba(10,108,255,.45)}100%{box-shadow:0 0 0 12px rgba(10,108,255,0)}}
+@keyframes sFlip{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+@keyframes sDrift{from{transform:translateX(-120px)}to{transform:translateX(470px)}}
+.s-wing-slow{animation:sFlap 1.2s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 50%}
+.s-dot1{animation:sDot 1.2s ease-in-out infinite}
+.s-dot2{animation:sDot 1.2s ease-in-out infinite;animation-delay:0.15s}
+.s-dot3{animation:sDot 1.2s ease-in-out infinite;animation-delay:0.3s}
+.s-descend{animation:sDescend 4s cubic-bezier(0.34,1.2,0.64,1) infinite alternate}
+.s-trail{animation:sTrail 4s cubic-bezier(0.34,1.2,0.64,1) infinite alternate}
+.s-shimmer{background:linear-gradient(90deg,#0A6CFF 0%,#0A6CFF 40%,#8FBCFF 50%,#0A6CFF 60%,#0A6CFF 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sShimmer 1.8s linear infinite}
+.s-row{animation:sRow 0.5s cubic-bezier(0.23,1,0.32,1) both}
+.s-pulse{animation:sPulse 1.4s ease-out infinite}
+.s-flip{display:inline-block;animation:sFlip 0.5s cubic-bezier(0.23,1,0.32,1) both;transform-origin:50% 50%}
+.s-cloud{animation:sDrift 42s linear infinite}
+@media (prefers-reduced-motion: reduce){.s-wing-slow,.s-dot1,.s-dot2,.s-dot3,.s-descend,.s-trail,.s-shimmer,.s-row,.s-pulse,.s-flip,.s-cloud{animation:none!important}.s-shimmer{color:#0A6CFF}}
+</style>
+<style>html,body{background:#E5E5EA} body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: linear-gradient(180deg, #DCEBFF 0%, #F2F2F7 40%); color: #0B0B0F; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column">
+  <svg class="s-cloud" aria-hidden="true" width="90" height="34" viewBox="0 0 90 34" style="position: absolute; left: 0; top: 70px"><path d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z" fill="#FFFFFF"></path></svg>
+
+  <div style="position: relative; display: flex; align-items: flex-start; justify-content: space-between; padding: 22px 20px 0 24px">
+    <div>
+      <p style="margin: 0; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #6B6B76">CMN → IST · 15 → 22 DÉC.</p>
+      <h1 style="margin: 6px 0 0 0; font-size: 28px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em">Safar prépare<br>ton voyage</h1>
+    </div>
+    <button type="button" style="height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: rgba(255,255,255,0.8); font-family: inherit; font-size: 14px; font-weight: 600; color: #6B6B76">Passer</button>
+  </div>
+
+  <section aria-label="Plan de vol" style="position: relative; flex: 1; margin-top: 20px; background: #FFFFFF; border-radius: 32px 32px 0 0; box-shadow: 0 -8px 24px rgba(0,0,0,.05); padding: 26px 20px 0 20px">
+    <div aria-hidden="true" style="position: absolute; left: 47px; top: 52px; width: 4px; height: 560px; border-radius: 2px; background: repeating-linear-gradient(180deg, #E5E5EA 0 8px, transparent 8px 14px)"></div>
+    <div class="s-trail" aria-hidden="true" style="position: absolute; left: 47px; top: 52px; width: 4px; border-radius: 2px; background: #0A6CFF"></div>
+
+    <div class="s-descend" style="position: absolute; left: 18px; top: 8px; width: 62px; height: 62px; z-index: 2">
+      <svg role="img" aria-label="Safar descend d'escale en escale" width="62" height="62" viewBox="0 0 200 200">
+        <circle class="s-dot1" cx="150" cy="30" r="9" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="4"></circle>
+        <circle class="s-dot2" cx="172" cy="24" r="9" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="4"></circle>
+        <g transform="translate(200,-10) scale(-1,1)"><path class="s-wing-slow" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="8" stroke-linejoin="round"></path></g>
+        <path class="s-wing-slow" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="8" stroke-linejoin="round"></path>
+        <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="8" stroke-linejoin="round"></path>
+        <circle cx="88" cy="80" r="7" fill="#0B0B0F"></circle>
+        <circle cx="122" cy="80" r="7" fill="#0B0B0F"></circle>
+        <path d="M90,108 Q100,104 110,108" fill="none" stroke="#0B0B0F" stroke-width="7" stroke-linecap="round"></path>
+      </svg>
+    </div>
+
+    <ol style="position: relative; list-style: none; margin: 0; padding: 0 0 0 72px; display: flex; flex-direction: column; gap: 22px">
+      <li>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <div><p style="margin: 0; font-size: 17px; font-weight: 800">Kanqelleb 3la tiyarat</p><p style="margin: 2px 0 0 0; font-size: 13px; color: #6B6B76">Je cherche les vols · Kiwi.com</p></div>
+          <span class="s-flip" style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; color: #FFFFFF; background: #15803D; padding: 4px 7px; border-radius: 6px; white-space: nowrap">15 VOLS</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px">
+          <div class="s-row" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: #F2F2F7"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; background: #FFC800; padding: 2px 5px; border-radius: 5px">AT</span><span style="font-size: 14px; font-weight: 700; color: #15803D; font-variant-numeric: tabular-nums">09:15 → 21:10</span><span style="font-size: 12px; color: #6B6B76; margin-left: auto">1 escale</span></div>
+          <div class="s-row" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: #F2F2F7; animation-delay: 0.12s"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; background: #FFC800; padding: 2px 5px; border-radius: 5px">TK</span><span style="font-size: 14px; font-weight: 700; color: #15803D; font-variant-numeric: tabular-nums">15:45 → 23:25</span><span style="font-size: 12px; color: #6B6B76; margin-left: auto">direct</span></div>
+          <div class="s-row" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: #F2F2F7; animation-delay: 0.24s"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; background: #FFC800; padding: 2px 5px; border-radius: 5px">PC</span><span style="font-size: 14px; font-weight: 700; color: #15803D; font-variant-numeric: tabular-nums">06:40 → 19:55</span><span style="font-size: 12px; color: #6B6B76; margin-left: auto">2 escales</span></div>
+        </div>
+      </li>
+      <li>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <div><p style="margin: 0; font-size: 17px; font-weight: 800">Kanqarn l'otelat</p><p class="s-shimmer" style="margin: 2px 0 0 0; font-size: 13px; font-weight: 600">Je compare les hôtels · trivago</p></div>
+          <span class="s-pulse" style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; color: #FFFFFF; background: #0A6CFF; padding: 4px 7px; border-radius: 6px; white-space: nowrap">EN COURS</span>
+        </div>
+      </li>
+      <li style="opacity: 0.55">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <div><p style="margin: 0; font-size: 17px; font-weight: 800">Kanchouf l'as3ar</p><p style="margin: 2px 0 0 0; font-size: 13px; color: #6B6B76">Je regarde les prix du mois</p></div>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; color: #6B6B76; background: #EFEFF4; padding: 4px 7px; border-radius: 6px; white-space: nowrap">À VENIR</span>
+        </div>
+      </li>
+      <li style="opacity: 0.55">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <div><p style="margin: 0; font-size: 17px; font-weight: 800">Kanverifi l'wraq</p><p style="margin: 2px 0 0 0; font-size: 13px; color: #6B6B76">Je vérifie visa et papiers</p></div>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; color: #6B6B76; background: #EFEFF4; padding: 4px 7px; border-radius: 6px; white-space: nowrap">À VENIR</span>
+        </div>
+      </li>
+      <li style="opacity: 0.55">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <div><p style="margin: 0; font-size: 17px; font-weight: 800">Kanwjjed lik l'forfait</p><p style="margin: 2px 0 0 0; font-size: 13px; color: #6B6B76">Je prépare ton forfait</p></div>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; color: #6B6B76; background: #EFEFF4; padding: 4px 7px; border-radius: 6px; white-space: nowrap">À VENIR</span>
+        </div>
+      </li>
+    </ol>
+
+    <div style="position: absolute; left: 20px; right: 20px; bottom: 22px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #F2F2F7">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0A6CFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg>
+      <span style="font-size: 13px; line-height: 1.4; color: #6B6B76">Les prix viennent en direct de <b style="color: #0B0B0F">Kiwi.com</b> et <b style="color: #0B0B0F">trivago</b>. Safar ne les invente jamais.</span>
+    </div>
+  </section>
+</div>
+</body>
+</html>

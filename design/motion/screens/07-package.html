@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BonSafar, fiche forfait (motion reference)</title>
+<!-- Motion reference for Cursor. Open in a browser to watch the loops. Layout, copy, timings and keyframes are the spec. -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B0B0F}a:hover{color:#0A6CFF}
+@keyframes sFlap{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-18deg)}}
+@keyframes sAlong{0%{offset-distance:0%}70%,100%{offset-distance:100%}}
+@keyframes sDraw{0%{stroke-dashoffset:420}70%,100%{stroke-dashoffset:0}}
+@keyframes sHalo{0%,100%{box-shadow:0 0 0 1px rgba(10,108,255,0.25),0 8px 28px rgba(10,108,255,0.18)}50%{box-shadow:0 0 0 1px rgba(10,108,255,0.45),0 10px 36px rgba(10,108,255,0.32)}}
+@keyframes sFlip{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+@keyframes sWink{0%,88%,100%{transform:scaleY(1)}93%{transform:scaleY(0.1)}}
+@keyframes sTakeoff{0%,70%{transform:translate(0,0) rotate(0deg);opacity:1}90%{transform:translate(14px,-10px) rotate(-20deg);opacity:0}91%{transform:translate(-8px,6px);opacity:0}100%{transform:none;opacity:1}}
+.s-wing{animation:sFlap 0.5s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 50%}
+.s-along{offset-path:path('M48,206 Q190,10 336,92');offset-rotate:0deg;animation:sAlong 5s cubic-bezier(0.45,0,0.2,1) infinite}
+.s-draw{stroke-dasharray:420;animation:sDraw 5s cubic-bezier(0.45,0,0.2,1) infinite}
+.s-halo{animation:sHalo 2.6s ease-in-out infinite}
+.s-flip{display:inline-block;animation:sFlip 0.5s cubic-bezier(0.23,1,0.32,1) both;transform-origin:50% 50%}
+.s-wink{animation:sWink 3s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+.s-takeoff{animation:sTakeoff 3.6s cubic-bezier(0.23,1,0.32,1) infinite}
+@media (prefers-reduced-motion: reduce){.s-wing,.s-along,.s-draw,.s-halo,.s-flip,.s-wink,.s-takeoff{animation:none!important}.s-along{offset-distance:100%}}
+</style>
+<style>html,body{background:#E5E5EA} body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #D4E8F6; color: #0B0B0F; font-family: Geist, system-ui, sans-serif">
+
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 390px; height: 260px">
+    <svg width="390" height="260" viewBox="0 0 390 260" style="position: absolute; left: 0; top: 0">
+      <path d="M0,150 C40,140 70,170 110,200 C130,215 120,260 120,260 L0,260 Z" fill="#EEF1E6"></path>
+      <path d="M240,40 C280,20 340,30 390,40 L390,150 C350,140 320,120 290,110 C260,100 236,70 240,40 Z" fill="#EEF1E6"></path>
+      <path d="M150,0 C190,10 220,30 230,60 C200,62 170,40 150,0 Z" fill="#EEF1E6"></path>
+      <path class="s-draw" d="M48,206 Q190,10 336,92" fill="none" stroke="#0A6CFF" stroke-width="4" stroke-linecap="round" stroke-dasharray="420"></path>
+      <circle cx="48" cy="206" r="7" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="3"></circle>
+      <circle cx="336" cy="92" r="7" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="3"></circle>
+    </svg>
+    <span style="position: absolute; left: 20px; top: 218px; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; background: #FFFFFF; padding: 3px 7px; border-radius: 6px">CMN</span>
+    <span style="position: absolute; left: 296px; top: 106px; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #0B0B0F; padding: 4px 8px; border-radius: 999px">IST Istanbul</span>
+    <div class="s-along" style="position: absolute; left: 0; top: 0; width: 54px; height: 54px">
+      <svg role="img" aria-label="Safar vole vers Istanbul" width="54" height="54" viewBox="0 0 200 200" style="transform: rotate(-14deg)">
+        <g transform="translate(200,-10) scale(-1,1)"><path class="s-wing" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="9" stroke-linejoin="round"></path></g>
+        <path class="s-wing" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="9" stroke-linejoin="round"></path>
+        <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="9" stroke-linejoin="round"></path>
+        <path d="M74,89 Q82,78 90,89 M108,89 Q116,78 124,89 M88,104 Q99,116 110,104" fill="none" stroke="#0B0B0F" stroke-width="8" stroke-linecap="round"></path>
+      </svg>
+    </div>
+    <button type="button" aria-label="Retour" style="position: absolute; left: 16px; top: 16px; width: 44px; height: 44px; border-radius: 999px; border: 0; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B0B0F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </button>
+  </div>
+
+  <section style="position: absolute; left: 0; top: 236px; width: 390px; bottom: 0; box-sizing: border-box; background: #F2F2F7; border-radius: 32px 32px 0 0; padding: 10px 20px 110px 20px; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+    <span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 999px; background: #E5E5EA"></span>
+    <div>
+      <p style="margin: 0; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #6B6B76">AT972 + PC1102 · MAR. 15 DÉC.</p>
+      <h1 style="margin: 4px 0 0 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em">Casablanca → Istanbul</h1>
+      <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 600; color: #15803D">Départ dans 42 jours · 7 nuits</p>
+    </div>
+
+    <div style="background: #FFFFFF; border-radius: 22px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)">
+      <div style="display: flex; align-items: flex-end; justify-content: space-between">
+        <div><p style="margin: 0; font-size: 36px; font-weight: 800; color: #15803D; font-variant-numeric: tabular-nums; letter-spacing: -0.02em">09:15</p><p style="margin: 0; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 600; color: #6B6B76">CMN</p></div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-bottom: 6px"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; background: #FFC800; padding: 3px 7px; border-radius: 6px">1 ESCALE MAD</span><span style="font-size: 12px; color: #6B6B76">8 h 55</span></div>
+        <div style="text-align: right"><p style="margin: 0; font-size: 36px; font-weight: 800; color: #15803D; font-variant-numeric: tabular-nums; letter-spacing: -0.02em">21:10</p><p style="margin: 0; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 600; color: #6B6B76">SAW</p></div>
+      </div>
+    </div>
+
+    <div>
+      <p style="margin: 0 0 8px 0; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #6B6B76">AVANT DE PARTIR</p>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <div style="background: #E8F7EE; border-radius: 16px; padding: 10px 12px"><p style="margin: 0; font-size: 12px; color: #6B6B76">Visa</p><p class="s-flip" style="margin: 2px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: #15803D">PAS BESOIN</p></div>
+        <div style="background: #E8F7EE; border-radius: 16px; padding: 10px 12px"><p style="margin: 0; font-size: 12px; color: #6B6B76">Passeport</p><p class="s-flip" style="margin: 2px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: #15803D; animation-delay: 0.1s">150 JOURS MIN.</p></div>
+        <div style="background: #FFF4E0; border-radius: 16px; padding: 10px 12px"><p style="margin: 0; font-size: 12px; color: #6B6B76">Bagage</p><p class="s-flip" style="margin: 2px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: #B45309; animation-delay: 0.2s">PETIT SAC SEUL</p></div>
+        <div style="background: #E8F7EE; border-radius: 16px; padding: 10px 12px"><p style="margin: 0; font-size: 12px; color: #6B6B76">Argent</p><p class="s-flip" style="margin: 2px 0 0 0; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: #15803D; animation-delay: 0.3s">7 % DOTATION</p></div>
+      </div>
+    </div>
+
+    <div class="s-halo" style="display: flex; align-items: center; gap: 12px; background: #FFFFFF; border-radius: 22px; padding: 12px 14px">
+      <svg role="img" aria-label="Safar te fait un clin d'œil" width="52" height="52" viewBox="0 0 200 200" style="flex-shrink: 0; transform: rotate(-10deg)">
+        <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="9" stroke-linejoin="round"></path>
+        <path d="M74,89 Q82,78 90,89" fill="none" stroke="#0B0B0F" stroke-width="8" stroke-linecap="round"></path>
+        <g class="s-wink"><circle cx="116" cy="86" r="7.5" fill="#0B0B0F"></circle></g>
+        <path d="M86,102 Q99,118 114,102" fill="none" stroke="#0B0B0F" stroke-width="8" stroke-linecap="round"></path>
+      </svg>
+      <div>
+        <p style="margin: 0; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #0A6CFF">LE CONSEIL DE SAFAR</p>
+        <p style="margin: 3px 0 0 0; font-size: 14px; line-height: 1.4"><b>Le vol direct Turkish</b> coûte un peu plus et te fait gagner <b>4 h 15</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <div style="position: absolute; left: 0; bottom: 0; width: 390px; box-sizing: border-box; padding: 14px 20px 22px 20px; background: #FFFFFF; border-top: 1px solid #E5E5EA; display: flex; align-items: center; gap: 14px">
+    <div style="flex: 1">
+      <p style="margin: 0; font-size: 12px; color: #6B6B76">Total, 2 personnes</p>
+      <p style="margin: 0; font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.01em"><span class="s-flip">[TOTAL DU STORE]</span> <span style="font-size: 15px">DH</span></p>
+    </div>
+    <button type="button" style="height: 56px; padding: 0 18px; border: 0; border-radius: 16px; background: #0B0B0F; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px">
+      Ana mwafeq
+      <svg class="s-takeoff" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><path d="M2.5 13.5l7 1.5 4.5 6h2l-2-6.5 5.5 1.2c1.2.2 2-.9 1.5-2L20 12l-6-1.5L10 3H8l1.5 7L4 9 2 10.5z" fill="#FFFFFF"></path></svg>
+    </button>
+  </div>
+</div>
+</body>
+</html>
