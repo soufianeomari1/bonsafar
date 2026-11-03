@@ -22,14 +22,20 @@ export function TrustSheet({ open, onClose }: { open: boolean; onClose: () => vo
   const t = useT();
   const reduced = useReducedMotion();
   const [found, setFound] = useState(false);
+  const [trackedOpen, setTrackedOpen] = useState(open);
   const timer = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (!open) setFound(false);
-    return () => {
+  if (open !== trackedOpen) {
+    setTrackedOpen(open);
+    if (open) setFound(false);
+  }
+
+  useEffect(
+    () => () => {
       if (timer.current) window.clearTimeout(timer.current);
-    };
-  }, [open]);
+    },
+    []
+  );
 
   function confirm() {
     if (found) return;
