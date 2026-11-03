@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "mcp:tools": "node scripts/mcp-list-tools.mjs",
+    "agent:check": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/agent-check.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
