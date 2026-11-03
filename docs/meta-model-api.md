@@ -48,6 +48,14 @@ Reported:
 - Structured outputs with a JSON schema in `response_format`.
 - Reasoning effort is configurable (levels reported from "minimal" up to "xhigh"). Check the exact parameter name in the live docs (likely `reasoning_effort` on Chat Completions or `reasoning.effort` on Responses). Use the lowest level that keeps quality for intent extraction.
 - Web search grounding is available, billed $2.50 per 1,000 searches. Check in the live docs how to enable it (built-in tool name and parameters) before coding `check_entry_requirements`.
+
+Verified on 2026-11-03 (block 3, `src/lib/agent/entry.ts`, `src/lib/ai/responses.ts`):
+- Web search works only on the Responses API (`/v1/responses`), not on Chat Completions: `tools: [{ type: "web_search", search_context_size: "low" }]`. Price confirmed on dev.meta.ai/docs/pricing-rate-limits: $2.50 per 1,000 search queries on top of tokens.
+- It combines with structured output: `text: { format: { type: "json_schema", name, schema } }`. The output holds several `message` items (progress notes, then the JSON): parse the last one only.
+- Each search or opened page is a `web_search_call` item (`action.type` = `search` or `open_page`). We bill `search` items only and count opened pages in the log note.
+- With a JSON output, `url_citation` annotations are usually missing. `include: ["web_search_call.results"]` returns the raw hits (title, url): sources are taken from there, official government domains first.
+- `reasoning: { effort: "minimal" }` plus "at most two searches" in the prompt: 8 to 14 s, $0.012 to $0.038 per check (a page open can push input to 37k tokens).
+- Usage fields on Responses: `input_tokens`, `input_tokens_details.cached_tokens`, `output_tokens`, `output_tokens_details.reasoning_tokens`.
 - Audio input exists but is reported as not fully supported, quality may be degraded. Fallback only.
 
 ## Muse Voice Transcribe 1.0: verified on 2026-11-03 (block 2)
@@ -80,6 +88,12 @@ Earlier notes from third-party docs, kept for reference:
 
 - Agent model built for long tasks, tool use and error recovery (Meta dashboard).
 - We use Chat Completions with `tools` (function calling). Check the live docs for parallel tool calls and streaming with tools.
+
+Verified on 2026-11-03 (block 3, `src/lib/agent/run.ts`):
+- Parallel tool calls come by default: the first turn returns all 4 tool calls at once.
+- `tools` and `response_format: { type: "json_schema" }` work in the same request: the model calls tools, then answers with schema-valid JSON once it has the data. `tool_choice: "none"` forces the answer.
+- `reasoning_effort: "minimal"` works. On the final package turn (about 4k tokens in, 1k out) it took 10 to 14 s, against 11 to 20 s with `"low"`, with the same choices on our two scenarios.
+- Measured full runs (Kiwi.com + trivago + Spark web search + Wonder): Istanbul 25.7 s, $0.068; Paris with the visa-free switch to Istanbul 32.6 s, $0.075.
 
 ## Muse Image 1.0
 
