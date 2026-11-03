@@ -118,13 +118,11 @@ export function HomeScreen() {
               <Microphone size={34} weight="fill" aria-hidden />
             </button>
           </div>
-          <Safar
-            state={safarState}
-            size={84}
-            className="absolute start-[6px] top-[18px]"
-          />
+          <div className="pointer-events-none absolute start-6 top-4 z-10">
+            <Safar state={safarState} size={84} />
+          </div>
           <div
-            className="absolute end-[2px] top-9 max-w-[190px] bg-card px-3 py-2 shadow-soft"
+            className="pointer-events-none absolute end-5 top-8 z-10 whitespace-nowrap bg-card px-3 py-2 shadow-soft"
             style={{
               borderStartStartRadius: 14,
               borderStartEndRadius: 14,
