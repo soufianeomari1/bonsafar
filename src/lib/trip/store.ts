@@ -3,7 +3,14 @@
 import { newRunId, type RunEvent } from "@/lib/ai/events";
 import { nightsBetween } from "@/lib/format";
 import { readJury, readLang } from "@/lib/i18n/store";
-import type { Intent } from "@/lib/intent/schema";
+import {
+  dismissAnsweredQuestion,
+  fieldsTouched,
+  locksFor,
+  mergeIntent,
+  type UserEdit,
+} from "@/lib/intent/edits";
+import type { Intent, QuestionField } from "@/lib/intent/schema";
 import { readProfileState } from "@/lib/profile/store";
 import { fetchIntent, transcribeWav, VoiceApiError } from "@/lib/voice/client";
 import type { TranscribeFinal } from "@/lib/voice/protocol";
@@ -34,6 +41,8 @@ export type TripJob = {
   transcription: TranscribeFinal | null;
   phase: TripPhase;
   intent: Intent | null;
+  /** Chips changed by hand. A later model answer must not overwrite them. */
+  userEdited: UserEdit[];
   /** Bumped on each model answer, not on hand edits: drives the A2 flight. */
   rev: number;
   answers: TripAnswer[];
@@ -77,6 +86,7 @@ function begin(fields: Pick<TripJob, "source" | "audioUrl" | "durationMs" | "lev
     partial: "",
     transcription: null,
     intent: null,
+    userEdited: [],
     rev: 0,
     answers: [],
     events: [],
@@ -87,11 +97,12 @@ function begin(fields: Pick<TripJob, "source" | "audioUrl" | "durationMs" | "lev
   return job;
 }
 
-async function understandJob(id: number) {
+async function understandJob(id: number, unlock?: QuestionField) {
   const current = job;
   if (!current || current.id !== id || !controller) return;
   set({ phase: "understanding", error: null }, id);
   const { profile } = readProfileState();
+  const requested = unlock ? current.userEdited.filter((field) => field !== unlock) : current.userEdited;
   try {
     const response = await fetchIntent(
       {
@@ -100,11 +111,29 @@ async function understandJob(id: number) {
         lang: readLang(),
         jury: readJury(),
         answers: current.answers,
+        locked: current.intent ? locksFor(current.intent, requested) : undefined,
       },
       current.runId,
       controller.signal
     );
-    set({ phase: "ready", intent: response.intent, rev: (job?.rev ?? 0) + 1, events: [...(job?.events ?? []), ...response.events] }, id);
+    const latest = job;
+    if (!latest || latest.id !== id) return;
+    const edited = unlock ? latest.userEdited.filter((field) => field !== unlock) : latest.userEdited;
+    const intent = latest.intent ? mergeIntent(response.intent, latest.intent, edited) : response.intent;
+    const userEdited =
+      unlock && (unlock !== "destination" || intent.destination)
+        ? [...new Set<UserEdit>([...latest.userEdited, unlock])]
+        : latest.userEdited;
+    set(
+      {
+        phase: "ready",
+        intent,
+        userEdited,
+        rev: latest.rev + 1,
+        events: [...latest.events, ...response.events],
+      },
+      id,
+    );
   } catch (error) {
     if (controller?.signal.aborted) return;
     const events = error instanceof VoiceApiError ? error.events : [];
@@ -175,12 +204,20 @@ export async function startTextTrip(text: string): Promise<void> {
   await understandJob(created.id);
 }
 
-/** Answer to the one question, or a correction typed in a chip editor. */
-export async function answerTrip(question: string, answer: string): Promise<void> {
+/**
+ * Answer to the one question, or a city typed in the destination chip.
+ * `unlock` is a fact this call is allowed to replace (the new city); every
+ * other hand edit stays locked.
+ */
+export async function answerTrip(
+  question: string,
+  answer: string,
+  unlock?: QuestionField,
+): Promise<void> {
   if (!job) return;
   const answers = [...job.answers, { question, answer }].slice(-3);
   set({ answers }, job.id);
-  await understandJob(job.id);
+  await understandJob(job.id, unlock);
 }
 
 export async function retryTrip(): Promise<void> {
@@ -189,7 +226,7 @@ export async function retryTrip(): Promise<void> {
   else if (job.transcript) await understandJob(job.id);
 }
 
-/** Edits made by hand on a chip. Nights always follow the dates. */
+/** Edits made by hand on a chip. Nights always follow the dates, and the edit wins over the model. */
 export function patchIntent(patch: Partial<Intent>): void {
   if (!job?.intent) return;
   const next = { ...job.intent, ...patch };
@@ -197,7 +234,8 @@ export function patchIntent(patch: Partial<Intent>): void {
     next.depart_date && next.return_date
       ? Math.max(1, nightsBetween(next.depart_date, next.return_date))
       : null;
-  set({ intent: next }, job.id);
+  const userEdited = [...new Set<UserEdit>([...job.userEdited, ...fieldsTouched(patch)])];
+  set({ intent: dismissAnsweredQuestion(next, userEdited), userEdited }, job.id);
 }
 
 export function clearTrip(): void {

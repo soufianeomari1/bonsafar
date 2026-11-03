@@ -67,7 +67,7 @@ function EditorBody({
       case "destination":
         if (city.trim() && city.trim() !== intent.destination?.city) {
           // The city name needs an airport code: the model resolves it.
-          void answerTrip(t("edit.destination"), city.trim());
+          void answerTrip(t("edit.destination"), city.trim(), "destination");
         }
         break;
       case "dates":

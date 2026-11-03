@@ -26,6 +26,9 @@ export const KEYWORD_SLOTS = [
 
 export const QUESTION_TOPICS = ["destination", "dates", "origin", "travelers", "other"] as const;
 
+/** Which fact a follow-up question is asking for. A hand edit of this fact wins. */
+export const QUESTION_FIELDS = ["destination", "dates", "nights", "travelers", "budget"] as const;
+
 const Trilingual = z.object({
   darija: z.string().min(1).max(200),
   fr: z.string().min(1).max(200),
@@ -60,6 +63,8 @@ export const IntentSchema = z.object({
   question: z
     .object({
       topic: z.enum(QUESTION_TOPICS),
+      /** The fact this question asks for. A hand edit of it dismisses the card. */
+      field: z.enum(QUESTION_FIELDS),
       darija: z.string().min(1).max(200),
       fr: z.string().min(1).max(200),
       en: z.string().min(1).max(200),
@@ -73,6 +78,28 @@ export type IntentKeyword = Intent["keywords"][number];
 export type IntentWish = Intent["wishes"][number];
 export type KeywordSlot = (typeof KEYWORD_SLOTS)[number];
 export type WishKind = (typeof WISH_KINDS)[number];
+export type QuestionField = (typeof QUESTION_FIELDS)[number];
+
+/** Values the traveller typed by hand. The model must copy them and must not ask about them. */
+export const LockedSchema = z.object({
+  fields: z.array(z.enum(QUESTION_FIELDS)).min(1).max(5),
+  destination: z
+    .object({
+      city: z.string().min(1).max(80),
+      country: z.string().min(1).max(80),
+      iata: z.string().regex(/^[A-Z]{3}$/),
+    })
+    .nullable()
+    .optional(),
+  depart_date: IsoDate.nullable().optional(),
+  return_date: IsoDate.nullable().optional(),
+  nights: z.number().int().min(1).nullable().optional(),
+  adults: z.number().int().min(1).max(9).optional(),
+  children: z.number().int().min(0).max(9).optional(),
+  budget_mad: z.number().positive().max(10_000_000).nullable().optional(),
+});
+
+export type IntentLocks = z.infer<typeof LockedSchema>;
 
 export const REASONING_EFFORTS = ["minimal", "low", "medium"] as const;
 export type IntentEffort = (typeof REASONING_EFFORTS)[number];
@@ -87,6 +114,8 @@ export const IntentRequestSchema = z.object({
     .array(z.object({ question: z.string().max(200), answer: z.string().max(200) }))
     .max(3)
     .default([]),
+  /** Hand-edited facts. Code copies them back over the model result. */
+  locked: LockedSchema.optional(),
   effort: z.enum(REASONING_EFFORTS).optional(),
 });
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LayoutGroup, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, CaretLeft, WarningCircle } from "@phosphor-icons/react";
 import { Button } from "@/components/bs/Button";
 import { Logo } from "@/components/bs/Brand";
@@ -18,6 +18,7 @@ import {
 } from "@/components/trip/chips";
 import { formatAmount } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
+import { hasIndispensableInfo } from "@/lib/intent/edits";
 import { useLanguage } from "@/lib/i18n/provider";
 import { PRESS_SCALE, PRESS_TRANSITION } from "@/lib/motion";
 import { answerTrip, retryTrip } from "@/lib/trip/store";
@@ -75,7 +76,7 @@ export function UnderstoodScreen() {
       : null;
   const transcribing = job.phase === "transcribing";
   const understanding = job.phase === "understanding";
-  const canSearch = job.phase === "ready" && !!intent?.destination && !intent.question;
+  const canSearch = job.phase === "ready" && !!intent && hasIndispensableInfo(intent);
   /** Nothing to retry: the take itself was too short or silent. */
   const dead = job.error === "short" || job.error === "empty";
 
@@ -212,19 +213,34 @@ export function UnderstoodScreen() {
             </section>
           )}
 
-          {intent?.question && job.phase !== "error" && (
-            understanding ? (
-              <div className="rounded-card bg-card p-3.5">
-                <span className="shimmer text-[15px] font-semibold">{t("understood.thinking")}</span>
-              </div>
-            ) : (
-              <QuestionCard
-                key={`${rev}-${intent.question.fr}`}
-                question={intent.question}
-                onAnswer={(question, answer) => void answerTrip(question, answer)}
-              />
-            )
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            {intent?.question && job.phase !== "error" &&
+              (understanding ? (
+                <motion.div
+                  key="question-thinking"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: reduced ? 0.2 : 0.3 }}
+                  className="rounded-card bg-card p-3.5"
+                >
+                  <span className="shimmer text-[15px] font-semibold">{t("understood.thinking")}</span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={`question-${intent.question.field}`}
+                  initial={false}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: reduced ? 0.2 : 0.35, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  <QuestionCard
+                    question={intent.question}
+                    onAnswer={(question, answer) => void answerTrip(question, answer)}
+                  />
+                </motion.div>
+              ))}
+          </AnimatePresence>
         </div>
       </LayoutGroup>
 

@@ -5,10 +5,12 @@ import type { RunLog } from "@/lib/ai/events";
 import { collectStrings, containsMoney, scrubMoney } from "@/lib/prices/guardrail";
 import type { Lang } from "@/lib/i18n";
 import { profileTravellers, type Profile } from "@/lib/profile/schema";
+import { applyLocks } from "./edits";
 import {
   IntentSchema,
   type Intent,
   type IntentEffort,
+  type IntentLocks,
 } from "./schema";
 
 /**
@@ -95,7 +97,7 @@ Rules:
 6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). label: 1 to 3 words in the label language.
 7. keywords: EXACT substrings copied from the transcript (same spelling, accents and case) that carry each extracted fact, with the slot they fill. At most 2 per slot, most telling first.
 8. translation_en: a faithful, natural English translation of the whole transcript. Never write an amount of money: put the token {budget} where the budget is said.
-9. question: null unless something indispensable is missing: the destination, or dates too vague to search. Then ask ONE short, friendly question about the most important gap, never about the departure city, travellers or papers. darija in the given script, plus French and English. Give 2 to 4 short answer options, each in darija, French and English. No amounts of money anywhere.`;
+9. question: null unless something indispensable is missing: the destination, or dates too vague to search. Then ask ONE short, friendly question about the most important gap, never about the departure city, travellers or papers. Set field to the gap you ask about: destination, dates, nights, travelers or budget. darija in the given script, plus French and English. Give 2 to 4 short answer options, each in darija, French and English. No amounts of money anywhere.`;
 
 function contextBlock(profile: Profile, lang: Lang, jury: boolean): string {
   const { iso, weekday } = today();
@@ -127,11 +129,44 @@ const SPOKEN_NUMBER = /\d|mille|alf|alaf|ألف|آلاف|million|mlyoun|thousand
  * date arithmetic, one question never about what the profile knows, no
  * invented budget, and no amount of money in any model text.
  */
+function locksBlock(locks: IntentLocks | undefined): string | null {
+  if (!locks?.fields.length) return null;
+  const lines = [
+    "Locked fields (the traveller set these by hand; copy them exactly, do not change them, and do not ask about them):",
+  ];
+  if (locks.fields.includes("destination")) {
+    lines.push(
+      locks.destination
+        ? `- destination: ${locks.destination.city}, ${locks.destination.country}, ${locks.destination.iata}`
+        : "- destination: null",
+    );
+  }
+  if (locks.fields.includes("dates")) {
+    lines.push(`- dates: depart ${locks.depart_date ?? "null"}, return ${locks.return_date ?? "null"}`);
+  }
+  if (locks.fields.includes("nights") || locks.fields.includes("dates")) {
+    lines.push(`- nights: ${locks.nights ?? "null"}`);
+  }
+  if (locks.fields.includes("travelers")) {
+    lines.push(`- travelers: ${locks.adults ?? 1} adults, ${locks.children ?? 0} children`);
+  }
+  if (locks.fields.includes("budget")) {
+    lines.push(
+      locks.budget_mad == null
+        ? "- budget_mad: null"
+        : `- budget_mad: ${locks.budget_mad} (copy this number, never write it in a sentence)`,
+    );
+  }
+  return lines.join("\n");
+}
+
 function enforce(
   raw: Intent,
   transcript: string,
+  answers: { answer: string }[],
   profile: Profile,
-  log: RunLog
+  locks: IntentLocks | undefined,
+  log: RunLog,
 ): Intent {
   const intent: Intent = structuredClone(raw);
 
@@ -160,7 +195,8 @@ function enforce(
     intent.return_date = addDays(intent.depart_date, intent.nights);
   }
 
-  if (intent.budget_mad !== null && !SPOKEN_NUMBER.test(transcript)) {
+  const spoken = [transcript, ...answers.map((answer) => answer.answer)].join("\n");
+  if (intent.budget_mad !== null && !SPOKEN_NUMBER.test(spoken)) {
     intent.budget_mad = null;
   }
 
@@ -168,7 +204,8 @@ function enforce(
   if (
     intent.question &&
     ((intent.question.topic === "origin" && profile.home_airport) ||
-      (intent.question.topic === "travelers" && travellersKnown))
+      ((intent.question.topic === "travelers" || intent.question.field === "travelers") &&
+        travellersKnown))
   ) {
     intent.question = null;
   }
@@ -207,7 +244,7 @@ function enforce(
       : `${modelText.length} model text fields scanned`,
   });
 
-  return intent;
+  return locks ? applyLocks(intent, locks) : intent;
 }
 
 export async function understand({
@@ -216,6 +253,7 @@ export async function understand({
   lang,
   jury,
   answers,
+  locked,
   effort = DEFAULT_INTENT_EFFORT,
   log,
 }: {
@@ -224,6 +262,7 @@ export async function understand({
   lang: Lang;
   jury: boolean;
   answers: { question: string; answer: string }[];
+  locked?: IntentLocks;
   effort?: IntentEffort;
   log: RunLog;
 }): Promise<Intent> {
@@ -238,7 +277,10 @@ export async function understand({
             .join("\n")}\nUse these answers and do not ask the same thing again.`,
         ]
       : []),
-  ].join("\n\n");
+    locksBlock(locked) ?? "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
     { role: "system", content: SYSTEM_PROMPT },
@@ -267,7 +309,7 @@ export async function understand({
     let issue: string;
     try {
       const parsed = IntentSchema.safeParse(JSON.parse(content));
-      if (parsed.success) return enforce(parsed.data, transcript, profile, log);
+      if (parsed.success) return enforce(parsed.data, transcript, answers, profile, locked, log);
       issue = z.prettifyError(parsed.error);
     } catch {
       issue = "The output was not valid JSON.";
