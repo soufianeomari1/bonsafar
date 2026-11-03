@@ -132,3 +132,56 @@ export function VoiceRadar({
     </div>
   );
 }
+
+/**
+ * The calm rings of screens/02-home.html and the faster ones of 03-voice.html.
+ * They loop on their own. Safar's arcs, not these rings, follow `level`.
+ */
+export function PulseRings({
+  core,
+  duration = 2.4,
+  scale = 2.2,
+  delays = [0, 0.8, 1.6],
+  opacity = 0.45,
+  sweep = false,
+}: {
+  core: number;
+  duration?: number;
+  scale?: number;
+  delays?: number[];
+  opacity?: number;
+  sweep?: boolean;
+}) {
+  const reduced = useReducedMotion();
+  const sweepSize = core + 120;
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute left-1/2 top-1/2"
+      style={{ width: core, height: core, marginLeft: -core / 2, marginTop: -core / 2 }}
+    >
+      {sweep && !reduced && (
+        <span
+          className="bs-motion absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-pill"
+          style={{
+            width: sweepSize,
+            height: sweepSize,
+            background:
+              "conic-gradient(from 0deg, color-mix(in srgb, var(--color-blue) 16%, transparent), transparent 70deg, transparent 360deg)",
+            animation: "bs-sweep 3s linear infinite",
+          }}
+        />
+      )}
+      {!reduced &&
+        delays.map((delay) => (
+          <motion.span
+            key={delay}
+            className="absolute inset-0 rounded-pill border-2 border-blue"
+            initial={{ scale: 1, opacity }}
+            animate={{ scale, opacity: 0 }}
+            transition={{ duration, ease: [0.23, 1, 0.32, 1], repeat: Infinity, delay }}
+          />
+        ))}
+    </div>
+  );
+}

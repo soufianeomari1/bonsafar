@@ -140,11 +140,17 @@ export const en = {
 
   // 2 · Home
   "home.title": "Salam!\nWhere do you want to travel?",
-  "home.subtitle": "Tell me where you want to go, I take care of the rest.",
-  "home.micLabel": "Press and speak",
+  // TODO: translated by the agent, not taken from the mockup.
+  "home.titleNamed": "Salam {name}!\nWhere do you want to travel?",
+  "home.subtitle": "Tell me everything, like on WhatsApp.",
+  "home.micLabel": "Press and hold to speak",
   "home.micTitle": "Press and speak",
   "home.micHint": "Press and speak, in darija or in French",
-  "home.ideasLabel": "Trip ideas",
+  "home.bubble": "Brek w hder",
+  "home.bubbleHint": "Press and speak",
+  "home.ideasVisa": "VISA-FREE IDEAS FOR YOU",
+  "home.ideasLabel": "IDEAS FOR YOU",
+  "home.muse": "MUSE IMAGE",
   "home.writeLabel": "Write your request",
   "home.writePlaceholder": "or write here…",
   "home.send": "Send",

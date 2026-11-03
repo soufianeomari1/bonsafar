@@ -7,6 +7,34 @@ const LOGO_SIZES = {
   lg: { box: 64, radius: 18, icon: 36 },
 } as const;
 
+/** Static Safar face used as the wordmark. Not the living mascot: one animated Safar per screen. */
+export function SafarMark({ size = 30, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      aria-hidden
+      width={size}
+      height={size}
+      viewBox="0 0 200 200"
+      className={cn("shrink-0", className)}
+    >
+      <g transform="rotate(-12 100 100)">
+        <path
+          d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z"
+          className="fill-blue stroke-ink"
+          strokeWidth={10}
+          strokeLinejoin="round"
+        />
+        <path
+          d="M74,90 Q82,78 90,90 M108,90 Q116,78 124,90 M88,104 Q99,117 110,104"
+          className="fill-none stroke-ink"
+          strokeWidth={9}
+          strokeLinecap="round"
+        />
+      </g>
+    </svg>
+  );
+}
+
 /** Black rounded square with the white plane, the BonSafar mark. */
 export function Logo({
   size = "md",

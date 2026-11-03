@@ -12,6 +12,8 @@ export type Idea = {
   sub: TranslationKey;
   subFree?: TranslationKey;
   image: string;
+  /** Gradient stand-in until a Muse Image illustration exists. */
+  wash: string;
   /** Schengen ideas are only visa-free for French passports or visa holders. */
   schengen: boolean;
   provisional: true;
@@ -23,6 +25,7 @@ const IDEAS: Record<Idea["id"], Idea> = {
     title: "idea.istanbul.title",
     sub: "idea.istanbul.sub",
     image: "/ideas/istanbul.svg",
+    wash: "bg-gradient-to-br from-yellow via-orange to-blue",
     schengen: false,
     provisional: true,
   },
@@ -32,6 +35,7 @@ const IDEAS: Record<Idea["id"], Idea> = {
     sub: "idea.paris.sub",
     subFree: "idea.paris.subFree",
     image: "/ideas/paris.svg",
+    wash: "bg-gradient-to-br from-blue-soft via-blue to-ink",
     schengen: true,
     provisional: true,
   },
@@ -40,6 +44,7 @@ const IDEAS: Record<Idea["id"], Idea> = {
     title: "idea.omra.title",
     sub: "idea.omra.sub",
     image: "/ideas/omra.svg",
+    wash: "bg-gradient-to-br from-yellow to-orange",
     schengen: false,
     provisional: true,
   },
@@ -48,6 +53,7 @@ const IDEAS: Record<Idea["id"], Idea> = {
     title: "idea.tunis.title",
     sub: "idea.tunis.sub",
     image: "/ideas/tunis.svg",
+    wash: "bg-gradient-to-br from-sea to-blue",
     schengen: false,
     provisional: true,
   },
@@ -57,6 +63,7 @@ const IDEAS: Record<Idea["id"], Idea> = {
     sub: "idea.barcelona.sub",
     subFree: "idea.barcelona.subFree",
     image: "/ideas/barcelona.svg",
+    wash: "bg-gradient-to-br from-land to-green",
     schengen: true,
     provisional: true,
   },

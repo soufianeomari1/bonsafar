@@ -97,12 +97,23 @@
   );
 }
 
-/* Home and trust sheet backdrop, mockups 02-Main and 01c-Confiance */
+/* Home sky, design/motion/screens/02-home.html */
 @utility bg-home-gradient {
   background-image: linear-gradient(
     180deg,
-    var(--color-blue-soft) 0%,
-    var(--color-card) 38%
+    var(--color-sky) 0%,
+    var(--color-blue-soft) 60%,
+    var(--color-bg) 100%
+  );
+}
+
+/* Voice note sky, design/motion/screens/03-voice.html */
+@utility bg-voice-gradient {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-sky) 0%,
+    var(--color-blue-soft) 50%,
+    var(--color-bg) 100%
   );
 }
 

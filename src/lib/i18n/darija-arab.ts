@@ -133,11 +133,17 @@ export const darijaArab: Dictionary = {
   "profile.restart": "عاود الأسئلة الأربعة",
 
   "home.title": "سلام !\nفين بغيتي تسافر ؟",
-  "home.subtitle": "گول ليا فين بغيتي تمشي، وأنا نقلب على كلشي.",
+  // TODO: translated by the agent, not taken from the mockup.
+  "home.titleNamed": "سلام {name} !\nفين بغيتي تسافر ؟",
+  "home.subtitle": "گول ليا كلشي، بحال واتساب.",
   "home.micLabel": "برك وهضر",
   "home.micTitle": "برك وهضر",
   "home.micHint": "برك وهضر، بالدارجة ولا بالفرنسية",
+  "home.bubble": "برك وهضر",
+  "home.bubbleHint": "برك وهضر، بالدارجة ولا بالفرنسية",
+  "home.ideasVisa": "أفكار بلا فيزا ليك",
   "home.ideasLabel": "أفكار ديال السفر",
+  "home.muse": "MUSE IMAGE",
   "home.writeLabel": "كتب الطلب ديالك",
   "home.writePlaceholder": "ولا كتب هنا…",
   "home.send": "صيفط",
