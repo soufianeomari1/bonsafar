@@ -1,0 +1,67 @@
+import type { Dictionary } from "./en";
+
+/** Modern Standard Arabic. Rendered right to left with IBM Plex Sans Arabic. */
+export const ar: Dictionary = {
+  "common.next": "التالي",
+  "common.skip": "تخطي",
+  "common.back": "رجوع",
+  "common.close": "إغلاق",
+  "common.cancel": "إلغاء",
+  "common.retry": "إعادة المحاولة",
+  "common.share": "مشاركة",
+  "common.understood": "فهمت",
+  "common.juryMode": "وضع لجنة التحكيم",
+  "common.signIn": "المتابعة باستخدام Google",
+  "common.signOut": "تسجيل الخروج",
+  "common.signedInAs": "مسجل الدخول باسم {name}",
+  "common.signedOut": "غير مسجل الدخول",
+  "common.loading": "لحظة من فضلك",
+
+  "welcome.tagline": "طريق السلامة",
+  "welcome.title": "وكالة أسفار في جيبك.",
+  "welcome.subtitle":
+    "تحدث عن رحلتك بصوتك، ونحن نجهز كل شيء، بالسعر الحقيقي.",
+  "welcome.perk.language": "تحدث بالدارجة أو الفرنسية أو العربية",
+  "welcome.perk.live": "رحلات وفنادق مباشرة، سعر واحد بالدرهم",
+  "welcome.perk.checks":
+    "التأشيرة والأمتعة والمال: كل شيء يُتحقق منه قبل السفر",
+  "welcome.noAccount": "المتابعة بدون حساب",
+  "welcome.footnote": "بعد ذلك، 4 أسئلة في 30 ثانية لتخصيص رحلاتك.",
+
+  "onboarding.step": "الخطوة {current} من {total}",
+  "onboarding.language.title": "تفضل أن نتحدث بـ…",
+  "onboarding.language.subtitle": "يمكنك دائمًا المزج، BonSafar يفهم.",
+  "onboarding.language.scriptLabel": "اكتب الدارجة بـ",
+  "onboarding.language.scriptLatin": "حروف لاتينية",
+  "onboarding.language.scriptArabic": "حروف عربية",
+  "onboarding.papers.title": "وثائقك",
+  "onboarding.papers.subtitle": "حتى نقترح عليك رحلات يمكنك القيام بها فعلًا.",
+  "onboarding.papers.passportLabel": "جواز سفرك",
+  "onboarding.papers.schengen": "تأشيرة شنغن سارية",
+  "onboarding.papers.schengenHint": "تفتح فرنسا وإسبانيا وإيطاليا…",
+  "onboarding.papers.passport6m": "جواز سفر صالح أكثر من 6 أشهر",
+  "onboarding.papers.passport6mHint": "تطلبه كثير من شركات الطيران",
+  "onboarding.papers.card": "بطاقة بنكية دولية",
+  "onboarding.papers.cardHint": "للدفع لدى الشريك",
+  "onboarding.papers.note":
+    "بدون تأشيرة شنغن، أقترح عليك أولًا الوجهات التي لا تحتاج تأشيرة، وأشرح لك كيفية طلب شنغن.",
+  "passport.moroccan": "مغربي",
+  "passport.french": "فرنسي",
+  "passport.both": "كلاهما",
+  "passport.other": "آخر",
+
+  "trust.title": "السعر الحقيقي، فورًا.",
+  "trust.subtitle": "ما تراه هو ما تدفعه، بالدرهم.",
+  "trust.point.live": "رحلات وفنادق مباشرة، لدى شركاء معروفين.",
+  "trust.point.total": "سعر إجمالي واحد، شامل، بلا مفاجآت.",
+  "trust.point.partner": "تدفع لدى الشريك. BonSafar لا يلمس أموالك أبدًا.",
+
+  "home.title": "سلام! إلى أين تريد السفر؟",
+  "home.subtitle": "قل لي إلى أين تريد الذهاب، وأنا أتكفل بالباقي.",
+  "home.micLabel": "اضغط وتحدث",
+  "home.micTitle": "اضغط وتحدث",
+  "home.micHint": "اضغط وتحدث، بالدارجة أو بالفرنسية",
+  "home.ideasLabel": "أفكار للسفر",
+  "home.writeLabel": "اكتب طلبك",
+  "home.writePlaceholder": "أو اكتب هنا…",
+};
