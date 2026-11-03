@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>BonSafar, vérifie et continue</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Arabic:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; color: #0B0B0F; font-family: Geist, system-ui, sans-serif; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 14px 20px 22px; gap: 16px">
+  <div style="display: flex; justify-content: flex-end">
+    <button type="button" aria-label="Fermer" style="width: 40px; height: 40px; border-radius: 50%; border: 0; background: #EFEFF4; color: #0B0B0F; display: flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg></button>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 2px">
+    <h1 style="margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1">Vérifie w kemmel</h1>
+    <span style="font-size: 16px; color: #6B6B76">Vérifie et continue</span>
+  </div>
+
+  <div style="border: 1px solid #E5E5EA; border-radius: 22px; padding: 16px; display: flex; flex-direction: column">
+    <div style="display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #E5E5EA">
+      <svg role="img" aria-label="Visuel Istanbul" width="72" height="72" viewBox="0 0 96 96" style="border-radius: 14px">
+        <defs><linearGradient id="gv" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A9D2FF"></stop><stop offset="60%" stop-color="#FFD3A1"></stop><stop offset="100%" stop-color="#F6A94A"></stop></linearGradient></defs>
+        <rect width="96" height="96" fill="url(#gv)"></rect><circle cx="68" cy="52" r="9" fill="#FFF1CC"></circle>
+        <g fill="#7A4A35"><rect x="0" y="76" width="96" height="20"></rect><path d="M30 76 Q48 48 66 76 Z"></path><path d="M18 76 Q25 66 32 76 Z"></path><path d="M64 76 Q71 66 78 76 Z"></path><rect x="14" y="44" width="3" height="32"></rect><polygon points="14,44 15.5,34 17,44"></polygon><rect x="80" y="44" width="3" height="32"></rect><polygon points="80,44 81.5,34 83,44"></polygon></g>
+      </svg>
+      <span style="display: flex; flex-direction: column; gap: 4px; justify-content: center; min-width: 0">
+        <span style="font-weight: 800; font-size: 18px">Istanbul · 7 nuits</span>
+        <span style="display: flex; align-items: center; gap: 4px; font-size: 14px; color: #6B6B76"><svg width="13" height="13" viewBox="0 0 256 256" fill="#0B0B0F" aria-hidden="true"><path d="M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z"></path></svg><strong style="color: #0B0B0F">9,3</strong> · Hampton by Hilton Şişli</span>
+      </span>
+    </div>
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #E5E5EA">
+        <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+          <span style="font-weight: 700; font-size: 16px">{{ r.k }}</span>
+          <span style="font-size: 15px; color: #6B6B76">{{ r.v }}</span>
+        </span>
+        <button type="button" style="height: 40px; padding: 0 14px; border-radius: 12px; border: 0; background: #EFEFF4; color: #0B0B0F; font: 600 14px Geist, sans-serif; flex: none">{{ r.a }}</button>
+      </div>
+    </sc-for>
+    <div style="display: flex; flex-direction: column; gap: 2px; padding-top: 14px">
+      <span style="font-weight: 700; font-size: 16px">Annulation</span>
+      <span style="font-size: 15px; color: #6B6B76">Hôtel non remboursable. Vols selon chaque compagnie.</span>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 10px; align-items: center; font-size: 15px; color: #3A3A42; line-height: 1.45; background: #E8F7EE; border-radius: 16px; padding: 12px 14px">
+    <svg width="22" height="22" viewBox="0 0 256 256" fill="#15803D" aria-hidden="true" style="flex: none"><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.910-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm-34.32,69.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
+    <span>Tu paies chez Kiwi.com et sur le site de l'hôtel. BonSafar ne voit jamais ta carte.</span>
+  </div>
+
+  <div style="flex: 1"></div>
+  <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+    <span style="height: 4px; border-radius: 4px; background: #0B0B0F"></span>
+    <span style="height: 4px; border-radius: 4px; background: #E5E5EA"></span>
+    <span style="height: 4px; border-radius: 4px; background: #E5E5EA"></span>
+  </div>
+  <a href="Dossier.dc.html" style="height: 56px; border-radius: 16px; background: #0B0B0F; color: #FFFFFF; font: 600 17px Geist, sans-serif; text-decoration: none; display: flex; align-items: center; justify-content: center">Suivant</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const rows = [
+      { k: 'Dates', v: 'Du 15 au 22 déc. 2026', a: 'Modifier' },
+      { k: 'Voyageurs', v: '2 adultes, départ Casablanca', a: 'Modifier' },
+      { k: 'Prix total', v: '14 085 DH, vols et hôtel compris', a: 'Détail' }
+    ];
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>

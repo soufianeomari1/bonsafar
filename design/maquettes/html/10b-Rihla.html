@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>BonSafar, affiche Rihla</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 390px; height: 694px; box-sizing: border-box; background: #FFD3A1; color: #0B0B0F; font-family: Geist, system-ui, sans-serif; position: relative; overflow: hidden">
+  <svg role="img" aria-label="Illustration d'Istanbul à l'heure dorée, générée par Muse Image, sans texte" width="390" height="694" viewBox="0 0 390 694" style="position: absolute; left: 0; top: 0">
+    <defs>
+      <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9CCBFF"></stop><stop offset="45%" stop-color="#FFE0B8"></stop><stop offset="72%" stop-color="#FFC07A"></stop><stop offset="100%" stop-color="#F29A3E"></stop></linearGradient>
+      <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F7B470"></stop><stop offset="100%" stop-color="#D9893A"></stop></linearGradient>
+    </defs>
+    <rect width="390" height="694" fill="url(#gold)"></rect>
+    <circle cx="276" cy="300" r="54" fill="#FFF3D6"></circle>
+    <g fill="#8A5238">
+      <path d="M0 420H390V430H0Z"></path>
+      <path d="M92 420Q195 250 298 420Z"></path>
+      <path d="M44 420Q84 360 124 420Z"></path>
+      <path d="M266 420Q306 360 346 420Z"></path>
+      <rect x="188" y="292" width="14" height="28"></rect>
+      <rect x="40" y="250" width="10" height="170"></rect><polygon points="40,250 45,212 50,250"></polygon>
+      <rect x="340" y="250" width="10" height="170"></rect><polygon points="340,250 345,212 350,250"></polygon>
+      <rect x="14" y="300" width="7" height="120"></rect><polygon points="14,300 17.5,276 21,300"></polygon>
+      <rect x="369" y="300" width="7" height="120"></rect><polygon points="369,300 372.5,276 376,300"></polygon>
+    </g>
+    <rect x="0" y="430" width="390" height="264" fill="url(#sea)"></rect>
+    <path d="M30 470h120M220 500h140M60 540h90M200 580h110M40 620h150" stroke="#FFE0B8" stroke-width="2" stroke-linecap="round" opacity="0.6"></path>
+    <path d="M150 486l22 0-6 8h-14z" fill="#8A5238" opacity="0.7"></path>
+  </svg>
+
+  <div style="position: absolute; left: 22px; top: 56px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px">
+    <span style="background: #0B0B0F; color: #FFFFFF; font: 700 16px 'Geist Mono', monospace; padding: 4px 8px; letter-spacing: 0.02em">BSLAMA CASA</span>
+    <span style="background: #0B0B0F; color: #FFFFFF; font: 700 16px 'Geist Mono', monospace; padding: 4px 8px; letter-spacing: 0.02em">NEXT : ISTANBUL</span>
+  </div>
+
+  <article aria-label="Carte d'embarquement souvenir" style="position: absolute; left: 26px; right: 26px; top: 476px; height: 150px; border-radius: 10px; background: #FFFFFF; transform: rotate(-6deg); box-shadow: 0 16px 30px rgba(0,0,0,0.25); display: grid; grid-template-columns: 130px minmax(0, 1fr); overflow: hidden">
+    <div style="background: #15803D; color: #FFFFFF; padding: 12px; display: flex; flex-direction: column; justify-content: center">
+      <span style="font-weight: 800; font-size: 34px; line-height: 0.95">CMN</span>
+      <span style="font-weight: 800; font-size: 34px; line-height: 0.95">→SAW</span>
+    </div>
+    <div style="padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; font-family: 'Geist Mono', monospace">
+      <span style="display: flex; justify-content: space-between; align-items: center">
+        <span style="font-size: 9px; color: #6B6B76">MADE WITH BONSAFAR</span>
+        <span lang="ar" dir="rtl" style="font-family: 'IBM Plex Sans Arabic', sans-serif; font-weight: 600; font-size: 20px; color: #C1272D; line-height: 1">رحلة</span>
+      </span>
+      <span style="font-size: 14px; font-weight: 700">FATIMA</span>
+      <span style="font-size: 10px; color: #6B6B76">CASABLANCA → ISTANBUL</span>
+      <span style="display: flex; justify-content: space-between; font-size: 10px"><span><span style="color: #6B6B76">DÉPART</span> 15 DÉC 09:15</span></span>
+      <span aria-hidden="true" style="height: 16px; background: repeating-linear-gradient(90deg, #0B0B0F 0 2px, transparent 2px 4px, #0B0B0F 4px 5px, transparent 5px 8px)"></span>
+    </div>
+  </article>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":694}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

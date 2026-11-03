@@ -1,0 +1,45 @@
+---
+description: BonSafar design system (tokens, typography, icons, motion, haptics, accessibility) for UI work
+globs: src/components/**, src/app/**/*.tsx, src/app/globals.css, src/lib/haptics.ts
+alwaysApply: false
+---
+
+# Design system
+
+Full spec: `docs/parcours-et-interfaces.md` sections 1 to 4 and 8. Mockups: `design/maquettes/png` (look) and `design/maquettes/html` (exact values; these HTML files are references, not code to import).
+
+## Tokens (declared once in `@theme`, never hardcode a hex elsewhere)
+- bg `#F2F2F7`, card `#FFFFFF`, ink `#0B0B0F`, muted `#6B6B76`, line `#E5E5EA`, fill `#EFEFF4`
+- green `#15803D`, green-bright `#22C55E`, green-soft `#E8F7EE`, yellow `#FFC800`
+- orange `#B45309` / orange-soft `#FFF4E0`, red `#DC2626` / red-soft `#FEECEC`, blue `#0A6CFF` / blue-soft `#EAF2FF`, violet `#A855F7`
+- sea `#D4E8F6`, land `#EEF1E6`, sky gradient `#DCEBFF` to white
+- stamp-red `#C1272D`, stamp-green `#006233` (only on the travel file stamp)
+- Radii: sheet 32px, card 22px, button 14 to 16px, pill 999px. Shadow: `0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)`.
+
+## Type
+- Geist for UI: titles 26 to 36px bold, body 17px, labels 12px small caps, letter-spaced, muted.
+- Big numbers (times, prices): Geist 700, 36 to 44px, `tabular-nums`.
+- Geist Mono: boarding pass, status badges, Under the hood panel.
+- Arabic script: IBM Plex Sans Arabic, line-height 1.6, `lang="ar" dir="rtl"`.
+
+## Icons
+- Phosphor "fill" weight for objects and statuses, inside a tinted circle of 36 to 48px. "bold" weight for UI controls.
+- In Server Components import from `@phosphor-icons/react/dist/ssr`.
+
+## Layout
+- Mobile first at 390px. On desktop: phone frame centered. Jury mode: 1440 frame, phone left, "Under the hood" panel right.
+- Touch targets 44px minimum, primary buttons 56px high, black with white text.
+- One dominant piece of information per block. Only one "AI" card per screen gets the halo (the smart tip).
+
+## Motion (`motion/react`)
+- Default ease `[0.23, 1, 0.32, 1]`, default spring `{ type: "spring", duration: 0.5, bounce: 0.15 }`.
+- Sheets 500ms with ease `[0.32, 0.72, 0, 1]`. Enter: opacity 0 to 1, y 8 to 0, scale 0.96 to 1. Stagger 50 to 60ms. Press: scale 0.97.
+- Signature animations A1 to A9 are specified in the doc section 3. Build them as reusable components.
+- `prefers-reduced-motion`: replace everything with 200ms fades.
+
+## Haptics
+- Only through `src/lib/haptics.ts` (8 named patterns). Each vibration also triggers its visual twin (HapticRing, 24px ring pulsing 200ms) so it shows in the video.
+- Max one vibration per second outside the flight plan. User can turn haptics off.
+
+## Accessibility
+- `aria-label` on every icon-only button, visible focus states, contrast AA on text.

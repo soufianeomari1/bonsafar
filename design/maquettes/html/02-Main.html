@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>BonSafar, accueil</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Arabic:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes sweep{to{transform:rotate(360deg)}}
+@keyframes ring{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.4);opacity:0}}
+@keyframes drift{from{transform:translateX(-80px)}to{transform:translateX(440px)}}
+@media (prefers-reduced-motion: reduce){.a{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: linear-gradient(180deg, #EAF2FF 0%, #FFFFFF 38%); color: #0B0B0F; font-family: Geist, system-ui, sans-serif; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 24px 20px 22px; gap: 16px">
+  <svg class="a" aria-hidden="true" width="90" height="34" viewBox="0 0 90 34" style="position: absolute; left: 0; top: 70px; animation: drift 38s linear infinite"><path d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z" fill="#FFFFFF"></path></svg>
+  <svg class="a" aria-hidden="true" width="60" height="24" viewBox="0 0 90 34" style="position: absolute; left: 0; top: 150px; opacity: 0.8; animation: drift 26s linear infinite; animation-delay: -12s"><path d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z" fill="#FFFFFF"></path></svg>
+
+  <div style="position: relative; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 10px; background: #0B0B0F; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor"><path d="M215.52,197.26a8,8,0,0,1-1.86,8.39l-24,24A8,8,0,0,1,184,232a7.09,7.09,0,0,1-.79,0,8,8,0,0,1-5.87-3.52l-44.07-66.12L112,183.59V208a8,8,0,0,1-2.34,5.65s-14,14.06-15.88,15.88A7.91,7.91,0,0,1,91,231.41a8,8,0,0,1-10.41-4.35l-.06-.15-14.7-36.76L29,175.42a8,8,0,0,1-2.69-13.08l16-16A8,8,0,0,1,48,144H72.4l21.27-21.27L27.56,78.65a8,8,0,0,1-1.22-12.32l24-24a8,8,0,0,1,8.39-1.86l85.94,31.25L176.2,40.19a28,28,0,0,1,39.6,39.6l-31.53,31.53Z"></path></svg></span>
+      <span style="font-weight: 800; font-size: 20px; letter-spacing: -0.02em">BonSafar</span>
+      <span style="font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 15px; color: #6B6B76">بون سفر</span>
+    </div>
+    <button type="button" style="height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: #FFFFFF; color: #0B0B0F; font: 600 14px Geist, sans-serif; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 6px 16px rgba(0,0,0,0.06)">
+      <svg width="14" height="14" viewBox="0 0 256 256" fill="#0A6CFF" aria-hidden="true"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path></svg>
+      Mode jury
+    </button>
+  </div>
+
+  <div style="position: relative; display: flex; flex-direction: column; gap: 6px; margin-top: 10px">
+    <h1 style="margin: 0; font-weight: 800; font-size: 34px; line-height: 1.08; letter-spacing: -0.025em">Salam !<br>Fin bghiti tsafer ?</h1>
+    <p style="margin: 0; font-size: 17px; line-height: 1.45; color: #6B6B76">Dis-moi où tu veux partir, je m'occupe du reste.</p>
+  </div>
+
+  <div style="position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px">
+    <div style="position: relative; width: 250px; height: 250px; display: flex; align-items: center; justify-content: center">
+      <span aria-hidden="true" style="position: absolute; inset: 0; border-radius: 50%; border: 1px solid #D6E4FF"></span>
+      <span aria-hidden="true" style="position: absolute; inset: 40px; border-radius: 50%; border: 1px solid #D6E4FF"></span>
+      <span aria-hidden="true" style="position: absolute; inset: 80px; border-radius: 50%; border: 1px dashed #C4D7FB"></span>
+      <span aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #E3ECFC"></span>
+      <span aria-hidden="true" style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #E3ECFC"></span>
+      <span class="a" aria-hidden="true" style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(10,108,255,0) 0deg, rgba(10,108,255,0) 290deg, rgba(10,108,255,0.22) 360deg); animation: sweep 4s linear infinite"></span>
+      <span aria-hidden="true" style="position: absolute; left: 64px; top: 58px; width: 7px; height: 7px; border-radius: 50%; background: #0A6CFF; box-shadow: 0 0 0 4px rgba(10,108,255,0.15)"></span>
+      <span aria-hidden="true" style="position: absolute; right: 52px; top: 150px; width: 6px; height: 6px; border-radius: 50%; background: #22C55E; box-shadow: 0 0 0 4px rgba(34,197,94,0.15)"></span>
+      <span class="a" aria-hidden="true" style="position: absolute; width: 84px; height: 84px; border-radius: 50%; border: 2px solid #0A6CFF; animation: ring 2.4s ease-out infinite"></span>
+      <span class="a" aria-hidden="true" style="position: absolute; width: 84px; height: 84px; border-radius: 50%; border: 2px solid #0A6CFF; animation: ring 2.4s ease-out infinite; animation-delay: 1.2s"></span>
+      <button type="button" aria-label="Appuie et parle" style="position: relative; width: 84px; height: 84px; border-radius: 50%; border: 0; background: #0B0B0F; color: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(11,11,15,0.25)">
+        <svg width="34" height="34" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M80,128V64a48,48,0,0,1,96,0v64a48,48,0,0,1-96,0Zm128,0a8,8,0,0,0-16,0,64,64,0,0,1-128,0,8,8,0,0,0-16,0,80.11,80.11,0,0,0,72,79.6V240a8,8,0,0,0,16,0V207.6A80.11,80.11,0,0,0,208,128Z"></path></svg>
+      </button>
+    </div>
+    <div style="text-align: center; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 17px; font-weight: 700">Brek w hder</span>
+      <span style="font-size: 15px; color: #6B6B76">Appuie et parle, en darija ou en français</span>
+    </div>
+  </div>
+
+  <div style="position: relative; display: flex; flex-direction: column; gap: 10px">
+    <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6B6B76">Idées de voyage</span>
+    <div style="display: flex; gap: 10px; overflow: hidden">
+      <sc-for list="{{ ideas }}" as="i" hint-placeholder-count="3">
+        <button type="button" style="flex: none; width: 150px; border: 0; padding: 0; background: transparent; text-align: left; display: flex; flex-direction: column; gap: 6px; color: #0B0B0F">
+          <span aria-hidden="true" style="width: 150px; height: 96px; border-radius: 18px; background: {{ i.bg }}; position: relative; overflow: hidden; display: block">
+            <svg width="150" height="96" viewBox="0 0 150 96" style="position: absolute; left: 0; bottom: 0"><path d="{{ i.sky }}" fill="rgba(255,255,255,0.55)"></path></svg>
+          </span>
+          <span style="font-weight: 600; font-size: 15px">{{ i.t }}</span>
+          <span style="font-size: 13px; color: #6B6B76">{{ i.s }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <label style="margin-top: 4px; height: 52px; box-sizing: border-box; border-radius: 16px; background: #F2F2F7; display: flex; align-items: center; padding: 0 8px 0 16px; gap: 8px">
+      <span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Écris ta demande</span>
+      <input type="text" placeholder="ou écris ici…" style="flex: 1; min-width: 0; border: 0; background: transparent; color: #0B0B0F; font: 400 16px Geist, sans-serif; outline: none">
+      <span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 12px; background: #0B0B0F; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,133.66l-72,72A8,8,0,0,1,136,200V136H40a8,8,0,0,1,0-16h96V56a8,8,0,0,1,13.66-5.66l72,72A8,8,0,0,1,221.66,133.66Z"></path></svg></span>
+    </label>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ideas = [
+      { t: 'Istanbul en décembre', s: 'Sans visa · 4 h 40 de vol', bg: 'linear-gradient(160deg, #A9D2FF 0%, #FFD3A1 70%, #F6A94A 100%)', sky: 'M0 96V70h30q8-22 22 0h8V40l3-10 3 10v30h20q15-34 30 0h10V44l3-10 3 10v26h18v26z' },
+      { t: 'Paris un week-end', s: '3 h de vol · visa Schengen', bg: 'linear-gradient(160deg, #BFE3FF 0%, #E9F3FF 100%)', sky: 'M0 96V80h50V74h8l8-50 8 50h8v6h68v16z' },
+      { t: 'Omra', s: 'Formalités pas à pas', bg: 'linear-gradient(160deg, #FFE7B8 0%, #F7C873 100%)', sky: 'M0 96V76h40V60h70v16h40v20z' }
+    ];
+    return { ideas };
+  }
+}
+</script>
+</body>
+</html>

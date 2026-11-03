@@ -1,0 +1,34 @@
+---
+description: BonSafar non-negotiable rules (hackathon compliance, prices, secrets, privacy)
+alwaysApply: true
+---
+
+# Non-negotiable rules
+
+Breaking one of these can get the project disqualified or lose the judges' trust.
+
+## Meta models only
+- All intelligence (transcription, understanding, planning, tool calling, writing, images) runs on Meta models through the Meta Model API.
+- No other LLM, no other speech or image AI service, not even as a fallback.
+- Model IDs come from env vars (`MODEL_TRANSCRIBE`, `MODEL_SPARK`, `MODEL_SPARK_AUDIO`, `MODEL_WONDER`, `MODEL_IMAGE`). Never hardcode them, never use a `-contributor` model.
+
+## Real prices only
+- Prices come only from Kiwi.com and trivago MCP results (or a recorded real run, labeled "replay").
+- Every offer goes into the server-side price store with an ID (F1, H1...), its source and its fetch time.
+- Models only handle offer IDs. They never write an amount. Reject any model text that contains a price or an amount of money (digits next to a currency, DH, MAD, EUR, €, $).
+- Totals, differences and currency conversion are computed by code. EUR to MAD uses `EUR_MAD_RATE` and always shows `EUR_MAD_DATE`.
+
+## Data and licenses
+- No scraping. External data only through the official Kiwi.com and trivago MCP servers.
+- Icons: `@phosphor-icons/react` only. Fonts: Geist, Geist Mono, IBM Plex Sans Arabic (OFL) via `next/font`.
+- No image, sound or text taken from the web. Illustrations come from Muse Image.
+
+## Secrets and privacy
+- API keys and `SUPABASE_SECRET_KEY` stay server-side (route handlers, server actions). Only `NEXT_PUBLIC_*` values may reach the browser.
+- Never log keys, tokens or full request headers.
+- Never store audio. Only the transcript is kept.
+- BonSafar never handles payment data: users pay on the partner's site.
+
+## Honesty in the demo
+- Never fake a live result. A replayed run always shows a visible "replay" badge and the price capture time.
+- Every cost and latency shown in "Under the hood" is measured, not estimated.

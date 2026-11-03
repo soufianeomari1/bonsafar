@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>BonSafar, résultat sur la carte</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Arabic:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes route{0%{offset-distance:0%}78%,100%{offset-distance:100%}}
+@keyframes draw{0%{stroke-dashoffset:520}78%,100%{stroke-dashoffset:0}}
+@media (prefers-reduced-motion: reduce){.a{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #D4E8F6; color: #0B0B0F; font-family: Geist, system-ui, sans-serif; position: relative; overflow: hidden">
+  <svg role="img" aria-label="Carte du trajet Casablanca vers Istanbul" width="390" height="440" viewBox="0 0 390 440" style="position: absolute; left: 0; top: 0">
+    <rect width="390" height="440" fill="#D4E8F6"></rect>
+    <path d="M0 0H390V150C362 158 336 148 312 168C292 186 262 174 240 190C220 205 200 190 184 202C164 216 140 202 120 216C100 230 80 222 68 236C58 248 38 246 18 250L0 252Z" fill="#EEF1E6"></path>
+    <path d="M296 150C326 138 366 144 390 150V236C360 242 328 232 304 226C288 206 288 166 296 150Z" fill="#E7EBDD"></path>
+    <path d="M0 300C40 290 70 302 100 296C150 288 200 300 250 296C300 292 340 302 390 296V440H0Z" fill="#EEF1E6"></path>
+    <path d="M150 0V140M260 0V180M0 270H390" stroke="#FFFFFF" stroke-width="1" opacity="0.7"></path>
+    <path d="M60 318Q190 90 330 168" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"></path>
+    <path d="M60 318Q190 90 330 168" fill="none" stroke="#B9D3FF" stroke-width="3" stroke-linecap="round"></path>
+    <path class="a" d="M60 318Q190 90 330 168" fill="none" stroke="#0A6CFF" stroke-width="3" stroke-linecap="round" stroke-dasharray="520" stroke-dashoffset="0" style="animation: draw 4s cubic-bezier(.45,0,.2,1) infinite"></path>
+    <circle cx="60" cy="318" r="6" fill="#FFFFFF" stroke="#0B0B0F" stroke-width="2.5"></circle>
+    <circle cx="330" cy="168" r="7" fill="#0A6CFF" stroke="#FFFFFF" stroke-width="2.5"></circle>
+  </svg>
+  <span class="a" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; color: #0B0B0F; offset-anchor: center; offset-path: path('M60 318Q190 90 330 168'); offset-rotate: auto 90deg; animation: route 4s cubic-bezier(.45,0,.2,1) infinite; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3))"><svg width="26" height="26" viewBox="0 0 256 256" fill="currentColor"><path d="M240,136v32a8,8,0,0,1-8,8,7.61,7.61,0,0,1-1.57-.16L156,161v23.73l17.66,17.65A8,8,0,0,1,176,208v24a8,8,0,0,1-11,7.43l-37-14.81L91,239.43A8,8,0,0,1,80,232V208a8,8,0,0,1,2.34-5.66L100,184.69V161L25.57,175.84A7.61,7.61,0,0,1,24,176a8,8,0,0,1-8-8V136a8,8,0,0,1,4.42-7.16L100,89.06V44a28,28,0,0,1,56,0V89.06l79.58,39.78A8,8,0,0,1,240,136Z"></path></svg></span>
+  <span style="position: absolute; left: 24px; top: 330px; font-size: 13px; font-weight: 700; background: #FFFFFF; padding: 5px 9px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.12)">Casablanca <span style="color: #6B6B76">CMN</span></span>
+  <span style="position: absolute; left: 236px; top: 128px; font-size: 13px; font-weight: 700; background: #0A6CFF; color: #FFFFFF; padding: 5px 9px; border-radius: 8px">Istanbul <span style="opacity: 0.8">IST</span></span>
+
+  <div style="position: absolute; right: 14px; top: 20px; width: 44px; border-radius: 22px; background: #FFFFFF; box-shadow: 0 2px 10px rgba(0,0,0,0.12); display: flex; flex-direction: column; align-items: center; padding: 6px 0; gap: 2px">
+    <button type="button" aria-label="Météo" style="width: 40px; height: 40px; border: 0; background: transparent; color: #0B0B0F; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M164,72a76.2,76.2,0,0,0-20.26,2.73,55.63,55.63,0,0,0-9.41-11.54l9.51-13.57a8,8,0,1,0-13.11-9.18L121.22,54A55.9,55.9,0,0,0,96,48c-.59,0-1.16,0-1.74,0L91.37,31.71a8,8,0,1,0-15.75,2.77L78.5,50.82A56.1,56.1,0,0,0,55.23,65.67L41.61,56.14a8,8,0,1,0-9.17,13.11L46,78.77A55.55,55.55,0,0,0,40,104c0,.57,0,1.15,0,1.72L23.71,108.6a8,8,0,0,0,1.38,15.88,8.24,8.24,0,0,0,1.39-.12l16.32-2.88a55.74,55.74,0,0,0,5.86,12.42A52,52,0,0,0,84,224h80a76,76,0,0,0,0-152ZM92.92,120.76a52.14,52.14,0,0,0-31,4.17,40,40,0,0,1,66.62-44.17A76.26,76.26,0,0,0,92.92,120.76Z"></path></svg></button>
+    <button type="button" aria-label="Trajet" style="width: 40px; height: 40px; border: 0; background: transparent; color: #0A6CFF; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M215.52,197.26a8,8,0,0,1-1.86,8.39l-24,24A8,8,0,0,1,184,232a7.09,7.09,0,0,1-.79,0,8,8,0,0,1-5.87-3.52l-44.07-66.12L112,183.59V208a8,8,0,0,1-2.34,5.65s-14,14.06-15.88,15.88A7.91,7.91,0,0,1,91,231.41a8,8,0,0,1-10.41-4.35l-.06-.15-14.7-36.76L29,175.42a8,8,0,0,1-2.69-13.08l16-16A8,8,0,0,1,48,144H72.4l21.27-21.27L27.56,78.65a8,8,0,0,1-1.22-12.32l24-24a8,8,0,0,1,8.39-1.86l85.94,31.25L176.2,40.19a28,28,0,0,1,39.6,39.6l-31.53,31.53Z"></path></svg></button>
+    <button type="button" aria-label="Lieux" style="width: 40px; height: 40px; border: 0; background: transparent; color: #0B0B0F; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"></path></svg></button>
+  </div>
+
+  <section style="position: absolute; left: 0; right: 0; bottom: 0; height: 460px; box-sizing: border-box; background: #FFFFFF; border-radius: 32px 32px 0 0; padding: 10px 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1)">
+    <span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 5px; background: #D1D1D6"></span>
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <span style="display: flex; flex-direction: column">
+        <span style="font-weight: 800; font-size: 26px; letter-spacing: -0.02em">Ton forfait</span>
+        <span style="font-size: 14px; color: #6B6B76">Hada howa l'forfait dyalk · 3 options comparées</span>
+      </span>
+      <button type="button" aria-label="Partager" style="width: 40px; height: 40px; border-radius: 50%; border: 0; background: #EFEFF4; color: #0B0B0F; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M220,112v96a20,20,0,0,1-20,20H56a20,20,0,0,1-20-20V112A20,20,0,0,1,56,92H76a12,12,0,0,1,0,24H60v88H196V116H180a12,12,0,0,1,0-24h20A20,20,0,0,1,220,112ZM96.49,72.49,116,53v83a12,12,0,0,0,24,0V53l19.51,19.52a12,12,0,1,0,17-17l-40-40a12,12,0,0,0-17,0l-40,40a12,12,0,1,0,17,17Z"></path></svg></button>
+    </div>
+
+    <div style="display: flex; flex-direction: column">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+        <a href="{{ r.href }}" style="text-decoration: none; color: inherit; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid #E5E5EA">
+          <span style="display: flex; flex-direction: column; align-items: center">
+            <span style="font-weight: 800; font-size: 24px; line-height: 1">7</span>
+            <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #6B6B76">NUITS</span>
+          </span>
+          <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+            <span style="display: flex; gap: 6px; align-items: center">
+              <span style="font: 700 10px 'Geist Mono', monospace; letter-spacing: 0.06em; color: {{ r.tagFg }}; background: {{ r.tagBg }}; padding: 3px 6px; border-radius: 5px">{{ r.tag }}</span>
+              <span style="font-size: 12px; color: #6B6B76">{{ r.air }}</span>
+            </span>
+            <span style="font-weight: 700; font-size: 16px">{{ r.title }}</span>
+            <span style="display: flex; gap: 10px; font-size: 13px; font-weight: 600; color: #15803D; font-variant-numeric: tabular-nums">
+              <span>↗ {{ r.dep }}</span><span>↘ {{ r.arr }}</span>
+            </span>
+          </span>
+          <span style="font-weight: 800; font-size: 17px; font-variant-numeric: tabular-nums">{{ r.price }}</span>
+        </a>
+      </sc-for>
+    </div>
+
+    <div style="flex: 1"></div>
+    <a href="#" style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6B6B76; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 256 256" fill="#22C55E" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
+      Atterri en 11 s · 5 étapes · <span style="color: #0A6CFF; font-weight: 700">Voir comment</span>
+    </a>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const rows = [
+      { href: 'Forfait.dc.html', tag: 'RECOMMANDÉ', tagFg: '#15803D', tagBg: '#E8F7EE', air: 'Royal Air Maroc + Pegasus', title: 'Hampton by Hilton Şişli', dep: 'CMN 09:15', arr: 'SAW 21:10', price: '14 085 DH' },
+      { href: '#', tag: 'DIRECT', tagFg: '#0A6CFF', tagBg: '#EAF2FF', air: 'Turkish Airlines', title: 'Plus rapide, bagage cabine', dep: 'CMN 15:45', arr: 'IST 23:25', price: '15 889 DH' },
+      { href: '#', tag: '2 ESCALES', tagFg: '#B45309', tagBg: '#FFF4E0', air: 'RAM + Ryanair + Pegasus', title: 'Le moins cher, 12 h', dep: 'CMN 06:55', arr: 'SAW 22:00', price: '13 707 DH' }
+    ];
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>

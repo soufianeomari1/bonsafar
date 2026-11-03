@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>BonSafar, plan de vol de l'agent</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes fly{0%,14%{transform:translateY(0)}72%,100%{transform:translateY(200px)}}
+@keyframes trail{0%,14%{height:0}72%,100%{height:200px}}
+@keyframes drift{from{transform:translateX(-80px)}to{transform:translateX(440px)}}
+@keyframes flip{0%{transform:rotateX(90deg)}10%,100%{transform:rotateX(0)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(10,108,255,.45)}100%{box-shadow:0 0 0 12px rgba(10,108,255,0)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion: reduce){.a{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: linear-gradient(180deg, #DCEBFF 0%, #F2F2F7 30%); color: #0B0B0F; font-family: Geist, system-ui, sans-serif; position: relative; overflow: hidden">
+  <svg class="a" aria-hidden="true" width="96" height="36" viewBox="0 0 90 34" style="position: absolute; left: 0; top: 40px; animation: drift 30s linear infinite"><path d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z" fill="#FFFFFF"></path></svg>
+  <svg class="a" aria-hidden="true" width="64" height="24" viewBox="0 0 90 34" style="position: absolute; left: 0; top: 96px; animation: drift 22s linear infinite; animation-delay: -9s"><path d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z" fill="#FFFFFF"></path></svg>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 22px; display: flex; justify-content: space-between; align-items: flex-start">
+    <span style="display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #3D4A63">Plan de vol</span>
+      <span style="font-weight: 800; font-size: 26px; letter-spacing: -0.02em">Casa → Istanbul</span>
+      <span style="font-size: 14px; color: #3D4A63">15 au 22 déc. · 2 adultes · 15 000 DH</span>
+    </span>
+    <button type="button" style="height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: #FFFFFF; color: #0B0B0F; font: 600 14px Geist, sans-serif; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 6px 16px rgba(0,0,0,0.06)">Stop</button>
+  </div>
+
+  <section style="position: absolute; left: 0; right: 0; top: 150px; bottom: 0; background: #FFFFFF; border-radius: 32px 32px 0 0; padding: 20px 18px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 -8px 30px rgba(0,0,0,0.06)">
+    <div style="display: flex; justify-content: space-between; align-items: baseline">
+      <span style="font-weight: 800; font-size: 20px">BonSafar khddam</span>
+      <span style="font-size: 13px; color: #6B6B76; font-variant-numeric: tabular-nums">6,2 s · arrivée ≈ 12 s</span>
+    </div>
+
+    <div style="position: relative; height: 472px">
+      <span aria-hidden="true" style="position: absolute; left: 13px; top: 14px; width: 2px; height: 404px; background: repeating-linear-gradient(180deg, #C7C7CC 0 6px, transparent 6px 12px)"></span>
+      <span class="a" aria-hidden="true" style="position: absolute; left: 13px; top: 14px; width: 2px; height: 200px; background: #0A6CFF; animation: trail 3.4s cubic-bezier(.45,0,.2,1) infinite"></span>
+
+      <div style="position: absolute; left: 0; top: 0; right: 0; height: 200px">
+        <span aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: #22C55E; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"></path></svg></span>
+        <div style="margin-left: 42px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+            <span style="display: flex; flex-direction: column; gap: 1px">
+              <span style="font-weight: 700; font-size: 16px">Kanqelleb 3la tiyarat</span>
+              <span style="font-size: 14px; color: #6B6B76">Je cherche les vols · 15 trouvés</span>
+            </span>
+            <span aria-label="Terminé" style="display: flex; gap: 2px; perspective: 200px">
+              <sc-for list="{{ done }}" as="l" hint-placeholder-count="7">
+                <span style="width: 11px; height: 18px; border-radius: 3px; background: #15803D; color: #FFFFFF; font: 700 10.5px 'Geist Mono', monospace; display: flex; align-items: center; justify-content: center; background-image: linear-gradient(180deg, transparent 49%, rgba(0,0,0,0.25) 49% 53%, transparent 53%)">{{ l }}</span>
+              </sc-for>
+            </span>
+          </div>
+          <div style="background: #F7F7FA; border-radius: 16px; padding: 4px 12px; display: flex; flex-direction: column">
+            <sc-for list="{{ flights }}" as="f" hint-placeholder-count="3">
+              <div style="display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: {{ f.border }}">
+                <span style="width: 30px; height: 30px; border-radius: 50%; background: #FFFFFF; border: 1px solid #E5E5EA; font: 700 10px 'Geist Mono', monospace; display: flex; align-items: center; justify-content: center">{{ f.code }}</span>
+                <span style="display: flex; flex-direction: column; min-width: 0">
+                  <span style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">{{ f.route }}</span>
+                  <span style="font-size: 12px; color: {{ f.tc }}; font-weight: 600">{{ f.tag }}</span>
+                </span>
+                <span style="font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums">{{ f.price }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="position: absolute; left: 0; top: 200px; right: 0; height: 68px">
+        <span class="a" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 28px; height: 28px; box-sizing: border-box; border-radius: 50%; background: #FFFFFF; border: 3px solid #0A6CFF; animation: pulse 1.6s ease-out infinite"></span>
+        <div style="margin-left: 42px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+          <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+            <span class="a" style="font-weight: 700; font-size: 16px; background: linear-gradient(90deg, #0B0B0F 0%, #0B0B0F 40%, #0A6CFF 50%, #0B0B0F 60%, #0B0B0F 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 2.2s linear infinite">Kanqarn l'otelat</span>
+            <span style="font-size: 14px; color: #6B6B76">Je compare les hôtels · 18 vus</span>
+            <span style="font-size: 13px; color: #0A6CFF; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px">Hampton by Hilton Şişli, DoubleTree…</span>
+          </span>
+          <span aria-label="En cours" style="display: flex; gap: 2px; perspective: 200px">
+            <sc-for list="{{ active }}" as="l" hint-placeholder-count="8">
+              <span class="a" style="width: 11px; height: 18px; border-radius: 3px; background: #0A6CFF; color: #FFFFFF; font: 700 10.5px 'Geist Mono', monospace; display: flex; align-items: center; justify-content: center; background-image: linear-gradient(180deg, transparent 49%, rgba(0,0,0,0.22) 49% 53%, transparent 53%); animation: flip 3.4s ease-out infinite; animation-delay: {{ l.d }}">{{ l.c }}</span>
+            </sc-for>
+          </span>
+        </div>
+      </div>
+
+      <sc-for list="{{ pending }}" as="p" hint-placeholder-count="3">
+        <div style="position: absolute; left: 0; right: 0; top: {{ p.top }}; height: 68px">
+          <span aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 28px; height: 28px; box-sizing: border-box; border-radius: 50%; background: #FFFFFF; border: 2px solid #C7C7CC"></span>
+          <div style="margin-left: 42px; display: flex; justify-content: space-between; gap: 8px">
+            <span style="display: flex; flex-direction: column; gap: 1px">
+              <span style="font-weight: 700; font-size: 16px; color: #8E8E93">{{ p.dj }}</span>
+              <span style="font-size: 14px; color: #8E8E93">{{ p.fr }}</span>
+            </span>
+            <span style="font: 600 11px 'Geist Mono', monospace; color: #8E8E93; letter-spacing: 0.06em; padding-top: 4px">À VENIR</span>
+          </div>
+        </div>
+      </sc-for>
+
+      <span class="a" aria-hidden="true" style="position: absolute; left: -2px; top: -2px; width: 32px; height: 32px; border-radius: 50%; background: #FFFFFF; color: #0A6CFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(10,108,255,0.35); animation: fly 3.4s cubic-bezier(.45,0,.2,1) infinite">
+        <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" style="transform: rotate(180deg)"><path d="M240,136v32a8,8,0,0,1-8,8,7.61,7.61,0,0,1-1.57-.16L156,161v23.73l17.66,17.65A8,8,0,0,1,176,208v24a8,8,0,0,1-11,7.43l-37-14.81L91,239.43A8,8,0,0,1,80,232V208a8,8,0,0,1,2.34-5.66L100,184.69V161L25.57,175.84A7.61,7.61,0,0,1,24,176a8,8,0,0,1-8-8V136a8,8,0,0,1,4.42-7.16L100,89.06V44a28,28,0,0,1,56,0V89.06l79.58,39.78A8,8,0,0,1,240,136Z"></path></svg>
+      </span>
+    </div>
+
+    <div style="margin-top: auto; padding: 12px 14px; border-radius: 16px; background: #F7F7FA; display: flex; justify-content: space-between; align-items: center; gap: 10px">
+      <span style="font-size: 13px; color: #6B6B76; line-height: 1.4">Muse Wonder planifie. Prix en direct de Kiwi.com et trivago.</span>
+      <a href="#" style="font-size: 14px; font-weight: 700; color: #0A6CFF; white-space: nowrap; text-decoration: none">Voir comment</a>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const done = 'TERMINÉ'.split('');
+    const active = 'EN COURS'.split('').map((c, i) => ({ c: c === ' ' ? '' : c, d: (i * 0.04) + 's' }));
+    const flights = [
+      { code: 'AT', route: 'CMN 09:15 → SAW 21:10', tag: '1 escale à Madrid', tc: '#B45309', price: '7 646 DH', border: '1px solid #E5E5EA' },
+      { code: 'TK', route: 'CMN 15:45 → IST 23:25', tag: 'Direct', tc: '#15803D', price: '9 450 DH', border: '1px solid #E5E5EA' },
+      { code: 'AT', route: 'CMN 08:55 → IST 16:50', tag: 'Direct', tc: '#15803D', price: '10 076 DH', border: '0' }
+    ];
+    const pending = [
+      { top: '268px', dj: "Kanchouf l'as3ar", fr: 'Je regarde les prix du mois' },
+      { top: '336px', dj: "Kanverifi l'wraq", fr: 'Je vérifie visa et papiers' },
+      { top: '404px', dj: "Kanwjjed lik l'forfait", fr: 'Je prépare ton forfait' }
+    ];
+    return { done, active, flights, pending };
+  }
+}
+</script>
+</body>
+</html>

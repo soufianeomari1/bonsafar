@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>BonSafar, profil, tes papiers</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Arabic:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; color: #0B0B0F; font-family: Geist, system-ui, sans-serif; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 20px 20px 22px; gap: 18px">
+  <div style="display: flex; justify-content: space-between; align-items: center">
+    <span style="font-size: 13px; font-weight: 600; color: #6B6B76">Étape 3 sur 4 · Salam Fatima</span>
+    <button type="button" style="height: 40px; padding: 0 12px; border: 0; background: transparent; color: #0B0B0F; font: 600 16px Geist, sans-serif; text-decoration: underline; text-underline-offset: 4px">Passer</button>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <span aria-hidden="true" style="width: 48px; height: 48px; border-radius: 50%; background: #EAF2FF; color: #0A6CFF; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 256 256" fill="currentColor"><path d="M112,120a16,16,0,1,1-16-16A16,16,0,0,1,112,120ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM135.75,166a39.76,39.76,0,0,0-17.19-23.34,32,32,0,1,0-45.12,0A39.84,39.84,0,0,0,56.25,166a8,8,0,0,0,15.5,4c2.64-10.25,13.06-18,24.25-18s21.62,7.73,24.25,18a8,8,0,1,0,15.5-4ZM200,144a8,8,0,0,0-8-8H152a8,8,0,0,0,0,16h40A8,8,0,0,0,200,144Zm0-32a8,8,0,0,0-8-8H152a8,8,0,0,0,0,16h40A8,8,0,0,0,200,112Z"></path></svg></span>
+    <h1 style="margin: 4px 0 0; font-weight: 800; font-size: 30px; line-height: 1.1; letter-spacing: -0.02em">Tes papiers</h1>
+    <p style="margin: 0; font-size: 17px; color: #6B6B76; line-height: 1.45">Pour te proposer des voyages que tu peux vraiment faire.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <span style="font-size: 15px; font-weight: 700">Ton passeport</span>
+    <div role="radiogroup" aria-label="Passeport" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <button type="button" role="radio" aria-checked="true" style="height: 52px; border-radius: 14px; border: 2px solid #0B0B0F; background: #FFFFFF; font: 700 16px Geist, sans-serif; color: #0B0B0F">Marocain</button>
+      <button type="button" role="radio" aria-checked="false" style="height: 52px; border-radius: 14px; border: 1px solid #E5E5EA; background: #FFFFFF; font: 600 16px Geist, sans-serif; color: #0B0B0F">Français</button>
+      <button type="button" role="radio" aria-checked="false" style="height: 52px; border-radius: 14px; border: 1px solid #E5E5EA; background: #FFFFFF; font: 600 16px Geist, sans-serif; color: #0B0B0F">Les deux</button>
+      <button type="button" role="radio" aria-checked="false" style="height: 52px; border-radius: 14px; border: 1px solid #E5E5EA; background: #FFFFFF; font: 600 16px Geist, sans-serif; color: #0B0B0F">Autre</button>
+    </div>
+  </div>
+
+  <div style="border: 1px solid #E5E5EA; border-radius: 20px; padding: 2px 14px">
+    <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="3">
+      <label style="display: grid; grid-template-columns: minmax(0, 1fr) 52px; gap: 12px; align-items: center; padding: 12px 0; border-top: {{ t.border }}">
+        <span style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-weight: 700; font-size: 16px">{{ t.k }}</span>
+          <span style="font-size: 13px; color: #6B6B76; line-height: 1.35">{{ t.h }}</span>
+        </span>
+        <span aria-hidden="true" style="width: 52px; height: 32px; border-radius: 999px; background: {{ t.track }}; position: relative; display: block"><span style="position: absolute; top: 2px; left: {{ t.knob }}; width: 28px; height: 28px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2)"></span></span>
+      </label>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; gap: 10px; align-items: flex-start; background: #EAF2FF; border-radius: 16px; padding: 12px 14px; font-size: 14px; line-height: 1.45">
+    <svg width="20" height="20" viewBox="0 0 256 256" fill="#0A6CFF" aria-hidden="true" style="flex: none"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z"></path></svg>
+    <span>Sans visa Schengen, je te propose d'abord les pays où tu peux partir sans visa, et je t'explique comment demander le Schengen.</span>
+  </div>
+
+  <div style="flex: 1"></div>
+  <div style="display: flex; flex-direction: column; gap: 14px">
+    <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+      <span style="height: 4px; border-radius: 4px; background: #0B0B0F"></span>
+      <span style="height: 4px; border-radius: 4px; background: #0B0B0F"></span>
+      <span style="height: 4px; border-radius: 4px; background: #0B0B0F"></span>
+      <span style="height: 4px; border-radius: 4px; background: #E5E5EA"></span>
+    </div>
+    <button type="button" style="height: 56px; border: 0; border-radius: 16px; background: #0B0B0F; color: #FFFFFF; font: 600 17px Geist, sans-serif">Suivant</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const on = { track: '#22C55E', knob: '22px' };
+    const off = { track: '#E5E5EA', knob: '2px' };
+    const toggles = [
+      { k: 'Visa Schengen valide', h: 'Ouvre la France, l’Espagne, l’Italie…', border: '0', ...off },
+      { k: 'Passeport valide plus de 6 mois', h: 'Demandé par beaucoup de compagnies', border: '1px solid #E5E5EA', ...on },
+      { k: 'Carte bancaire internationale', h: 'Pour payer chez les partenaires', border: '1px solid #E5E5EA', ...on }
+    ];
+    return { toggles };
+  }
+}
+</script>
+</body>
+</html>

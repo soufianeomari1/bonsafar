@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>BonSafar, bienvenue et connexion</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Arabic:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes drift{from{transform:translateX(-80px)}to{transform:translateX(440px)}}
+@media (prefers-reduced-motion: reduce){.a{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: linear-gradient(180deg, #DCEBFF 0%, #FFFFFF 46%); color: #0B0B0F; font-family: Geist, system-ui, sans-serif; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 22px 20px 22px; gap: 18px">
+  <svg class="a" aria-hidden="true" width="96" height="36" viewBox="0 0 90 34" style="position: absolute; left: 0; top: 120px; animation: drift 34s linear infinite"><path d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z" fill="#FFFFFF"></path></svg>
+
+  <div style="position: relative; display: flex; justify-content: space-between; align-items: center">
+    <span style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.06)">
+      <span style="height: 30px; padding: 0 10px; border-radius: 999px; background: #0B0B0F; color: #FFFFFF; font: 600 13px Geist, sans-serif; display: flex; align-items: center">FR</span>
+      <span style="height: 30px; padding: 0 10px; border-radius: 999px; font: 600 13px Geist, sans-serif; display: flex; align-items: center">Darija</span>
+      <span style="height: 30px; padding: 0 10px; border-radius: 999px; font: 600 14px 'IBM Plex Sans Arabic', sans-serif; display: flex; align-items: center">عربي</span>
+      <span style="height: 30px; padding: 0 10px; border-radius: 999px; font: 600 13px Geist, sans-serif; display: flex; align-items: center">EN</span>
+    </span>
+    <button type="button" style="height: 34px; padding: 0 12px; border-radius: 999px; border: 0; background: #FFFFFF; color: #0B0B0F; font: 600 13px Geist, sans-serif; box-shadow: 0 1px 2px rgba(0,0,0,0.06)">Mode jury</button>
+  </div>
+
+  <div style="position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 34px">
+    <span aria-hidden="true" style="width: 64px; height: 64px; border-radius: 18px; background: #0B0B0F; color: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(11,11,15,0.25)"><svg width="36" height="36" viewBox="0 0 256 256" fill="currentColor"><path d="M215.52,197.26a8,8,0,0,1-1.86,8.39l-24,24A8,8,0,0,1,184,232a7.09,7.09,0,0,1-.79,0,8,8,0,0,1-5.87-3.52l-44.07-66.12L112,183.59V208a8,8,0,0,1-2.34,5.65s-14,14.06-15.88,15.88A7.91,7.91,0,0,1,91,231.41a8,8,0,0,1-10.41-4.35l-.06-.15-14.7-36.76L29,175.42a8,8,0,0,1-2.69-13.08l16-16A8,8,0,0,1,48,144H72.4l21.27-21.27L27.56,78.65a8,8,0,0,1-1.22-12.32l24-24a8,8,0,0,1,8.39-1.86l85.94,31.25L176.2,40.19a28,28,0,0,1,39.6,39.6l-31.53,31.53Z"></path></svg></span>
+    <span style="display: flex; align-items: baseline; gap: 8px"><span style="font-weight: 800; font-size: 22px; letter-spacing: -0.02em">BonSafar</span><span style="font-size: 15px; color: #6B6B76; font-style: italic">trik slama</span></span>
+    <h1 style="margin: 0; font-weight: 800; font-size: 36px; line-height: 1.06; letter-spacing: -0.03em">L'agence de voyage<br>dans ta poche.</h1>
+    <p style="margin: 0; font-size: 17px; color: #6B6B76; line-height: 1.45">Tu expliques ton voyage à voix haute. On prépare tout, au vrai prix.</p>
+  </div>
+
+  <ul style="position: relative; list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px">
+    <sc-for list="{{ perks }}" as="p" hint-placeholder-count="3">
+      <li style="display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; align-items: center">
+        <span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 50%; background: {{ p.bg }}; color: {{ p.fg }}; display: flex; align-items: center; justify-content: center"><svg width="19" height="19" viewBox="0 0 256 256" fill="currentColor"><path d="{{ p.icon }}"></path></svg></span>
+        <span style="font-size: 16px; line-height: 1.35">{{ p.t }}</span>
+      </li>
+    </sc-for>
+  </ul>
+
+  <div style="flex: 1"></div>
+  <div style="display: flex; flex-direction: column; gap: 10px">
+    <button type="button" style="height: 56px; border-radius: 16px; border: 1px solid #D1D1D6; background: #FFFFFF; color: #0B0B0F; font: 600 17px Geist, sans-serif; display: flex; align-items: center; justify-content: center; gap: 10px">
+      <span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 50%; border: 1px solid #D1D1D6; font: 700 13px Geist, sans-serif; display: flex; align-items: center; justify-content: center">G</span>
+      Continuer avec Google
+    </button>
+    <button type="button" style="height: 48px; border: 0; background: transparent; color: #0B0B0F; font: 600 16px Geist, sans-serif; text-decoration: underline; text-underline-offset: 4px">Continuer sans compte</button>
+    <span style="text-align: center; font-size: 13px; color: #6B6B76; line-height: 1.4">Ensuite, 4 questions en 30 secondes pour adapter tes voyages.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const perks = [
+      { t: 'Parle en darija, en français ou en arabe', bg: '#EAF2FF', fg: '#0A6CFF', icon: 'M80,128V64a48,48,0,0,1,96,0v64a48,48,0,0,1-96,0Zm128,0a8,8,0,0,0-16,0,64,64,0,0,1-128,0,8,8,0,0,0-16,0,80.11,80.11,0,0,0,72,79.6V240a8,8,0,0,0,16,0V207.6A80.11,80.11,0,0,0,208,128Z' },
+      { t: 'Vols et hôtels en direct, un seul prix en dirhams', bg: '#FFF4E0', fg: '#B45309', icon: 'M216,64H56a8,8,0,0,1,0-16H192a8,8,0,0,0,0-16H56A24,24,0,0,0,32,56V184a24,24,0,0,0,24,24H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64Zm-36,80a12,12,0,1,1,12-12A12,12,0,0,1,180,144Z' },
+      { t: 'Visa, bagage, argent : tout est vérifié avant de partir', bg: '#E8F7EE', fg: '#15803D', icon: 'M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm-34.32,69.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z' }
+    ];
+    return { perks };
+  }
+}
+</script>
+</body>
+</html>

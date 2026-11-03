@@ -1,0 +1,18 @@
+---
+description: Supabase auth, database and storage patterns for Next.js 16
+globs: src/lib/supabase/**, src/proxy.ts, src/app/auth/**, supabase/**, src/lib/profile/**
+alwaysApply: false
+---
+
+# Supabase
+
+- Package `@supabase/ssr` only. Never `@supabase/auth-helpers-nextjs`.
+- Browser client: `createBrowserClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)`.
+- Server client: `createServerClient` with `cookies: { getAll, setAll }` only, from `await cookies()`.
+- Next.js 16: session refresh lives in `src/proxy.ts` (exported function `proxy`), which must call `supabase.auth.getUser()` and return the `supabaseResponse`. Exclude static assets in the matcher. Never create `middleware.ts`.
+- Google sign-in: `signInWithOAuth({ provider: "google", options: { redirectTo: `${origin}/auth/callback` } })`, then `src/app/auth/callback/route.ts` exchanges the code and redirects.
+- Admin operations (usage counter, saving replays) use a server-only client with `SUPABASE_SECRET_KEY`, in route handlers only.
+- Schema in `supabase/schema.sql`: `profiles`, `trips`, `usage`. RLS on every table: a user reads and writes only their own `profiles` and `trips` rows; `usage` is written only by the server.
+- Storage bucket `posters` (public read) for Muse Image posters.
+- Without an account the same profile object lives in `localStorage` and migrates to Supabase at sign-in.
+- Never store audio.

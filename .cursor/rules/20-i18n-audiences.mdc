@@ -1,0 +1,23 @@
+---
+description: Languages and audiences (end user in darija or French, judges in English) for any user-facing text
+globs: src/**/*.tsx, src/lib/i18n/**, src/app/api/**
+alwaysApply: false
+---
+
+# Languages and audiences
+
+Ask "who reads this?" before writing any string. See `docs/parcours-et-interfaces.md` section 0.
+
+| Audience | UI language | Agent language |
+|---|---|---|
+| Moroccan traveller (end user) | From profile: fr (default), darija-latn, darija-arab, ar, en | Darija (Latin or Arabic script) or the profile language |
+| Judges (`?jury=1`, desktop, video) | English everywhere | Darija stays visible as proof, English translation right under it |
+| README, code, commits | English | n/a |
+
+## Rules
+- No hardcoded user-facing string. Everything goes through `src/lib/i18n` and `useT()`. Keys are English, e.g. `home.title`.
+- Dictionaries: `en`, `fr`, `darija-latn`, `darija-arab`, `ar`. Missing key falls back to `en`, then logs a dev warning.
+- `?jury=1` forces English UI and switches agent messages to the bilingual shape `{ darija: string, en: string }`, rendered darija first, English below in muted italic.
+- `darija-arab` and `ar`: set `dir="rtl"` on the container and use the Arabic font. Numbers and flight codes stay left-to-right (wrap them in `<bdi>` or `dir="ltr"`).
+- Darija in Latin script uses the usual Arabizi digits (3, 7, 9). Keep the exact strings from the mockups for headings like "Salam ! Fin bghiti tsafer ?" and "Yallah, qelleb !".
+- Dates and money are formatted by code with `Intl` (fr-MA for the end user, en for the jury), never by a model.

@@ -1,0 +1,38 @@
+---
+description: Meta Model API usage, agent loop, MCP data tools, price store and event logging
+globs: src/app/api/**, src/lib/ai/**, src/lib/agent/**, src/lib/mcp/**, src/lib/prices/**
+alwaysApply: false
+---
+
+# Meta Model API, agent and prices
+
+Verified facts and open questions: `docs/meta-model-api.md`. Read it before touching this code.
+
+## Client
+- One shared client in `src/lib/ai/client.ts`: `new OpenAI({ baseURL: env.META_API_BASE_URL, apiKey: env.META_API_KEY })`. Server only.
+- Every call goes through a wrapper that measures latency, reads `usage` (including reasoning tokens, billed as output), computes cost from `src/lib/ai/pricing.ts`, and appends an event `{ t, step, model, latency_ms, tokens_in, tokens_out, cost_usd, replay }` to the run log. The Under the hood panel only reads these events.
+- Timeouts on every call, one retry on network errors, then a clear error event.
+
+## Model roles
+- `MODEL_TRANSCRIBE` (muse-voice-transcribe-1.0): speech to text over the realtime WebSocket, server side.
+- `MODEL_SPARK` (muse-spark-1.3): intent JSON, bilingual messages, entry requirements with web search, "good to know". Use the lowest reasoning effort that keeps quality for intent (latency target under 5s).
+- `MODEL_WONDER` (muse-wonder-1.0): agent planner with function calling. Final answer is strict JSON with offer IDs only.
+- `MODEL_IMAGE` (muse-image-1.0): text-free illustrations.
+- `MODEL_SPARK_AUDIO`: fallback only if the transcription WebSocket fails (audio understanding is flagged as not fully supported).
+
+## Structured output
+- Ask for JSON with a JSON schema in `response_format` when supported, and always validate with zod. On validation failure: one repair attempt, then a clean error.
+
+## MCP data tools
+- `src/lib/mcp/` connects with `StreamableHTTPClientTransport` to `KIWI_MCP_URL` and `TRIVAGO_MCP_URL`, calls `listTools`, and builds typed wrappers from the live schemas. Never guess tool names or arguments.
+- Tools seen on 2026-11-03: Kiwi `search-flight`; trivago `trivago-accommodation-radius-search`, `trivago-accommodation-search`, `trivago-destination-price-trends`.
+- trivago: country, currency and language from the user's profile (MA, MAD for the demo). Kiwi returns EUR.
+
+## Price store
+- `src/lib/prices/store.ts`: every offer normalised to `{ id, kind, price, currency, source, fetched_at, deeplink, attrs }`. IDs are short (F1..Fn, H1..Hn).
+- Conversion EUR to MAD by code with `EUR_MAD_RATE`; keep both values and show the rate date.
+- Guardrail: a validator scans every model text field and rejects amounts of money. Log a "price guardrail" event each time it passes or blocks.
+
+## Runs and replay
+- Each successful run is saved as JSON (events, offers, prices, capture time) so it can be replayed. A replay marks every event `replay: true`.
+- Long routes set `export const maxDuration = 60`.

@@ -1,0 +1,214 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Connexion.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "0 · Bienvenue et connexion"
+    },
+    "Onboarding.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "1 · Profil, langue (étape 1 sur 4)"
+    },
+    "Profil.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "1 bis · Profil, tes papiers (étape 3 sur 4)"
+    },
+    "Confiance.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "1 ter · Carte de confiance"
+    },
+    "Main.dc.html": {
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "2 · Accueil, radar vocal"
+    },
+    "Vocal.dc.html": {
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "3 · Vocal verrouillé"
+    },
+    "Compris.dc.html": {
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "4 · BonSafar a compris"
+    },
+    "Agent.dc.html": {
+      "x": 0,
+      "y": 1400,
+      "w": 390,
+      "h": 844,
+      "title": "5 · Plan de vol de l'agent"
+    },
+    "Resultat.dc.html": {
+      "x": 470,
+      "y": 1400,
+      "w": 390,
+      "h": 844,
+      "title": "6 · Résultat, la carte qui vole"
+    },
+    "Forfait.dc.html": {
+      "x": 940,
+      "y": 1400,
+      "w": 390,
+      "h": 2360,
+      "title": "7 · Fiche forfait"
+    },
+    "Checklist.dc.html": {
+      "x": 1410,
+      "y": 1400,
+      "w": 390,
+      "h": 844,
+      "title": "8 · Prêt à partir"
+    },
+    "Valider.dc.html": {
+      "x": 0,
+      "y": 4200,
+      "w": 390,
+      "h": 844,
+      "title": "9 · Vérifie et continue"
+    },
+    "Dossier.dc.html": {
+      "x": 470,
+      "y": 4200,
+      "w": 390,
+      "h": 844,
+      "title": "10 · Dossier, carte imprimée"
+    },
+    "Rihla.dc.html": {
+      "x": 940,
+      "y": 4200,
+      "w": 390,
+      "h": 694,
+      "title": "10 bis · Affiche Rihla (story)"
+    },
+    "Jury.dc.html": {
+      "x": 0,
+      "y": 5450,
+      "w": 1440,
+      "h": 900,
+      "title": "J · Mode jury, accueil (English)"
+    },
+    "Desktop.dc.html": {
+      "x": 1520,
+      "y": 5450,
+      "w": 1440,
+      "h": 900,
+      "title": "J2 · Desktop, under the hood (English)"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-11-03T13:35:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "noteOrder": [
+    "t1",
+    "s1",
+    "t2",
+    "s2",
+    "t3",
+    "s3",
+    "t4",
+    "s4"
+  ],
+  "notes": {
+    "s1": {
+      "text": "Animations et vibrations\n\nA1 Radar vocal : pas d'orbe. Des cercles s'échappent du micro comme un radar de tour de contrôle, plus forts quand la voix monte, avec un balayage lent.\nVocal : appui = start, cadenas = lock, glisser à gauche = cancel.\nA2 Les mots deviennent des chips : les mots clés de la transcription se surlignent, se détachent et volent dans les chips. Réponse rapide = select.\n\nConnexion : Google ou sans compte, puis 4 questions en 30 secondes (langue, ville de départ, avec qui, papiers). Chaque réponse = select. Le profil pré-remplit les chips et personnalise visa et idées.",
+      "w": 380,
+      "x": 3290,
+      "y": 0
+    },
+    "s2": {
+      "text": "Animations et vibrations\n\nA3 Plan de vol : l'avion descend d'escale en escale, la traînée devient bleue, chaque escale atterrit en vert avec une vibration tick.\nA4 Tableau des départs : prix, compteurs et statuts tournent comme les palettes d'un tableau d'aéroport.\nA5 Carte qui vole : l'avion suit l'arc puis la carte zoome sur Istanbul.\nA6 La carte devient fiche (vidéo Flighty).\nA7 Décollage : l'avion du bouton Je valide décolle.",
+      "w": 380,
+      "x": 1880,
+      "y": 1400
+    },
+    "s3": {
+      "text": "Animations et vibrations\n\nA8 Carte imprimée : la carte d'embarquement sort d'une fente comme à une borne d'aéroport, par à-coups, puis le tampon marocain tombe dessus avec une vibration success.\nAffiche : étiquettes façon story Flighty, carte d'embarquement inclinée.\nA9 Nuages : pendant les attentes, de petits nuages défilent derrière l'en-tête.",
+      "w": 380,
+      "x": 1410,
+      "y": 4200
+    },
+    "t1": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Connexion, profil et voix",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 1800,
+      "text": "L'agent et le forfait",
+      "w": 240,
+      "x": 0,
+      "y": 1100
+    },
+    "t3": {
+      "kind": "title1",
+      "maxW": 1330,
+      "text": "Validation et dossier",
+      "w": 240,
+      "x": 0,
+      "y": 3900
+    },
+    "t4": {
+      "kind": "title1",
+      "maxW": 2960,
+      "text": "Mode jury et desktop, tout en anglais",
+      "w": 240,
+      "x": 0,
+      "y": 5150
+    },
+    "s4": {
+      "x": 3040,
+      "y": 5450,
+      "w": 380,
+      "text": "Public : le jury, anglophone.\n\nEntrée par ?jury=1 ou le bouton Mode jury. Persona Fatima, 3 notes vocales réelles en darija avec traduction anglaise, Run live sur les modèles Meta.\nSi l'API dépasse 20 s : rejeu enregistré, badge replay visible.\nBandeau guidé 1 à 5, panneau Under the hood avec modèle, latence et coût réels."
+    }
+  },
+  "order": [
+    "Connexion.dc.html",
+    "Onboarding.dc.html",
+    "Profil.dc.html",
+    "Confiance.dc.html",
+    "Main.dc.html",
+    "Vocal.dc.html",
+    "Compris.dc.html",
+    "Agent.dc.html",
+    "Resultat.dc.html",
+    "Forfait.dc.html",
+    "Checklist.dc.html",
+    "Valider.dc.html",
+    "Dossier.dc.html",
+    "Rihla.dc.html",
+    "Jury.dc.html",
+    "Desktop.dc.html"
+  ],
+  "pages": [],
+  "title": "BonSafar, écrans"
+}

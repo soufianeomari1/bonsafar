@@ -1,0 +1,9 @@
+# Keep secrets away from AI features and indexing
+.env
+.env.*
+!.env.example
+
+# Heavy or generated folders
+node_modules/
+.next/
+.vercel/
