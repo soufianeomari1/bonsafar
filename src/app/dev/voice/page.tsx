@@ -10,10 +10,84 @@ import { useProfile } from "@/lib/profile/useProfile";
 import { fetchIntent, transcribeWav } from "@/lib/voice/client";
 import type { TranscribeFinal } from "@/lib/voice/protocol";
 import { RecorderError, VoiceRecorder } from "@/lib/voice/recorder";
+import { micHoldStyle, useVoiceCapture, type PointerTrace } from "@/components/voice/useVoiceCapture";
 import { toWav24k } from "@/lib/voice/wav";
 import { cn } from "@/lib/utils";
 
 type Phase = "idle" | "recording" | "transcribing" | "understanding";
+
+type PointerLine = PointerTrace & { at: number };
+
+/** Same hold target as the home mic, so a phone can show what the pointer does. */
+function PointerLog() {
+  const origin = useRef(0);
+  const [lines, setLines] = useState<PointerLine[]>([]);
+  const [micError, setMicError] = useState<string | null>(null);
+  const onPointer = useRef((event: PointerTrace) => {
+    const at = Math.round(performance.now() - origin.current);
+    setLines((current) => [...current.slice(-29), { ...event, at }]);
+  });
+  const { capture, micHandlers, micRef, send, cancel } = useVoiceCapture({
+    onTake: () => setMicError(null),
+    onError: (error) => setMicError(error),
+    onPointer: (event) => onPointer.current(event),
+  });
+
+  const recording = capture.status === "recording" ? capture : null;
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-muted">
+        Pointer log
+      </h2>
+      <div className="flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          ref={micRef}
+          {...micHandlers}
+          onPointerDown={(event) => {
+            if (origin.current === 0) origin.current = performance.now();
+            micHandlers.onPointerDown(event);
+          }}
+          aria-label="Hold to record"
+          style={micHoldStyle}
+          className="bs-mic-hold flex size-[84px] items-center justify-center rounded-pill bg-ink text-card"
+        >
+          <Microphone size={34} weight="fill" aria-hidden />
+        </button>
+        <p className="font-mono text-xs text-muted">
+          {recording ? (recording.locked ? "locked, recording" : "holding") : "idle"}
+          {micError ? ` · ${micError}` : ""} · hold the mic, then read the events
+        </p>
+        {recording?.locked && (
+          <span className="flex gap-2">
+            <button type="button" onClick={cancel} className="h-10 rounded-xl bg-red-soft px-4 text-sm font-semibold text-red">
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => void send()}
+              className="h-10 rounded-xl bg-ink px-4 text-sm font-semibold text-card"
+            >
+              Send
+            </button>
+          </span>
+        )}
+      </div>
+      <ol className="max-h-48 overflow-auto rounded-2xl bg-card font-mono text-xs shadow-soft">
+        {lines.length === 0 && <li className="px-3 py-3 text-muted">No pointer events yet.</li>}
+        {lines.map((line, index) => (
+          <li key={index} className="flex gap-3 border-t border-line px-3 py-1.5 first:border-t-0">
+            <span className="tabular w-14 text-muted">{line.at} ms</span>
+            <span className="w-16">{line.type}</span>
+            <span className="tabular w-10 text-muted">{line.pointerId}</span>
+            <span>{line.note}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
 
 /**
  * Developer bench for block 2: record, watch the words arrive, then the
@@ -144,6 +218,8 @@ export default function VoiceBenchPage() {
         </label>
         <span className="font-mono text-xs text-muted">{phase}</span>
       </section>
+
+      <PointerLog />
 
       <section className="flex flex-col gap-2">
         <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-muted">Transcript</h2>

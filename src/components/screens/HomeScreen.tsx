@@ -10,7 +10,7 @@ import { JuryPill, Logo } from "@/components/bs/Brand";
 import { VoiceRadar } from "@/components/bs/VoiceRadar";
 import { TrustSheet } from "@/components/screens/TrustSheet";
 import { VocalScreen } from "@/components/screens/VocalScreen";
-import { useVoiceCapture, type CaptureError } from "@/components/voice/useVoiceCapture";
+import { micHoldStyle, useVoiceCapture, type CaptureError } from "@/components/voice/useVoiceCapture";
 import { haptic } from "@/lib/haptics";
 import type { TranslationKey } from "@/lib/i18n";
 import { useT } from "@/lib/i18n/provider";
@@ -43,7 +43,7 @@ export function HomeScreen() {
     if (needsProfile) router.replace("/");
   }, [needsProfile, router]);
 
-  const { capture, micHandlers, getLevel, send, cancel, pause, resume } = useVoiceCapture({
+  const { capture, micHandlers, micRef, getLevel, send, cancel, pause, resume } = useVoiceCapture({
     onTake: (take, durationMs, levels) => {
       void startVoiceTrip(take, durationMs, levels);
       router.push("/trip/understood");
@@ -100,9 +100,11 @@ export function HomeScreen() {
           <VoiceRadar size={250} core={84}>
             <button
               type="button"
+              ref={micRef}
               aria-label={t("home.micLabel")}
               {...micHandlers}
-              className="flex size-[84px] touch-none select-none items-center justify-center rounded-pill bg-ink text-card shadow-[0_12px_30px_rgba(11,11,15,0.25)] [-webkit-touch-callout:none] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue"
+              style={micHoldStyle}
+              className="bs-mic-hold flex size-[84px] items-center justify-center rounded-pill bg-ink text-card shadow-[0_12px_30px_rgba(11,11,15,0.25)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue"
             >
               <Microphone size={34} weight="fill" aria-hidden />
             </button>

@@ -12,7 +12,7 @@ import {
   Trash,
 } from "@phosphor-icons/react";
 import { VoiceRadar } from "@/components/bs/VoiceRadar";
-import type { CaptureState } from "@/components/voice/useVoiceCapture";
+import { bindMicHold, micHoldStyle, type CaptureState } from "@/components/voice/useVoiceCapture";
 import { formatClock } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -45,7 +45,10 @@ export function VocalScreen({
 
   return (
     <motion.div
-      className="absolute inset-0 z-30 flex flex-col bg-card"
+      ref={bindMicHold}
+      onContextMenu={(event) => event.preventDefault()}
+      style={micHoldStyle}
+      className="bs-mic-hold absolute inset-0 z-30 flex flex-col bg-card"
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
@@ -72,7 +75,10 @@ export function VocalScreen({
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[22px] bg-listen-gradient px-4">
         <VoiceRadar listening={!capture.paused} getLevel={getLevel} size={300} core={96}>
-          <span className="flex size-24 items-center justify-center rounded-pill bg-blue text-card shadow-[0_14px_34px_color-mix(in_srgb,var(--color-blue)_35%,transparent)]">
+          <span
+            style={micHoldStyle}
+            className="bs-mic-hold flex size-24 items-center justify-center rounded-pill bg-blue text-card shadow-[0_14px_34px_color-mix(in_srgb,var(--color-blue)_35%,transparent)]"
+          >
             <Microphone size={40} weight="fill" aria-hidden />
           </span>
         </VoiceRadar>
@@ -170,7 +176,10 @@ export function VocalScreen({
               <CaretLeft size={16} weight="bold" aria-hidden className="rtl:-scale-x-100" />
               {t("voice.slideCancel")}
             </motion.span>
-            <span className="flex size-[60px] shrink-0 items-center justify-center rounded-pill bg-blue text-card">
+            <span
+              style={micHoldStyle}
+              className="bs-mic-hold flex size-[60px] shrink-0 items-center justify-center rounded-pill bg-blue text-card"
+            >
               <Microphone size={26} weight="fill" aria-hidden />
             </span>
           </div>

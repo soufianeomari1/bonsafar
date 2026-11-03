@@ -101,6 +101,7 @@ export class VoiceRecorder {
     return this.smoothed;
   }
 
+  /** Captured audio only. The clock starts when MediaRecorder starts, after the permission prompt, never at pointerdown. */
   elapsedMs(): number {
     if (!this.startedAt) return 0;
     const now = this.recorder?.state === "paused" ? this.pausedAt : performance.now();
