@@ -1,19 +1,12 @@
 "use client";
 
 import { Info, Minus, Plus } from "@phosphor-icons/react";
-import { ChoiceButton, ChoiceCard, Segmented } from "@/components/bs/Choice";
+import { ChoiceButton, ChoiceCard } from "@/components/bs/Choice";
 import { Switch, SwitchGroup } from "@/components/bs/Switch";
 import { translate, type Lang, type TranslationKey } from "@/lib/i18n";
 import { useT } from "@/lib/i18n/provider";
 import { haptic } from "@/lib/haptics";
-import {
-  AIRPORTS,
-  COMPANIONS,
-  PASSPORTS,
-  STYLES,
-  isDarija,
-  type Profile,
-} from "@/lib/profile/schema";
+import { AIRPORTS, COMPANIONS, PASSPORTS, STYLES, type Profile } from "@/lib/profile/schema";
 import type { ProfilePatch } from "@/lib/profile/store";
 
 export type FieldsProps = {
@@ -29,66 +22,56 @@ function FieldLabel({ children, weight = "bold" }: { children: React.ReactNode; 
   );
 }
 
-/** Language names and samples are shown in their own language. */
+/** Language names and sample sentences live in the English dictionary, in their own script. */
 const native = (key: TranslationKey) => translate("en", key);
 
-const LANGUAGE_CHOICES: { id: "darija" | Lang; arabic?: boolean }[] = [
-  { id: "darija" },
-  { id: "fr" },
-  { id: "ar", arabic: true },
-  { id: "en" },
+const LANGUAGE_CHOICES: {
+  lang: Lang;
+  titleArabic?: boolean;
+  sampleArabic?: boolean;
+  script?: "latn" | "arab";
+}[] = [
+  { lang: "darija-latn", script: "latn" },
+  { lang: "darija-arab", sampleArabic: true, script: "arab" },
+  { lang: "fr" },
+  { lang: "ar", titleArabic: true, sampleArabic: true },
+  { lang: "en" },
 ];
 
-/** Step 1: language of the interface and of the agent. */
+/** Step 1: one card per language, darija split by script (01a). */
 export function LanguageFields({ profile, update }: FieldsProps) {
   const t = useT();
-  const darija = isDarija(profile.ui_lang);
-  const darijaLang: Lang = profile.darija_script === "arab" ? "darija-arab" : "darija-latn";
 
   return (
-    <>
-      <div role="radiogroup" aria-label={t("onboarding.language.groupLabel")} className="flex flex-col gap-2.5">
-        {LANGUAGE_CHOICES.map((choice) => {
-          const lang = choice.id === "darija" ? darijaLang : choice.id;
-          const selected = choice.id === "darija" ? darija : profile.ui_lang === choice.id;
-          return (
-            <ChoiceCard
-              key={choice.id}
-              selected={selected}
-              onSelect={() => update({ ui_lang: lang })}
-              title={native(`lang.${lang}`)}
-              subtitle={native(`lang.sample.${lang}`)}
-              dir={choice.arabic ? "rtl" : undefined}
-              lang={choice.arabic ? "ar" : undefined}
-            />
-          );
-        })}
-      </div>
-
-      {darija && (
-        <div className="flex flex-col gap-2">
-          <FieldLabel weight="semibold">{t("onboarding.language.scriptLabel")}</FieldLabel>
-          <Segmented
-            label={t("onboarding.language.scriptLabel")}
-            value={profile.darija_script}
-            options={[
-              { value: "latn", label: t("onboarding.language.scriptLatin") },
-              {
-                value: "arab",
-                label: translate("darija-arab", "onboarding.language.scriptArabic"),
-                arabic: true,
-              },
-            ]}
-            onChange={(script) =>
+    <div role="radiogroup" aria-label={t("onboarding.language.groupLabel")} className="flex flex-col gap-2.5">
+      {LANGUAGE_CHOICES.map((choice, index) => {
+        const sample = native(`lang.sample.${choice.lang}`);
+        const script =
+          choice.script === "latn"
+            ? t("onboarding.language.scriptLatin")
+            : choice.script === "arab"
+              ? native("onboarding.language.scriptArabic")
+              : null;
+        return (
+          <ChoiceCard
+            key={choice.lang}
+            compact
+            enterDelay={index * 0.05}
+            selected={profile.ui_lang === choice.lang}
+            onSelect={() =>
               update({
-                darija_script: script,
-                ui_lang: script === "arab" ? "darija-arab" : "darija-latn",
+                ui_lang: choice.lang,
+                ...(choice.script ? { darija_script: choice.script } : {}),
               })
             }
+            title={native(`lang.${choice.lang}`)}
+            titleArabic={choice.titleArabic}
+            subtitle={script ? `${sample} · ${script}` : sample}
+            subtitleArabic={choice.sampleArabic}
           />
-        </div>
-      )}
-    </>
+        );
+      })}
+    </div>
   );
 }
 
@@ -274,7 +257,7 @@ export function Stepper({
     onChange(next);
   };
   return (
-    <div className="flex items-center justify-between rounded-[20px] border border-line px-3.5 py-2.5">
+    <div className="flex items-center justify-between rounded-[20px] border border-line bg-card px-3.5 py-2.5">
       <span className="text-base font-bold">{label}</span>
       <div className="flex items-center gap-3">
         <button

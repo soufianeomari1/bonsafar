@@ -1,6 +1,5 @@
 "use client";
 
-import { CheckCircle } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { haptic } from "@/lib/haptics";
@@ -41,7 +40,26 @@ export function ChoiceButton({ selected, onSelect, className, children, ...rest 
   );
 }
 
-/** Large radio card with a title, a sample line and a round check (mockup 01a). */
+function RadioMark({ selected }: { selected: boolean }) {
+  if (!selected) {
+    return <span aria-hidden className="size-[22px] shrink-0 rounded-pill border-2 border-line" />;
+  }
+  return (
+    <svg aria-hidden width={24} height={24} viewBox="0 0 24 24" className="shrink-0">
+      <circle cx="12" cy="12" r="11" className="fill-ink" />
+      <path
+        d="M7 12.5l3.2 3.2L17 9"
+        fill="none"
+        className="stroke-card"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Large radio card with a title, a sample line and a round check (01a). */
 export function ChoiceCard({
   selected,
   onSelect,
@@ -50,7 +68,19 @@ export function ChoiceCard({
   subtitle,
   dir,
   lang,
-}: Omit<BaseProps, "children"> & { title: string; subtitle?: string }) {
+  compact = false,
+  titleArabic = false,
+  subtitleArabic = false,
+  enterDelay = 0,
+}: Omit<BaseProps, "children"> & {
+  title: string;
+  subtitle?: string;
+  /** 64px language row of screens/01a-onboarding.html. */
+  compact?: boolean;
+  titleArabic?: boolean;
+  subtitleArabic?: boolean;
+  enterDelay?: number;
+}) {
   const reduced = useReducedMotion();
   const arabic = dir === "rtl";
   return (
@@ -60,35 +90,54 @@ export function ChoiceCard({
       aria-checked={selected}
       dir={dir}
       lang={lang}
+      initial={reduced ? false : { opacity: 0, y: 8, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       whileTap={reduced ? undefined : { scale: PRESS_SCALE }}
-      transition={PRESS_TRANSITION}
+      transition={
+        reduced
+          ? { duration: 0.2 }
+          : {
+              opacity: { duration: 0.5, ease: [0.23, 1, 0.32, 1], delay: enterDelay },
+              y: { duration: 0.5, ease: [0.23, 1, 0.32, 1], delay: enterDelay },
+              scale: PRESS_TRANSITION,
+            }
+      }
       onClick={() => {
         haptic("select");
         onSelect();
       }}
       className={cn(
-        "flex min-h-20 items-center justify-between gap-3 rounded-[20px] bg-card px-4 py-3.5 text-start text-ink",
+        "flex items-center justify-between gap-3 bg-card px-4 text-start text-ink",
+        compact ? "h-16 rounded-[18px]" : "min-h-20 rounded-[20px] py-3.5",
         selected ? "border-2 border-ink" : "border border-line",
         arabic && "font-arabic",
         className
       )}
     >
-      <span className="flex flex-col gap-0.5">
-        <span className={cn("text-lg", arabic ? "font-semibold" : "font-bold")}>{title}</span>
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span
+          className={cn(
+            compact ? "text-base" : "text-lg",
+            titleArabic || arabic ? "font-arabic font-semibold" : "font-bold"
+          )}
+        >
+          {title}
+        </span>
         {subtitle && (
-          <span className={cn("text-base text-muted", arabic && "leading-relaxed")}>
+          <span
+            dir={subtitleArabic ? "rtl" : undefined}
+            lang={subtitleArabic ? "ar" : undefined}
+            className={cn(
+              "text-muted",
+              compact ? "text-[13px]" : "text-base",
+              (subtitleArabic || arabic) && "font-arabic leading-relaxed"
+            )}
+          >
             {subtitle}
           </span>
         )}
       </span>
-      {selected ? (
-        <CheckCircle size={28} weight="fill" className="shrink-0 text-ink" aria-hidden />
-      ) : (
-        <span
-          aria-hidden
-          className="size-[26px] shrink-0 rounded-pill border-2 border-knob-off"
-        />
-      )}
+      <RadioMark selected={selected} />
     </motion.button>
   );
 }
@@ -137,20 +186,34 @@ export function Segmented<T extends string>({
   );
 }
 
-/** The 4 (or 3) thin segments above the main button. */
-export function ProgressSegments({ total, done }: { total: number; done: number }) {
+/** The thin step segments. `label` makes them an accessible progress name. */
+export function ProgressSegments({
+  total,
+  done,
+  label,
+  pendingClassName = "bg-line",
+  className,
+}: {
+  total: number;
+  done: number;
+  label?: string;
+  pendingClassName?: string;
+  className?: string;
+}) {
   return (
     <div
-      aria-hidden
-      className="grid gap-1.5"
+      role={label ? "img" : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
+      className={cn("grid gap-1.5", className)}
       style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}
     >
       {Array.from({ length: total }, (_, index) => (
         <span
           key={index}
           className={cn(
-            "h-1 rounded-[4px] transition-colors duration-300",
-            index < done ? "bg-ink" : "bg-line"
+            "h-1.5 rounded-pill transition-colors duration-300",
+            index < done ? "bg-ink" : pendingClassName
           )}
         />
       ))}

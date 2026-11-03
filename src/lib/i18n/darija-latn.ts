@@ -51,6 +51,9 @@ export const darijaLatn: Dictionary = {
 
   "onboarding.step": "Khatwa {current} men {total}",
   "onboarding.hello": "Salam {name}",
+  "onboarding.language.ask": "Salam ! B ach t7eb nhdro ?",
+  // TODO: translated by the agent, not taken from the mockup.
+  "onboarding.language.note": "Tqder tbddel hadchi weqt ma bghiti f profil dyalek.",
   "onboarding.language.title": "Bghiti nhedro b…",
   "onboarding.language.subtitle": "Tqder dima tkhellet, BonSafar kayfhem.",
   "onboarding.language.groupLabel": "Logha",

@@ -54,6 +54,9 @@ export const en = {
   // 1 · Profile, 4 steps
   "onboarding.step": "Step {current} of {total}",
   "onboarding.hello": "Salam {name}",
+  "onboarding.language.ask": "Salam ! B ach t7eb nhdro ?",
+  // TODO: translated by the agent, not taken from the mockup.
+  "onboarding.language.note": "You can change this any time in your profile.",
   "onboarding.language.title": "You'd rather we speak…",
   "onboarding.language.subtitle": "You can always mix, BonSafar understands.",
   "onboarding.language.groupLabel": "Language",
@@ -235,11 +238,11 @@ export const en = {
   "lang.fr": "Français",
   "lang.ar": "العربية",
   "lang.en": "English",
-  "lang.sample.darija-latn": "Salam! Labas?",
-  "lang.sample.darija-arab": "سلام! لاباس؟",
-  "lang.sample.fr": "Bonjour !",
-  "lang.sample.ar": "مرحبا !",
-  "lang.sample.en": "Hello!",
+  "lang.sample.darija-latn": "Salam, labas ?",
+  "lang.sample.darija-arab": "سلام، لاباس؟",
+  "lang.sample.fr": "Bonjour, ça va ?",
+  "lang.sample.ar": "مرحبا، كيف حالك؟",
+  "lang.sample.en": "Hi, how are you?",
 
   // Safar, the mascot. One label per state.
   "safar.idle": "Safar resting, eyes closed in a smile",

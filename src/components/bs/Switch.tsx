@@ -59,7 +59,7 @@ export function Switch({ checked, onChange, label, hint, className }: SwitchProp
 /** The bordered card that groups switches, rows split by hairlines. */
 export function SwitchGroup({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-[20px] border border-line px-3.5 py-0.5 [&>*+*]:border-t [&>*+*]:border-line">
+    <div className="rounded-[20px] border border-line bg-card px-3.5 py-0.5 [&>*+*]:border-t [&>*+*]:border-line">
       {children}
     </div>
   );

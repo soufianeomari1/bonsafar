@@ -50,12 +50,14 @@ export const fr: Dictionary = {
 
   "onboarding.step": "Étape {current} sur {total}",
   "onboarding.hello": "Salam {name}",
+  "onboarding.language.ask": "Salam ! B ach t7eb nhdro ?",
+  "onboarding.language.note": "Tu pourras changer ça à tout moment dans ton profil.",
   "onboarding.language.title": "Tu préfères qu'on parle en…",
   "onboarding.language.subtitle":
     "Tu peux toujours mélanger, BonSafar comprend.",
   "onboarding.language.groupLabel": "Langue",
   "onboarding.language.scriptLabel": "Écrire la darija en",
-  "onboarding.language.scriptLatin": "Lettres latines",
+  "onboarding.language.scriptLatin": "lettres latines",
   "onboarding.language.scriptArabic": "حروف عربية",
   "onboarding.trip.title": "D'où tu pars, et avec qui ?",
   "onboarding.trip.subtitle": "Je ne te reposerai plus la question.",

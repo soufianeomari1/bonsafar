@@ -3,7 +3,7 @@ import { OnboardingScreen } from "@/components/screens/OnboardingScreen";
 
 export default function OnboardingPage() {
   return (
-    <MobileFrame surfaceClassName="bg-card">
+    <MobileFrame surfaceClassName="bg-bg">
       <OnboardingScreen />
     </MobileFrame>
   );

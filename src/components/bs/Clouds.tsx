@@ -3,8 +3,16 @@
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
+export type CloudLayer = {
+  top: number;
+  width: number;
+  opacity: number;
+  duration: number;
+  delay: number;
+};
+
 /** Three layers, slower the further away, as in docs section 3 (A9). */
-const LAYERS = [
+const LAYERS: CloudLayer[] = [
   { top: 70, width: 90, opacity: 1, duration: 38, delay: 0 },
   { top: 118, width: 60, opacity: 0.8, duration: 26, delay: -12 },
   { top: 168, width: 44, opacity: 0.6, duration: 54, delay: -30 },
@@ -12,10 +20,11 @@ const LAYERS = [
 
 export type CloudsProps = {
   className?: string;
+  layers?: CloudLayer[];
 };
 
 /** A9: small white clouds drifting behind a header while something loads. */
-export function Clouds({ className }: CloudsProps) {
+export function Clouds({ className, layers = LAYERS }: CloudsProps) {
   const reduced = useReducedMotion();
 
   return (
@@ -23,7 +32,7 @@ export function Clouds({ className }: CloudsProps) {
       aria-hidden
       className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
     >
-      {LAYERS.map((layer, index) => (
+      {layers.map((layer, index) => (
         <motion.svg
           key={index}
           viewBox="0 0 90 34"

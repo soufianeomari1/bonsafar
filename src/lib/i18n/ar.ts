@@ -51,6 +51,9 @@ export const ar: Dictionary = {
 
   "onboarding.step": "الخطوة {current} من {total}",
   "onboarding.hello": "مرحبا {name}",
+  // TODO: translated by the agent, not taken from the mockup.
+  "onboarding.language.ask": "سلام! بماذا تحب أن نتحدث؟",
+  "onboarding.language.note": "يمكنك تغيير هذا في أي وقت من ملفك.",
   "onboarding.language.title": "تفضل أن نتحدث بـ…",
   "onboarding.language.subtitle": "يمكنك دائمًا المزج، BonSafar يفهم.",
   "onboarding.language.groupLabel": "اللغة",

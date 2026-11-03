@@ -1,7 +1,7 @@
 export { Button, type ButtonProps } from "./Button";
 export { Card, type CardProps } from "./Card";
 export { Chip, type ChipProps } from "./Chip";
-export { Clouds, type CloudsProps } from "./Clouds";
+export { Clouds, type CloudsProps, type CloudLayer } from "./Clouds";
 export { HapticRing } from "./HapticRing";
 export {
   IconCircle,

@@ -51,6 +51,9 @@ export const darijaArab: Dictionary = {
 
   "onboarding.step": "خطوة {current} من {total}",
   "onboarding.hello": "سلام {name}",
+  // TODO: translated by the agent, not taken from the mockup.
+  "onboarding.language.ask": "سلام! بأش تحب نهضرو؟",
+  "onboarding.language.note": "تقدر تبدل هادشي وقت ما بغيتي ف البروفيل ديالك.",
   "onboarding.language.title": "بغيتي نهضرو بـ…",
   "onboarding.language.subtitle": "تقدر ديما تخلط، BonSafar كيفهم.",
   "onboarding.language.groupLabel": "اللغة",
