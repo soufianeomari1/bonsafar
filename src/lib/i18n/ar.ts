@@ -162,10 +162,13 @@ export const ar: Dictionary = {
   "idea.barcelona.sub": "تأشيرة شنغن",
   "idea.barcelona.subFree": "بدون تأشيرة",
 
+  // TODO: translated by the agent, not taken from the mockup.
+  "voice.pill": "سفر يستمع إليك",
+  "voice.max": "max 1:00",
   "voice.headerStatus": "يستمع إليك…",
   "voice.title": "أستمع إليك…",
   "voice.subtitle": "أنا أستمع. خذ وقتك.",
-  "voice.locked": "مقفل، يمكنك الإفلات",
+  "voice.locked": "مقفل: يمكنك ترك الشاشة",
   "voice.slideCancel": "اسحب جانبًا للإلغاء",
   "voice.slideLock": "اسحب للأعلى للقفل",
   "voice.pause": "إيقاف مؤقت",

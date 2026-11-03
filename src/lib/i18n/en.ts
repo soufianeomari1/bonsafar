@@ -173,10 +173,14 @@ export const en = {
   "idea.barcelona.subFree": "No visa",
 
   // 3 · Voice note
+  // TODO: translated by the agent, not taken from the mockup.
+  "voice.pill": "Safar is listening",
+  "voice.max": "max 1:00",
   "voice.headerStatus": "listening…",
   "voice.title": "Listening…",
   "voice.subtitle": "I'm listening. Take your time.",
-  "voice.locked": "Locked, you can let go",
+  // TODO: translated by the agent, not taken from the mockup.
+  "voice.locked": "Locked: you can let go of the screen",
   "voice.slideCancel": "Slide left to cancel",
   "voice.slideLock": "Slide up to lock",
   "voice.pause": "Pause",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
   CaretLeft,
@@ -11,7 +12,8 @@ import {
   Play,
   Trash,
 } from "@phosphor-icons/react";
-import { VoiceRadar } from "@/components/bs/VoiceRadar";
+import { Safar } from "@/components/bs/Safar";
+import { PulseRings } from "@/components/bs/VoiceRadar";
 import { bindMicSurface, micHoldStyle, type CaptureState } from "@/components/voice/useVoiceCapture";
 import { formatClock } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
@@ -20,9 +22,59 @@ import { cn } from "@/lib/utils";
 
 type Recording = Extract<CaptureState, { status: "recording" }>;
 
-const BAR_COUNT = 34;
+const WAVE = 16;
 
-/** Screen 3, mockup 03-Vocal. Shown over the home screen while recording. */
+/** Words of a real transcript, one after another. An empty string leaves the caret. */
+function LiveWords({ text }: { text: string }) {
+  const reduced = useReducedMotion();
+  const words = text.trim().length ? text.trim().split(/\s+/) : [];
+  return (
+    <p className="text-center text-2xl font-bold leading-[1.35] tracking-[-0.01em]" aria-live="polite">
+      {words.map((word, index) => (
+        <motion.span
+          key={`${index}-${word}`}
+          className="me-[0.3em] inline-block"
+          initial={reduced ? false : { opacity: 0, y: 6, filter: "blur(3px)" }}
+          animate={{ opacity: 1, y: 0, filter: "none" }}
+          transition={{
+            duration: reduced ? 0.2 : 0.45,
+            delay: reduced ? 0 : index * 0.3,
+            ease: [0.23, 1, 0.32, 1],
+          }}
+        >
+          {word}
+        </motion.span>
+      ))}
+      <motion.span
+        aria-hidden
+        className="inline-block h-[26px] w-[3px] translate-y-1 rounded-sm bg-blue align-middle"
+        animate={reduced ? { opacity: 1 } : { opacity: [1, 1, 0, 0] }}
+        transition={reduced ? { duration: 0.2 } : { duration: 1, repeat: Infinity, ease: "linear" }}
+      />
+    </p>
+  );
+}
+
+function useMicLevel(getLevel: () => number, active: boolean) {
+  const [level, setLevel] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    let frame = 0;
+    let last = 0;
+    const loop = (now: number) => {
+      if (now - last > 50) {
+        last = now;
+        setLevel(Math.min(1, Math.max(0, getLevel())));
+      }
+      frame = requestAnimationFrame(loop);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, [active, getLevel]);
+  return active ? level : 0;
+}
+
+/** Screen 3. Look: design/motion/screens/03-voice.html. The hold, lock and cancel gestures stay. */
 export function VocalScreen({
   capture,
   getLevel,
@@ -40,149 +92,135 @@ export function VocalScreen({
 }) {
   const { t, rtl } = useLanguage();
   const reduced = useReducedMotion();
-  const bars = capture.bars.slice(-BAR_COUNT);
-  const padded = [...Array(Math.max(0, BAR_COUNT - bars.length)).fill(0), ...bars];
+  const level = useMicLevel(getLevel, !capture.paused);
+  const bars = capture.bars.slice(-WAVE);
+  const padded = [...Array(Math.max(0, WAVE - bars.length)).fill(0), ...bars];
 
   return (
     <motion.div
       ref={bindMicSurface}
       onContextMenu={(event) => event.preventDefault()}
-      className="bs-mic-screen absolute inset-0 z-30 flex flex-col bg-card"
+      className="bs-mic-screen absolute inset-0 z-30 flex flex-col bg-voice-gradient"
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+      transition={{ duration: reduced ? 0.2 : 0.25, ease: [0.23, 1, 0.32, 1] }}
     >
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-line pe-3 ps-1.5">
-        <button
-          type="button"
-          aria-label={t("common.cancel")}
-          onClick={onCancel}
-          className="flex size-11 items-center justify-center text-ink"
-        >
-          <CaretLeft size={20} weight="bold" className="rtl:-scale-x-100" />
-        </button>
-        <span className="flex flex-col">
-          <span className="text-[17px] font-bold" dir="ltr">
-            BonSafar
-          </span>
-          <span className="text-[13px] font-medium text-blue">
-            {capture.paused ? t("voice.paused") : t("voice.headerStatus")}
-          </span>
-        </span>
-      </header>
-
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[22px] bg-listen-gradient px-4">
-        <VoiceRadar listening={!capture.paused} getLevel={getLevel} size={300} core={96}>
+      <div className="flex justify-center px-5 pt-[22px]">
+        <span className="inline-flex h-8 items-center gap-2 rounded-pill bg-card px-3 text-[13px] font-bold">
           <span
-            style={micHoldStyle}
-            className="bs-mic-hold flex size-24 items-center justify-center rounded-pill bg-blue text-card shadow-[0_14px_34px_color-mix(in_srgb,var(--color-blue)_35%,transparent)]"
-          >
-            <Microphone size={40} weight="fill" aria-hidden />
-          </span>
-        </VoiceRadar>
-        <div className="flex flex-col gap-1 text-center">
-          <span className="text-[28px] font-extrabold tracking-[-0.02em]">{t("voice.title")}</span>
-          <span className="text-base text-muted">{t("voice.subtitle")}</span>
-        </div>
+            className={cn(
+              "size-2 rounded-pill bg-red",
+              !capture.paused && "bs-motion animate-[bs-rec_1.2s_ease-in-out_infinite]"
+            )}
+          />
+          {capture.paused ? t("voice.paused") : t("voice.pill")}
+        </span>
       </div>
 
-      <div className="flex justify-center bg-listen px-4 pb-2.5">
+      <section aria-label={t("voice.pill")} className="relative flex h-[340px] items-center justify-center">
+        <PulseRings core={150} duration={1.6} scale={2.3} delays={[0, 0.53, 1.06]} opacity={0.5} />
+        <Safar state="listening" size={170} tilt={-10} level={level} />
+      </section>
+
+      <section className="min-h-[120px] px-7">
+        {/* Transcription starts after send, so this caret waits for real words. */}
+        <LiveWords text="" />
+        <p className="mt-2.5 text-center text-[13px] text-muted">{t("voice.subtitle")}</p>
+      </section>
+
+      <div aria-hidden className="mt-3 flex h-12 items-center justify-center gap-1 px-7">
+        {padded.map((value, index) => (
+          <span
+            key={index}
+            className="w-1 rounded-sm bg-ink"
+            style={{ height: 8 + Math.round(value * 38) }}
+          />
+        ))}
+      </div>
+
+      <div className="flex-1" />
+
+      <div className="flex flex-col gap-3 px-5 pb-[22px]">
         {capture.locked ? (
-          <span className="flex h-8 items-center gap-1.5 rounded-pill bg-green-soft px-3 text-[13px] font-semibold text-green">
+          <div className="flex items-center justify-center gap-1.5 text-[13px] text-muted">
             <LockSimple size={14} weight="fill" aria-hidden />
             {t("voice.locked")}
-          </span>
+          </div>
         ) : (
-          <motion.span
-            className="flex h-8 items-center gap-1.5 rounded-pill bg-card px-3 text-[13px] font-semibold text-muted shadow-soft"
-            style={{ y: capture.dragY * 0.4 }}
+          <motion.div
+            className="flex items-center justify-center gap-1.5 text-[13px] font-semibold text-muted"
+            style={{ y: capture.dragY * 0.35 }}
           >
             <CaretUp size={14} weight="bold" aria-hidden />
             <LockSimple size={14} weight="fill" aria-hidden />
             {t("voice.slideLock")}
-          </motion.span>
+          </motion.div>
         )}
-      </div>
 
-      <div className="flex flex-col gap-4 border-t border-line bg-card px-4 pb-[22px] pt-4">
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden
-            className={cn(
-              "size-2.5 rounded-pill",
-              capture.paused ? "bg-knob-off" : "bs-motion bg-red animate-[bs-rec_1.2s_ease-in-out_infinite]"
-            )}
-          />
-          <span className="tabular text-xl font-bold" aria-live="off">
-            {formatClock(capture.elapsedMs)}
-          </span>
-          <div aria-hidden className="flex h-10 min-w-0 flex-1 items-center justify-end gap-[3px] overflow-hidden" dir="ltr">
-            {padded.map((value, index) => (
+        <div className="flex h-[68px] items-center gap-2.5 rounded-pill bg-card px-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.08)]">
+          {capture.locked ? (
+            <>
+              <button
+                type="button"
+                aria-label={t("voice.delete")}
+                onClick={onCancel}
+                className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-red-soft text-red"
+              >
+                <Trash size={20} weight="bold" />
+              </button>
+              <div className="flex min-w-0 flex-1 items-center gap-2 ps-1">
+                <span
+                  className={cn(
+                    "size-2.5 shrink-0 rounded-pill bg-red",
+                    !capture.paused && "bs-motion animate-[bs-rec_1.2s_ease-in-out_infinite]"
+                  )}
+                />
+                <span className="font-mono text-base font-semibold tabular">{formatClock(capture.elapsedMs)}</span>
+                <span className="truncate text-xs text-muted">{t("voice.max")}</span>
+              </div>
+              <button
+                type="button"
+                aria-label={capture.paused ? t("voice.resume") : t("voice.pause")}
+                onClick={() => {
+                  haptic("tap");
+                  if (capture.paused) onResume();
+                  else onPause();
+                }}
+                className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-fill text-ink"
+              >
+                {capture.paused ? <Play size={16} weight="fill" /> : <Pause size={16} weight="fill" />}
+              </button>
+              <button
+                type="button"
+                aria-label={t("voice.send")}
+                onClick={() => {
+                  haptic("tap");
+                  onSend();
+                }}
+                className="flex size-[52px] shrink-0 items-center justify-center rounded-pill bg-ink text-card"
+              >
+                <PaperPlaneRight size={20} weight="bold" className="rtl:-scale-x-100" />
+              </button>
+            </>
+          ) : (
+            <>
+              <motion.span
+                className="flex min-w-0 flex-1 items-center gap-1.5 ps-3 text-[15px] font-semibold text-muted"
+                style={{ x: capture.dragX * 0.6 * (rtl ? -1 : 1), opacity: 1 + capture.dragX / 160 }}
+              >
+                <CaretLeft size={16} weight="bold" aria-hidden className="rtl:-scale-x-100" />
+                {t("voice.slideCancel")}
+              </motion.span>
               <span
-                key={index}
-                className={cn("w-[3px] shrink-0 rounded-[3px]", index > BAR_COUNT - 10 ? "bg-ink" : "bg-knob-off")}
-                style={{ height: 4 + Math.round(value * 34) }}
-              />
-            ))}
-          </div>
+                style={micHoldStyle}
+                className="bs-mic-hold flex size-[52px] shrink-0 items-center justify-center rounded-pill bg-blue text-card"
+              >
+                <Microphone size={22} weight="fill" aria-hidden />
+              </span>
+            </>
+          )}
         </div>
-
-        {capture.locked ? (
-          <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              aria-label={t("voice.delete")}
-              onClick={onCancel}
-              className="flex size-[52px] shrink-0 items-center justify-center rounded-pill bg-red-soft text-red"
-            >
-              <Trash size={22} weight="fill" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                haptic("tap");
-                if (capture.paused) onResume();
-                else onPause();
-              }}
-              className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-pill bg-fill text-base font-semibold text-ink"
-            >
-              {capture.paused ? (
-                <Play size={16} weight="fill" aria-hidden />
-              ) : (
-                <Pause size={16} weight="fill" aria-hidden />
-              )}
-              {capture.paused ? t("voice.resume") : t("voice.pause")}
-            </button>
-            <button
-              type="button"
-              aria-label={t("voice.send")}
-              onClick={() => {
-                haptic("tap");
-                onSend();
-              }}
-              className="flex size-[60px] shrink-0 items-center justify-center rounded-pill bg-ink text-card shadow-[0_8px_22px_rgba(11,11,15,0.25)]"
-            >
-              <PaperPlaneRight size={24} weight="fill" className="rtl:-scale-x-100" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex h-[60px] items-center justify-between gap-3">
-            <motion.span
-              className="flex items-center gap-1.5 text-[15px] font-semibold text-muted"
-              style={{ x: capture.dragX * 0.6 * (rtl ? -1 : 1), opacity: 1 + capture.dragX / 160 }}
-            >
-              <CaretLeft size={16} weight="bold" aria-hidden className="rtl:-scale-x-100" />
-              {t("voice.slideCancel")}
-            </motion.span>
-            <span
-              style={micHoldStyle}
-              className="bs-mic-hold flex size-[60px] shrink-0 items-center justify-center rounded-pill bg-blue text-card"
-            >
-              <Microphone size={26} weight="fill" aria-hidden />
-            </span>
-          </div>
-        )}
       </div>
     </motion.div>
   );

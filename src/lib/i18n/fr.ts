@@ -166,10 +166,12 @@ export const fr: Dictionary = {
   "idea.barcelona.sub": "Visa Schengen",
   "idea.barcelona.subFree": "Sans visa",
 
+  "voice.pill": "Safar t'écoute",
+  "voice.max": "max 1:00",
   "voice.headerStatus": "kaysme3 lik…",
   "voice.title": "Kansme3 lik…",
   "voice.subtitle": "Je t'écoute. Prends ton temps.",
-  "voice.locked": "Verrouillé, tu peux lâcher",
+  "voice.locked": "Verrouillé : tu peux lâcher l'écran",
   "voice.slideCancel": "Glisse à gauche pour annuler",
   "voice.slideLock": "Glisse vers le haut pour verrouiller",
   "voice.pause": "Pause",

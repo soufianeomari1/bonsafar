@@ -165,10 +165,13 @@ export const darijaLatn: Dictionary = {
   "idea.barcelona.sub": "Visa Schengen",
   "idea.barcelona.subFree": "Bla visa",
 
+  // TODO: translated by the agent, not taken from the mockup.
+  "voice.pill": "Safar kaysme3 lik",
+  "voice.max": "max 1:00",
   "voice.headerStatus": "kaysme3 lik…",
   "voice.title": "Kansme3 lik…",
   "voice.subtitle": "Kansme3 lik. Khoud wqtek.",
-  "voice.locked": "Msdoud, tqder tlaq",
+  "voice.locked": "Msdoud: tqder tlaq l'écran",
   "voice.slideCancel": "Jerr l lisser bach tlghi",
   "voice.slideLock": "Jerr l fo9 bach tsedd",
   "voice.pause": "Wqef",

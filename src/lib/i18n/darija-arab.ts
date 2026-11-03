@@ -163,10 +163,13 @@ export const darijaArab: Dictionary = {
   "idea.barcelona.sub": "فيزا شنگن",
   "idea.barcelona.subFree": "بلا فيزا",
 
+  // TODO: translated by the agent, not taken from the mockup.
+  "voice.pill": "سفر كيسمع ليك",
+  "voice.max": "max 1:00",
   "voice.headerStatus": "كيسمع ليك…",
   "voice.title": "كنسمع ليك…",
   "voice.subtitle": "كنسمع ليك. خود وقتك.",
-  "voice.locked": "مسدود، تقدر تطلق",
+  "voice.locked": "مسدود: تقدر تطلق الشاشة",
   "voice.slideCancel": "جر للجهة باش تلغي",
   "voice.slideLock": "جر لفوق باش تسد",
   "voice.pause": "وقف",
