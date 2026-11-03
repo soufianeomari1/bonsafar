@@ -1,3 +1,5 @@
+import type { RunLog } from "@/lib/ai/events";
+
 /**
  * Price guardrail: models never write an amount of money. Every model text
  * field is scanned; amounts are only ever formatted by code from stored
@@ -25,6 +27,31 @@ export function containsMoney(text: string): boolean {
 
 export function scrubMoney(text: string, replacement: string): string {
   return text.replace(MONEY, replacement);
+}
+
+export type GuardrailVerdict = { passed: boolean; blocked: string[]; scanned: number };
+
+/**
+ * Scans every string of a model output and logs one "price_guardrail" event,
+ * passed or blocked. The caller decides what a block means (repair, scrub).
+ */
+export function guardModelText(
+  value: unknown,
+  log: RunLog,
+  label: string,
+): GuardrailVerdict {
+  const strings = collectStrings(value);
+  const blocked = strings.filter(containsMoney);
+  log.add({
+    step: "price_guardrail",
+    model: "code",
+    latency_ms: 0,
+    status: blocked.length ? "blocked" : "passed",
+    note: blocked.length
+      ? `${label}: ${blocked.length} of ${strings.length} text fields carried an amount`
+      : `${label}: ${strings.length} text fields scanned`,
+  });
+  return { passed: blocked.length === 0, blocked, scanned: strings.length };
 }
 
 /** Collects every string in a JSON value, to scan a whole model output. */
