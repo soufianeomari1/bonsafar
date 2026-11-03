@@ -227,6 +227,14 @@ export const en = {
   "lang.sample.fr": "Bonjour !",
   "lang.sample.ar": "مرحبا !",
   "lang.sample.en": "Hello!",
+
+  // Safar, the mascot. One label per state.
+  "safar.idle": "Safar resting, eyes closed in a smile",
+  "safar.listening": "Safar listening, eyes wide open, wings flapping fast",
+  "safar.thinking": "Safar thinking, looking up, three dots above him",
+  "safar.found": "Safar delighted, jumping for joy, mouth wide open",
+  "safar.oops": "Safar worried, furrowed brows and a drop of sweat",
+  "safar.bye": "Safar winking and flying off: trik slama",
 } as const;
 
 export type TranslationKey = keyof typeof en;

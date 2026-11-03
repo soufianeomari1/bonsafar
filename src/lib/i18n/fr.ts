@@ -201,4 +201,11 @@ export const fr: Dictionary = {
 
   "search.title": "Je cherche ton voyage",
   "search.soon": "Les vols et les hôtels en direct arrivent ici très bientôt.",
+
+  "safar.idle": "Safar au repos, les yeux plissés de bonheur",
+  "safar.listening": "Safar qui écoute, les yeux grands ouverts, les ailes qui battent vite",
+  "safar.thinking": "Safar qui réfléchit, le regard vers le haut, trois points au-dessus de lui",
+  "safar.found": "Safar ravi, qui saute de joie, la bouche grande ouverte",
+  "safar.oops": "Safar embêté, sourcils inquiets et goutte de sueur",
+  "safar.bye": "Safar qui fait un clin d'œil et s'envole : trik slama",
 };

@@ -194,4 +194,11 @@ export const darijaLatn: Dictionary = {
 
   "search.title": "Kanqelleb 3la safar dyalek",
   "search.soon": "Tiyarat w otelat direct ghadi yjiw hna 9riban.",
+
+  "safar.idle": "Safar mrtah, 3inih mseddin w howa mbsem",
+  "safar.listening": "Safar kaytsnet, 3inih mehloulin, jnaho kaykheffo bzerba",
+  "safar.thinking": "Safar kayfker, chayef lfoq, 3 noqat foq raso",
+  "safar.found": "Safar ferhan, kaynqqez, fommo mehloul",
+  "safar.oops": "Safar mqelleq, hwaejebo mhemmnin w qetra d l3erq",
+  "safar.bye": "Safar kayghmez b 3ino w kaytir: trik slama",
 };

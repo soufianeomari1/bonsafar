@@ -14,6 +14,7 @@ import { AuthPanel } from "@/components/auth/AuthPanel";
 import { Button } from "@/components/bs/Button";
 import { Card } from "@/components/bs/Card";
 import { Chip } from "@/components/bs/Chip";
+import { Safar, SafarBubble, SAFAR_STATES } from "@/components/bs/Safar";
 import { Clouds } from "@/components/bs/Clouds";
 import { IconCircle, ICON_CIRCLE_TONES } from "@/components/bs/IconCircle";
 import { LanguagePicker } from "@/components/bs/LanguagePicker";
@@ -62,6 +63,7 @@ export default function DesignKitPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [priceIndex, setPriceIndex] = useState(0);
+  const [level, setLevel] = useState(0.7);
 
   const hapticsOn = useSyncExternalStore(
     subscribeToHapticsSetting,
@@ -98,6 +100,36 @@ export default function DesignKitPage() {
               {t("onboarding.step", { current: 2, total: 4 })}
             </span>
           </Card>
+        </Section>
+
+        <Section title="Safar">
+          <label className="flex items-center gap-3 text-[15px] font-semibold">
+            <span className="shrink-0">Voice level {level.toFixed(2)}</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={Math.round(level * 100)}
+              aria-label="Voice level"
+              onChange={(event) => setLevel(Number(event.target.value) / 100)}
+              className="h-2 flex-1 accent-blue"
+            />
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {SAFAR_STATES.map((name) => (
+              <Card key={name} animate={false} className="flex flex-col items-center gap-2 overflow-visible">
+                <div className="flex h-[168px] items-center justify-center">
+                  <Safar state={name} size={112} level={level} />
+                </div>
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-blue">
+                  {name}
+                </span>
+              </Card>
+            ))}
+          </div>
+          <SafarBubble size={72}>
+            <p className="text-[15px] font-bold leading-snug">Brek w hder</p>
+          </SafarBubble>
         </Section>
 
         <Section title="Buttons">
