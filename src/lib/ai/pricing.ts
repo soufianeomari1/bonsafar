@@ -15,6 +15,9 @@ export const PRICING = {
   image: { usdPerImage: 0.01 },
 } as const;
 
+/** web_search tool on text models, on top of tokens (dev.meta.ai/docs/pricing-rate-limits). */
+export const WEB_SEARCH_USD_PER_QUERY = 2.5 / 1000;
+
 export type ModelRole = keyof typeof PRICING;
 
 export type TokenUsage = {

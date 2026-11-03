@@ -1,0 +1,2834 @@
+{
+  "listed_at": "2026-11-03T22:13:22.474Z",
+  "servers": {
+    "kiwi": {
+      "url": "https://mcp.kiwi.com",
+      "server": {
+        "name": "kiwicom-flight-search",
+        "version": ""
+      },
+      "tools": [
+        {
+          "name": "search-flight",
+          "title": "Search for flights with Kiwi.com",
+          "description": "# Search for flights\n\nSearches Kiwi.com for available flights between two locations for the given dates and passengers. City or airport names are resolved automatically, so call this whenever the user wants to search for flights — whether they gave IATA codes or just place names.\n\n## Result shape\n\nReturns `{ query, currency, passengers, resultsCount, itineraries, searchTimeMs }`. Each item in `itineraries` has:\n- `price` (number) and `priceFormatted` (e.g. \"123 EUR\")\n- `totalDurationSeconds`\n- `bookingUrl` — the link to book the flight\n- `imageId` — destination city id for a hero photo (https://images.kiwi.com/photos/600x600/{imageId}.jpg)\n- `baggage` — total included baggage across all travelers: `{ personalItem, cabinBag, checkedBag }` (counts)\n- `outbound` (and `inbound` for return flights), each a leg with: `route` (list of airport codes including layovers, e.g. [\"PRG\",\"MAD\",\"BCN\"]), `departureTime` / `arrivalTime` (local ISO timestamps), `durationSeconds`, `stops`, `cabinClass`, and a `segments` list. Each segment has `from`/`to` (IATA), `fromCity`/`toCity`, `fromName`/`toName` (full airport names), `fromCountry`/`toCountry`, `carrier` (code) and `carrierName` (airline name), `flightNumber`, and `cabinClass`.\n\n## How to display\n\nRender a markdown table. Group results into cheapest (lowest `price`), shortest (lowest `totalDurationSeconds`), and other notable options. For each itinerary show, in order:\n  - Route: join `outbound.route` with \" → \" (e.g. \"PRG → MAD → BCN\"); for return flights show `inbound.route` on a second line.\n  - Times & duration: `outbound.departureTime` → `outbound.arrivalTime` (local), formatted readably (e.g. \"12 Jun 06:05 → 09:30 (3h 25m)\") using `outbound.durationSeconds`; add the `inbound` equivalents for return flights.\n  - Cabin: `outbound.cabinClass` (e.g. \"Economy\").\n  - Price: `priceFormatted`.\n  - Booking link: `bookingUrl`.\n\nFinally, summarise the best price and the shortest option, give a recommendation, and end wishing the user a nice trip with a short fun fact about the destination!",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "flyFrom": {
+                "description": "Origin: IATA code, city or airport name (e.g. \"PRG\", \"Prague\", \"London Heathrow\")",
+                "maxLength": 100,
+                "minLength": 1,
+                "title": "Flyfrom",
+                "type": "string"
+              },
+              "flyTo": {
+                "description": "Destination: IATA code, city or airport name",
+                "maxLength": 100,
+                "minLength": 1,
+                "title": "Flyto",
+                "type": "string"
+              },
+              "departureDate": {
+                "description": "Departure date in dd/mm/yyyy — the day to fly, or the earliest date of a range (see departureDateTo)",
+                "maxLength": 10,
+                "title": "Departuredate",
+                "type": "string"
+              },
+              "departureDateFlexDays": {
+                "default": 0,
+                "description": "Search +/- this many days around departureDate (symmetric). Leave 0 when using departureDateTo",
+                "maximum": 10,
+                "minimum": 0,
+                "title": "Departuredateflexdays",
+                "type": "integer"
+              },
+              "departureDateTo": {
+                "anyOf": [
+                  {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Latest departure date in dd/mm/yyyy for an explicit range [departureDate .. departureDateTo]. Use instead of departureDateFlexDays for a one-directional or asymmetric range; must be >= departureDate",
+                "title": "Departuredateto"
+              },
+              "returnDate": {
+                "anyOf": [
+                  {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Return date in dd/mm/yyyy — the day to fly back, or the earliest return date of a range (omit for one-way)",
+                "title": "Returndate"
+              },
+              "returnDateFlexDays": {
+                "default": 0,
+                "description": "Search +/- this many days around returnDate (symmetric). Leave 0 when using returnDateTo",
+                "maximum": 10,
+                "minimum": 0,
+                "title": "Returndateflexdays",
+                "type": "integer"
+              },
+              "returnDateTo": {
+                "anyOf": [
+                  {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Latest return date in dd/mm/yyyy for an explicit range [returnDate .. returnDateTo]. Requires returnDate; use instead of returnDateFlexDays; must be >= returnDate",
+                "title": "Returndateto"
+              },
+              "adults": {
+                "default": 1,
+                "description": "Number of adults (12+)",
+                "ge": 1,
+                "le": 9,
+                "title": "Adults",
+                "type": "integer"
+              },
+              "children": {
+                "default": 0,
+                "description": "Number of children (2-11)",
+                "maximum": 8,
+                "minimum": 0,
+                "title": "Children",
+                "type": "integer"
+              },
+              "infants": {
+                "default": 0,
+                "description": "Number of infants (<2)",
+                "maximum": 4,
+                "minimum": 0,
+                "title": "Infants",
+                "type": "integer"
+              },
+              "cabinClass": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "M",
+                      "W",
+                      "C",
+                      "F"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "M=economy, W=premium economy, C=business, F=first",
+                "title": "Cabinclass"
+              },
+              "currency": {
+                "default": "EUR",
+                "description": "Currency code (e.g. EUR, USD)",
+                "maxLength": 3,
+                "minLength": 1,
+                "title": "Currency",
+                "type": "string"
+              },
+              "locale": {
+                "default": "en",
+                "description": "Locale (e.g. en, de, fr)",
+                "maxLength": 10,
+                "minLength": 1,
+                "title": "Locale",
+                "type": "string"
+              },
+              "nights_in_dst_from": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Minimum nights at destination before return flight. Turns the search into a return search",
+                "title": "Nights In Dst From"
+              },
+              "nights_in_dst_to": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Maximum nights at destination before return flight",
+                "title": "Nights In Dst To"
+              },
+              "one_for_city": {
+                "default": false,
+                "description": "If true, return only the single best result per destination city — useful for 'explore' searches with broad destinations",
+                "title": "One For City",
+                "type": "boolean"
+              },
+              "max_sector_stopovers": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Maximum number of stopovers (connections) allowed per flight sector",
+                "title": "Max Sector Stopovers"
+              },
+              "price_from": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Minimum total price filter in the specified currency",
+                "title": "Price From"
+              },
+              "price_to": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Maximum total price filter in the specified currency",
+                "title": "Price To"
+              },
+              "max_fly_duration": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Maximum total flight duration in hours",
+                "title": "Max Fly Duration"
+              },
+              "select_airlines": {
+                "anyOf": [
+                  {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Only include flights operated by these airlines — comma-separated IATA codes, e.g. 'FR,U2,BA'. Mutually exclusive with exclude_airlines",
+                "title": "Select Airlines"
+              },
+              "exclude_airlines": {
+                "anyOf": [
+                  {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Exclude flights operated by these airlines — comma-separated IATA codes, e.g. 'FR,W6'. Mutually exclusive with select_airlines",
+                "title": "Exclude Airlines"
+              },
+              "dtime_from": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "le": 23,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Earliest outbound departure hour (0-23, local)",
+                "title": "Dtime From"
+              },
+              "dtime_to": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "le": 23,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Latest outbound departure hour (0-23, local)",
+                "title": "Dtime To"
+              },
+              "atime_from": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "le": 23,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Earliest outbound arrival hour (0-23, local)",
+                "title": "Atime From"
+              },
+              "atime_to": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "le": 23,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Latest outbound arrival hour (0-23, local)",
+                "title": "Atime To"
+              },
+              "ret_dtime_from": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "le": 23,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Earliest return departure hour (0-23, local)",
+                "title": "Ret Dtime From"
+              },
+              "ret_dtime_to": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "le": 23,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Latest return departure hour (0-23, local)",
+                "title": "Ret Dtime To"
+              },
+              "ret_atime_from": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "le": 23,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Earliest return arrival hour (0-23, local)",
+                "title": "Ret Atime From"
+              },
+              "ret_atime_to": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "le": 23,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Latest return arrival hour (0-23, local)",
+                "title": "Ret Atime To"
+              },
+              "stopover_from": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Minimum layover duration in hours",
+                "title": "Stopover From"
+              },
+              "stopover_to": {
+                "anyOf": [
+                  {
+                    "ge": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Maximum layover duration in hours",
+                "title": "Stopover To"
+              },
+              "adults_hold_bags": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "maximum": 2,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "maxItems": 9,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Checked (hold) bags per adult, one entry per adult (each 0-2), e.g. [1, 0]",
+                "title": "Adults Hold Bags"
+              },
+              "adults_hand_bags": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "maximum": 1,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "maxItems": 9,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Cabin (hand) bags per adult, one entry per adult (each 0-1), e.g. [1, 1]",
+                "title": "Adults Hand Bags"
+              },
+              "children_hold_bags": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "maximum": 2,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "maxItems": 8,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Checked (hold) bags per child, one entry per child (each 0-2), e.g. [2]",
+                "title": "Children Hold Bags"
+              },
+              "children_hand_bags": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "maximum": 1,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "maxItems": 8,
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Cabin (hand) bags per child, one entry per child (each 0-1), e.g. [1]",
+                "title": "Children Hand Bags"
+              },
+              "allow_self_transfer": {
+                "default": true,
+                "description": "Allow self-transfer (virtual interlining) connections between separate tickets",
+                "title": "Allow Self Transfer",
+                "type": "boolean"
+              },
+              "allow_overnight_stopovers": {
+                "default": true,
+                "description": "Allow overnight (red-eye) layovers",
+                "title": "Allow Overnight Stopovers",
+                "type": "boolean"
+              },
+              "allow_diff_airport_connection": {
+                "default": true,
+                "description": "Allow connections that change airports within the same city",
+                "title": "Allow Diff Airport Connection",
+                "type": "boolean"
+              },
+              "stopover_airports": {
+                "anyOf": [
+                  {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Only connect via these airports — comma-separated IATA codes. Constrains connecting flights only; direct (non-stop) flights are still returned.",
+                "title": "Stopover Airports"
+              },
+              "exclude_stopover_airports": {
+                "anyOf": [
+                  {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Never connect via these airports — comma-separated IATA codes",
+                "title": "Exclude Stopover Airports"
+              },
+              "stopover_countries": {
+                "anyOf": [
+                  {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Only connect via these countries — comma-separated ISO 3166-1 alpha-2 codes, e.g. 'DE,AT'. Constrains connecting flights only; direct (non-stop) flights are still returned.",
+                "title": "Stopover Countries"
+              },
+              "exclude_stopover_countries": {
+                "anyOf": [
+                  {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Never connect via these countries — comma-separated ISO 3166-1 alpha-2 codes",
+                "title": "Exclude Stopover Countries"
+              },
+              "fly_days": {
+                "anyOf": [
+                  {
+                    "maxLength": 32,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Allowed outbound departure weekdays — comma-separated 0=Sun..6=Sat, e.g. '1,2,3,4,5' for weekdays",
+                "title": "Fly Days"
+              },
+              "ret_fly_days": {
+                "anyOf": [
+                  {
+                    "maxLength": 32,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Allowed return departure weekdays — comma-separated 0=Sun..6=Sat",
+                "title": "Ret Fly Days"
+              },
+              "sort": {
+                "default": "price",
+                "description": "Result ordering",
+                "enum": [
+                  "price",
+                  "duration",
+                  "quality",
+                  "date",
+                  "popularity"
+                ],
+                "title": "Sort",
+                "type": "string"
+              }
+            },
+            "required": [
+              "flyFrom",
+              "flyTo",
+              "departureDate"
+            ],
+            "title": "search_flightsArguments"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "title": "Query",
+                "type": "string"
+              },
+              "currency": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Currency"
+              },
+              "passengers": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SearchFlightsPassengersOutput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "resultsCount": {
+                "default": 0,
+                "title": "Resultscount",
+                "type": "integer"
+              },
+              "itineraries": {
+                "items": {
+                  "$ref": "#/$defs/SearchFlightsItineraryOutput"
+                },
+                "title": "Itineraries",
+                "type": "array"
+              },
+              "searchTimeMs": {
+                "default": 0,
+                "title": "Searchtimems",
+                "type": "integer"
+              },
+              "error": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Error"
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "$defs": {
+              "SearchFlightsBaggageOutput": {
+                "description": "Included per-traveler baggage counts (see ``transform._included_baggage``).",
+                "properties": {
+                  "personalItem": {
+                    "default": 0,
+                    "title": "Personalitem",
+                    "type": "integer"
+                  },
+                  "cabinBag": {
+                    "default": 0,
+                    "title": "Cabinbag",
+                    "type": "integer"
+                  },
+                  "checkedBag": {
+                    "default": 0,
+                    "title": "Checkedbag",
+                    "type": "integer"
+                  }
+                },
+                "title": "SearchFlightsBaggageOutput",
+                "type": "object"
+              },
+              "SearchFlightsItineraryOutput": {
+                "additionalProperties": true,
+                "properties": {
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "price": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Price"
+                  },
+                  "priceFormatted": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Priceformatted"
+                  },
+                  "totalDurationSeconds": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Totaldurationseconds"
+                  },
+                  "bookingUrl": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Bookingurl"
+                  },
+                  "imageId": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Imageid"
+                  },
+                  "baggage": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/SearchFlightsBaggageOutput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "outbound": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/SearchFlightsLegOutput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "inbound": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/SearchFlightsLegOutput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "title": "SearchFlightsItineraryOutput",
+                "type": "object"
+              },
+              "SearchFlightsLegOutput": {
+                "additionalProperties": true,
+                "properties": {
+                  "from": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "From"
+                  },
+                  "to": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "To"
+                  },
+                  "departureTime": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Departuretime"
+                  },
+                  "arrivalTime": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Arrivaltime"
+                  },
+                  "durationSeconds": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Durationseconds"
+                  },
+                  "stops": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Stops"
+                  },
+                  "route": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Route",
+                    "type": "array"
+                  },
+                  "cabinClass": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cabinclass"
+                  },
+                  "segments": {
+                    "items": {
+                      "$ref": "#/$defs/SearchFlightsSegmentOutput"
+                    },
+                    "title": "Segments",
+                    "type": "array"
+                  }
+                },
+                "title": "SearchFlightsLegOutput",
+                "type": "object"
+              },
+              "SearchFlightsPassengersOutput": {
+                "properties": {
+                  "adults": {
+                    "default": 0,
+                    "title": "Adults",
+                    "type": "integer"
+                  },
+                  "children": {
+                    "default": 0,
+                    "title": "Children",
+                    "type": "integer"
+                  },
+                  "infants": {
+                    "default": 0,
+                    "title": "Infants",
+                    "type": "integer"
+                  }
+                },
+                "title": "SearchFlightsPassengersOutput",
+                "type": "object"
+              },
+              "SearchFlightsSegmentOutput": {
+                "additionalProperties": true,
+                "properties": {
+                  "from": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "From"
+                  },
+                  "to": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "To"
+                  },
+                  "fromCity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Fromcity"
+                  },
+                  "toCity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Tocity"
+                  },
+                  "fromName": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Fromname"
+                  },
+                  "toName": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Toname"
+                  },
+                  "fromCountry": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Fromcountry"
+                  },
+                  "toCountry": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Tocountry"
+                  },
+                  "departureTime": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Departuretime"
+                  },
+                  "arrivalTime": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Arrivaltime"
+                  },
+                  "durationSeconds": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Durationseconds"
+                  },
+                  "carrier": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Carrier"
+                  },
+                  "carrierName": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Carriername"
+                  },
+                  "flightNumber": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Flightnumber"
+                  },
+                  "cabinClass": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cabinclass"
+                  }
+                },
+                "title": "SearchFlightsSegmentOutput",
+                "type": "object"
+              }
+            },
+            "additionalProperties": true,
+            "description": "Wire shape for ``structuredContent`` (see ``transform.format_itineraries``).",
+            "title": "SearchFlightsStructuredOutput"
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "feedback-to-devs",
+          "title": "Send Feedback to Developers",
+          "description": "Send feedback, bug reports, or feature requests about the Kiwi.com flight search MCP tools on this server to their developers. This channel is ONLY for the flight search tools — search results, pricing, itineraries, filters, or errors in search responses. Do NOT use it for other MCP servers, Claude/app behaviour, account or booking management, voice mode, or unrelated Kiwi.com features; those won't reach the right team. Include error messages, logs, or context that would help the developers reproduce the issue.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "description": "The content of the feedback. This is ONLY for the Kiwi.com flight search MCP tools on this server (search results, pricing, itineraries, filters, search errors) — not other MCP servers, Claude/app behaviour, or general Kiwi.com products. Include error messages, logs, or context that would help the developers reproduce the issue.",
+                "maxLength": 3000,
+                "minLength": 1,
+                "title": "Text",
+                "type": "string"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "title": "feedback_to_devsArguments"
+          },
+          "outputSchema": {
+            "type": "object",
+            "additionalProperties": true,
+            "title": "feedback_to_devsDictOutput"
+          },
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": true
+          }
+        }
+      ]
+    },
+    "trivago": {
+      "url": "https://mcp.trivago.com/mcp",
+      "server": {
+        "name": "trivago Accommodation Search",
+        "version": "0.6.0"
+      },
+      "tools": [
+        {
+          "name": "trivago-accommodation-radius-search",
+          "title": "Search hotels near a location on trivago",
+          "description": "PREFERRED way to search hotels. Search live hotel and accommodation listings around coordinates — the center of a city, a neighborhood, a landmark, an address, or a venue — aggregated via trivago's metasearch of major booking sites. Returns the same, filterable results as trivago-accommodation-search. Before calling, resolve the latitude and longitude of the place the user wants to stay in yourself (e.g. Berlin → 52.52, 13.405). Use it for every city, neighborhood, or landmark search, including plain requests like \"hotels in Paris\". Use trivago-accommodation-search only for one specific property by name, or for a region or country too large for one point.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number",
+                "format": "double",
+                "description": "Latitude of the place the user wants to stay near: the center of the city or neighborhood, or the landmark, address, or venue. Resolve it yourself; not the user's own location."
+              },
+              "longitude": {
+                "type": "number",
+                "format": "double",
+                "description": "Longitude of the place the user wants to stay near: the center of the city or neighborhood, or the landmark, address, or venue. Resolve it yourself; not the user's own location."
+              },
+              "arrival": {
+                "type": "string",
+                "description": "The arrival date in YYYY-MM-DD format. It must be today or in the future and MUST be before the departure date. If the arrival date is not in the future, notify the user that the arrival date is not in the future."
+              },
+              "departure": {
+                "type": "string",
+                "description": "The departure date in YYYY-MM-DD format. It MUST be after the arrival date. If the departure date is not after the arrival date, notify the user that the departure date is not after the arrival date."
+              },
+              "adults": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The number of adults."
+              },
+              "children": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The number of children."
+              },
+              "children_ages": {
+                "type": "string",
+                "description": "Dashed separated list of children ages, e.g. 10-12-14"
+              },
+              "rooms": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The number of rooms, Number of rooms must be lower than or equal to the number of adults"
+              },
+              "country": {
+                "type": "string",
+                "enum": [
+                  "AD",
+                  "AE",
+                  "AF",
+                  "AG",
+                  "AI",
+                  "AL",
+                  "AM",
+                  "AO",
+                  "AR",
+                  "AS",
+                  "AT",
+                  "AU",
+                  "AW",
+                  "AX",
+                  "AZ",
+                  "BA",
+                  "BB",
+                  "BD",
+                  "BE",
+                  "BF",
+                  "BG",
+                  "BH",
+                  "BI",
+                  "BJ",
+                  "BL",
+                  "BM",
+                  "BN",
+                  "BO",
+                  "BQ",
+                  "BR",
+                  "BS",
+                  "BT",
+                  "BW",
+                  "BY",
+                  "BZ",
+                  "CA",
+                  "CC",
+                  "CD",
+                  "CF",
+                  "CG",
+                  "CH",
+                  "CI",
+                  "CK",
+                  "CL",
+                  "CM",
+                  "CN",
+                  "CO",
+                  "CR",
+                  "CU",
+                  "CV",
+                  "CW",
+                  "CX",
+                  "CY",
+                  "CZ",
+                  "DE",
+                  "DJ",
+                  "DK",
+                  "DM",
+                  "DO",
+                  "DZ",
+                  "EC",
+                  "EE",
+                  "EG",
+                  "ER",
+                  "ES",
+                  "ET",
+                  "FI",
+                  "FJ",
+                  "FK",
+                  "FM",
+                  "FO",
+                  "FR",
+                  "GA",
+                  "GB",
+                  "GD",
+                  "GE",
+                  "GF",
+                  "GG",
+                  "GH",
+                  "GI",
+                  "GL",
+                  "GM",
+                  "GN",
+                  "GP",
+                  "GQ",
+                  "GR",
+                  "GT",
+                  "GU",
+                  "GW",
+                  "GY",
+                  "HK",
+                  "HN",
+                  "HR",
+                  "HT",
+                  "HU",
+                  "ID",
+                  "IE",
+                  "IL",
+                  "IM",
+                  "IN",
+                  "IQ",
+                  "IS",
+                  "IT",
+                  "JE",
+                  "JM",
+                  "JO",
+                  "JP",
+                  "KE",
+                  "KG",
+                  "KH",
+                  "KM",
+                  "KN",
+                  "KR",
+                  "KW",
+                  "KY",
+                  "KZ",
+                  "LA",
+                  "LB",
+                  "LC",
+                  "LI",
+                  "LK",
+                  "LR",
+                  "LS",
+                  "LT",
+                  "LU",
+                  "LV",
+                  "LY",
+                  "MA",
+                  "MC",
+                  "MD",
+                  "ME",
+                  "MF",
+                  "MG",
+                  "MH",
+                  "MK",
+                  "ML",
+                  "MM",
+                  "MN",
+                  "MO",
+                  "MP",
+                  "MQ",
+                  "MR",
+                  "MS",
+                  "MT",
+                  "MU",
+                  "MV",
+                  "MW",
+                  "MX",
+                  "MY",
+                  "MZ",
+                  "NA",
+                  "NC",
+                  "NE",
+                  "NF",
+                  "NG",
+                  "NI",
+                  "NL",
+                  "NO",
+                  "NP",
+                  "NR",
+                  "NU",
+                  "NZ",
+                  "OM",
+                  "PA",
+                  "PE",
+                  "PF",
+                  "PG",
+                  "PH",
+                  "PK",
+                  "PL",
+                  "PM",
+                  "PR",
+                  "PS",
+                  "PT",
+                  "PW",
+                  "PY",
+                  "QA",
+                  "RE",
+                  "RO",
+                  "RS",
+                  "RW",
+                  "SA",
+                  "SB",
+                  "SC",
+                  "SD",
+                  "SE",
+                  "SG",
+                  "SH",
+                  "SI",
+                  "SK",
+                  "SL",
+                  "SM",
+                  "SN",
+                  "SO",
+                  "SR",
+                  "SS",
+                  "ST",
+                  "SV",
+                  "SX",
+                  "SY",
+                  "SZ",
+                  "TC",
+                  "TD",
+                  "TG",
+                  "TH",
+                  "TJ",
+                  "TL",
+                  "TM",
+                  "TN",
+                  "TO",
+                  "TR",
+                  "TT",
+                  "TW",
+                  "TZ",
+                  "UA",
+                  "UG",
+                  "US",
+                  "UY",
+                  "UZ",
+                  "VA",
+                  "VC",
+                  "VE",
+                  "VG",
+                  "VI",
+                  "VN",
+                  "VU",
+                  "WS",
+                  "XK",
+                  "YE",
+                  "YT",
+                  "ZA",
+                  "ZM",
+                  "ZW"
+                ],
+                "description": "The user's own market as an ISO alpha-2 country code: where the user lives or browses from, NOT the destination's country. It determines market-specific pricing and content. Use ONLY one of the listed values; if the user's country is not listed, pick the closest listed market (same region or language). Omit it when you know nothing about the user. Default: US."
+              },
+              "currency": {
+                "type": "string",
+                "enum": [
+                  "AED",
+                  "ARS",
+                  "AUD",
+                  "AZN",
+                  "BGN",
+                  "BHD",
+                  "BRL",
+                  "CAD",
+                  "CHF",
+                  "CLP",
+                  "CNY",
+                  "COP",
+                  "CZK",
+                  "DKK",
+                  "DZD",
+                  "EGP",
+                  "EUR",
+                  "GBP",
+                  "HKD",
+                  "HRK",
+                  "HUF",
+                  "IDR",
+                  "ILS",
+                  "INR",
+                  "JOD",
+                  "JPY",
+                  "KRW",
+                  "KWD",
+                  "KZT",
+                  "LBP",
+                  "MAD",
+                  "MDL",
+                  "MXN",
+                  "MYR",
+                  "NGN",
+                  "NOK",
+                  "NZD",
+                  "OMR",
+                  "PEN",
+                  "PHP",
+                  "PLN",
+                  "QAR",
+                  "RON",
+                  "RSD",
+                  "RUB",
+                  "SAR",
+                  "SEK",
+                  "SGD",
+                  "THB",
+                  "TND",
+                  "TRY",
+                  "TWD",
+                  "UAH",
+                  "USD",
+                  "UYU",
+                  "VND",
+                  "ZAR"
+                ],
+                "description": "ISO 4217 code of the currency the user wants to see prices in: the one they ask for, or else the currency of their own country, NOT the destination's unless the user asks for it. Use ONLY one of the listed values; if the user's currency is not listed, pick the closest listed one (the most used currency in their region, else USD or EUR). Omit it when you know nothing about the user. Default: USD."
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "AR145",
+                  "CS_CZ",
+                  "DA_DK",
+                  "DE_AT",
+                  "DE_CH",
+                  "DE_DE",
+                  "EL_GR",
+                  "EN_AU",
+                  "EN_GB",
+                  "EN_HK",
+                  "EN_IE",
+                  "EN_IN",
+                  "EN_NZ",
+                  "EN_PH",
+                  "EN_SG",
+                  "EN_US",
+                  "EN_ZA",
+                  "ES_AR",
+                  "ES_CL",
+                  "ES_CO",
+                  "ES_ES",
+                  "ES_MX",
+                  "ES_PE",
+                  "FI_FI",
+                  "FR_BE",
+                  "FR_CH",
+                  "FR_FR",
+                  "HE_IL",
+                  "HU_HU",
+                  "ID_ID",
+                  "IT_IT",
+                  "JA_JP",
+                  "KO_KR",
+                  "MS_MY",
+                  "NL_BE",
+                  "NL_NL",
+                  "NO_NO",
+                  "PL_PL",
+                  "PT_BR",
+                  "PT_PT",
+                  "RO_RO",
+                  "RU_RU",
+                  "SV_SE",
+                  "TH_TH",
+                  "TR_TR",
+                  "VI_VN",
+                  "ZH_HANS_CN",
+                  "ZH_HANT_HK",
+                  "ZH_HANT_TW"
+                ],
+                "description": "Language for translated content: the language the user writes in. Their country only picks the regional variant, never the language (e.g. a German speaker in Switzerland → DE_CH, an English speaker in Germany → EN_GB or EN_US, not DE_DE). Use ONLY one of the listed values, written exactly as listed (e.g. EN_US, DE_DE, ZH_HANS_CN), never a tag such as \"en\" or \"en-US\". If there is no exact match, pick the closest listed value: the same language in another region (e.g. Canadian French → FR_FR), else EN_US. Default: EN_US."
+              },
+              "filters": {
+                "type": "object",
+                "properties": {
+                  "airConditioning": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has air conditioning"
+                  },
+                  "breakfastIncluded": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation includes breakfast"
+                  },
+                  "freeCancellation": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has free cancellation"
+                  },
+                  "freeWiFi": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has free WiFi"
+                  },
+                  "gym": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a gym"
+                  },
+                  "kitchen": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a kitchen"
+                  },
+                  "parking": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has parking"
+                  },
+                  "petFriendly": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation is pet friendly"
+                  },
+                  "pool": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a pool"
+                  },
+                  "spa": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a spa"
+                  }
+                },
+                "description": "The filters that you want to apply to the search. Set true or false for each filter. Multiple filters can be selected."
+              },
+              "review_rating": {
+                "type": "object",
+                "properties": {
+                  "rating70": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a Guest Rating of 7.0+"
+                  },
+                  "rating75": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a Guest Rating of 7.5+"
+                  },
+                  "rating80": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a Guest Rating of 8.0+"
+                  },
+                  "rating85": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a Guest Rating of 8.5+"
+                  }
+                },
+                "description": "The guest review rating that you want to filter by. Set true or false for each rating. Multiple ratings can be selected."
+              },
+              "hotel_rating": {
+                "type": "object",
+                "properties": {
+                  "1star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 1 star rating"
+                  },
+                  "2star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 2 star rating"
+                  },
+                  "3star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 3 star rating"
+                  },
+                  "4star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 4 star rating"
+                  },
+                  "5star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 5 star rating"
+                  }
+                },
+                "description": "The hotel rating that you want to filter by. Set true or false for each rating. Multiple ratings can be selected."
+              },
+              "price_range": {
+                "type": "object",
+                "properties": {
+                  "budgetType": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "PRICE_PER_NIGHT",
+                          "PRICE_PER_STAY"
+                        ]
+                      }
+                    ],
+                    "description": "Whether minPrice/maxPrice apply per night (PRICE_PER_NIGHT) or for the whole stay (PRICE_PER_STAY). Defaults to PRICE_PER_NIGHT when a price is given but this is omitted."
+                  },
+                  "maxPrice": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "format": "int32",
+                    "description": "Maximum price, in major units of the resolved currency (e.g. 150 for $150). Omit for no maximum."
+                  },
+                  "minPrice": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "format": "int32",
+                    "description": "Minimum price, in major units of the resolved currency (e.g. 50 for $50). Omit for no minimum."
+                  }
+                },
+                "description": "Optional price filter. minPrice/maxPrice are in major units of the resolved currency (e.g. 100 for $100). When both are given, minPrice must be strictly less than maxPrice. budgetType (PRICE_PER_NIGHT or PRICE_PER_STAY) chooses whether the bounds apply per night or for the whole stay, and defaults to PRICE_PER_NIGHT."
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude",
+              "arrival",
+              "departure"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema"
+          },
+          "annotations": {
+            "title": "Search hotels near a location on trivago",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          },
+          "_meta": {
+            "ui": {
+              "resourceUri": "ui://widget/accommodation-list.html"
+            },
+            "openai/outputTemplate": "ui://widget/accommodation-list.html",
+            "openai/toolInvocation/invoking": "Searching accommodations on trivago…",
+            "openai/toolInvocation/invoked": "Found accommodations"
+          }
+        },
+        {
+          "name": "trivago-accommodation-search",
+          "title": "Search hotels on trivago",
+          "description": "Search live hotel and accommodation listings by name or free text, aggregated via trivago's metasearch of major booking sites. Returns results with price, rating, amenities, and a link per property. Supports date range, guest/room configuration, and filters for star rating, guest rating, amenities, and price range. Use it ONLY when the user asks about one specific property by name, or for a region or country too large fora single point. For a city, neighborhood or landmark, call trivago-accommodation-radius-search with that place's coordinates instead: it returns far more options.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "A specific property name, or a region or country. For a city, neighborhood, or landmark, use trivago-accommodation-radius-search instead."
+              },
+              "arrival": {
+                "type": "string",
+                "description": "The arrival date in YYYY-MM-DD format. It must be today or in the future and MUST be before the departure date. If the arrival date is not in the future, notify the user that the arrival date is not in the future."
+              },
+              "departure": {
+                "type": "string",
+                "description": "The departure date in YYYY-MM-DD format. It MUST be after the arrival date. If the departure date is not after the arrival date, notify the user that the departure date is not after the arrival date."
+              },
+              "adults": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The number of adults."
+              },
+              "children": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The number of children."
+              },
+              "children_ages": {
+                "type": "string",
+                "description": "Dashed separated list of children ages, e.g. 10-12-14"
+              },
+              "rooms": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The number of rooms, Number of rooms must be lower than or equal to the number of adults"
+              },
+              "country": {
+                "type": "string",
+                "enum": [
+                  "AD",
+                  "AE",
+                  "AF",
+                  "AG",
+                  "AI",
+                  "AL",
+                  "AM",
+                  "AO",
+                  "AR",
+                  "AS",
+                  "AT",
+                  "AU",
+                  "AW",
+                  "AX",
+                  "AZ",
+                  "BA",
+                  "BB",
+                  "BD",
+                  "BE",
+                  "BF",
+                  "BG",
+                  "BH",
+                  "BI",
+                  "BJ",
+                  "BL",
+                  "BM",
+                  "BN",
+                  "BO",
+                  "BQ",
+                  "BR",
+                  "BS",
+                  "BT",
+                  "BW",
+                  "BY",
+                  "BZ",
+                  "CA",
+                  "CC",
+                  "CD",
+                  "CF",
+                  "CG",
+                  "CH",
+                  "CI",
+                  "CK",
+                  "CL",
+                  "CM",
+                  "CN",
+                  "CO",
+                  "CR",
+                  "CU",
+                  "CV",
+                  "CW",
+                  "CX",
+                  "CY",
+                  "CZ",
+                  "DE",
+                  "DJ",
+                  "DK",
+                  "DM",
+                  "DO",
+                  "DZ",
+                  "EC",
+                  "EE",
+                  "EG",
+                  "ER",
+                  "ES",
+                  "ET",
+                  "FI",
+                  "FJ",
+                  "FK",
+                  "FM",
+                  "FO",
+                  "FR",
+                  "GA",
+                  "GB",
+                  "GD",
+                  "GE",
+                  "GF",
+                  "GG",
+                  "GH",
+                  "GI",
+                  "GL",
+                  "GM",
+                  "GN",
+                  "GP",
+                  "GQ",
+                  "GR",
+                  "GT",
+                  "GU",
+                  "GW",
+                  "GY",
+                  "HK",
+                  "HN",
+                  "HR",
+                  "HT",
+                  "HU",
+                  "ID",
+                  "IE",
+                  "IL",
+                  "IM",
+                  "IN",
+                  "IQ",
+                  "IS",
+                  "IT",
+                  "JE",
+                  "JM",
+                  "JO",
+                  "JP",
+                  "KE",
+                  "KG",
+                  "KH",
+                  "KM",
+                  "KN",
+                  "KR",
+                  "KW",
+                  "KY",
+                  "KZ",
+                  "LA",
+                  "LB",
+                  "LC",
+                  "LI",
+                  "LK",
+                  "LR",
+                  "LS",
+                  "LT",
+                  "LU",
+                  "LV",
+                  "LY",
+                  "MA",
+                  "MC",
+                  "MD",
+                  "ME",
+                  "MF",
+                  "MG",
+                  "MH",
+                  "MK",
+                  "ML",
+                  "MM",
+                  "MN",
+                  "MO",
+                  "MP",
+                  "MQ",
+                  "MR",
+                  "MS",
+                  "MT",
+                  "MU",
+                  "MV",
+                  "MW",
+                  "MX",
+                  "MY",
+                  "MZ",
+                  "NA",
+                  "NC",
+                  "NE",
+                  "NF",
+                  "NG",
+                  "NI",
+                  "NL",
+                  "NO",
+                  "NP",
+                  "NR",
+                  "NU",
+                  "NZ",
+                  "OM",
+                  "PA",
+                  "PE",
+                  "PF",
+                  "PG",
+                  "PH",
+                  "PK",
+                  "PL",
+                  "PM",
+                  "PR",
+                  "PS",
+                  "PT",
+                  "PW",
+                  "PY",
+                  "QA",
+                  "RE",
+                  "RO",
+                  "RS",
+                  "RW",
+                  "SA",
+                  "SB",
+                  "SC",
+                  "SD",
+                  "SE",
+                  "SG",
+                  "SH",
+                  "SI",
+                  "SK",
+                  "SL",
+                  "SM",
+                  "SN",
+                  "SO",
+                  "SR",
+                  "SS",
+                  "ST",
+                  "SV",
+                  "SX",
+                  "SY",
+                  "SZ",
+                  "TC",
+                  "TD",
+                  "TG",
+                  "TH",
+                  "TJ",
+                  "TL",
+                  "TM",
+                  "TN",
+                  "TO",
+                  "TR",
+                  "TT",
+                  "TW",
+                  "TZ",
+                  "UA",
+                  "UG",
+                  "US",
+                  "UY",
+                  "UZ",
+                  "VA",
+                  "VC",
+                  "VE",
+                  "VG",
+                  "VI",
+                  "VN",
+                  "VU",
+                  "WS",
+                  "XK",
+                  "YE",
+                  "YT",
+                  "ZA",
+                  "ZM",
+                  "ZW"
+                ],
+                "description": "The user's own market as an ISO alpha-2 country code: where the user lives or browses from, NOT the destination's country. It determines market-specific pricing and content. Use ONLY one of the listed values; if the user's country is not listed, pick the closest listed market (same region or language). Omit it when you know nothing about the user. Default: US."
+              },
+              "currency": {
+                "type": "string",
+                "enum": [
+                  "AED",
+                  "ARS",
+                  "AUD",
+                  "AZN",
+                  "BGN",
+                  "BHD",
+                  "BRL",
+                  "CAD",
+                  "CHF",
+                  "CLP",
+                  "CNY",
+                  "COP",
+                  "CZK",
+                  "DKK",
+                  "DZD",
+                  "EGP",
+                  "EUR",
+                  "GBP",
+                  "HKD",
+                  "HRK",
+                  "HUF",
+                  "IDR",
+                  "ILS",
+                  "INR",
+                  "JOD",
+                  "JPY",
+                  "KRW",
+                  "KWD",
+                  "KZT",
+                  "LBP",
+                  "MAD",
+                  "MDL",
+                  "MXN",
+                  "MYR",
+                  "NGN",
+                  "NOK",
+                  "NZD",
+                  "OMR",
+                  "PEN",
+                  "PHP",
+                  "PLN",
+                  "QAR",
+                  "RON",
+                  "RSD",
+                  "RUB",
+                  "SAR",
+                  "SEK",
+                  "SGD",
+                  "THB",
+                  "TND",
+                  "TRY",
+                  "TWD",
+                  "UAH",
+                  "USD",
+                  "UYU",
+                  "VND",
+                  "ZAR"
+                ],
+                "description": "ISO 4217 code of the currency the user wants to see prices in: the one they ask for, or else the currency of their own country, NOT the destination's unless the user asks for it. Use ONLY one of the listed values; if the user's currency is not listed, pick the closest listed one (the most used currency in their region, else USD or EUR). Omit it when you know nothing about the user. Default: USD."
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "AR145",
+                  "CS_CZ",
+                  "DA_DK",
+                  "DE_AT",
+                  "DE_CH",
+                  "DE_DE",
+                  "EL_GR",
+                  "EN_AU",
+                  "EN_GB",
+                  "EN_HK",
+                  "EN_IE",
+                  "EN_IN",
+                  "EN_NZ",
+                  "EN_PH",
+                  "EN_SG",
+                  "EN_US",
+                  "EN_ZA",
+                  "ES_AR",
+                  "ES_CL",
+                  "ES_CO",
+                  "ES_ES",
+                  "ES_MX",
+                  "ES_PE",
+                  "FI_FI",
+                  "FR_BE",
+                  "FR_CH",
+                  "FR_FR",
+                  "HE_IL",
+                  "HU_HU",
+                  "ID_ID",
+                  "IT_IT",
+                  "JA_JP",
+                  "KO_KR",
+                  "MS_MY",
+                  "NL_BE",
+                  "NL_NL",
+                  "NO_NO",
+                  "PL_PL",
+                  "PT_BR",
+                  "PT_PT",
+                  "RO_RO",
+                  "RU_RU",
+                  "SV_SE",
+                  "TH_TH",
+                  "TR_TR",
+                  "VI_VN",
+                  "ZH_HANS_CN",
+                  "ZH_HANT_HK",
+                  "ZH_HANT_TW"
+                ],
+                "description": "Language for translated content: the language the user writes in. Their country only picks the regional variant, never the language (e.g. a German speaker in Switzerland → DE_CH, an English speaker in Germany → EN_GB or EN_US, not DE_DE). Use ONLY one of the listed values, written exactly as listed (e.g. EN_US, DE_DE, ZH_HANS_CN), never a tag such as \"en\" or \"en-US\". If there is no exact match, pick the closest listed value: the same language in another region (e.g. Canadian French → FR_FR), else EN_US. Default: EN_US."
+              },
+              "filters": {
+                "type": "object",
+                "properties": {
+                  "airConditioning": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has air conditioning"
+                  },
+                  "breakfastIncluded": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation includes breakfast"
+                  },
+                  "freeCancellation": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has free cancellation"
+                  },
+                  "freeWiFi": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has free WiFi"
+                  },
+                  "gym": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a gym"
+                  },
+                  "kitchen": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a kitchen"
+                  },
+                  "parking": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has parking"
+                  },
+                  "petFriendly": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation is pet friendly"
+                  },
+                  "pool": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a pool"
+                  },
+                  "spa": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a spa"
+                  }
+                },
+                "description": "The filters that you want to apply to the search. Set true or false for each filter. Multiple filters can be selected."
+              },
+              "review_rating": {
+                "type": "object",
+                "properties": {
+                  "rating70": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a Guest Rating of 7.0+"
+                  },
+                  "rating75": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a Guest Rating of 7.5+"
+                  },
+                  "rating80": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a Guest Rating of 8.0+"
+                  },
+                  "rating85": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a Guest Rating of 8.5+"
+                  }
+                },
+                "description": "The guest review rating that you want to filter by. Set true or false for each rating. Multiple ratings can be selected."
+              },
+              "hotel_rating": {
+                "type": "object",
+                "properties": {
+                  "1star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 1 star rating"
+                  },
+                  "2star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 2 star rating"
+                  },
+                  "3star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 3 star rating"
+                  },
+                  "4star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 4 star rating"
+                  },
+                  "5star": {
+                    "type": "boolean",
+                    "description": "Whether the accommodation has a 5 star rating"
+                  }
+                },
+                "description": "The hotel rating that you want to filter by. Set true or false for each rating. Multiple ratings can be selected."
+              },
+              "price_range": {
+                "type": "object",
+                "properties": {
+                  "budgetType": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "PRICE_PER_NIGHT",
+                          "PRICE_PER_STAY"
+                        ]
+                      }
+                    ],
+                    "description": "Whether minPrice/maxPrice apply per night (PRICE_PER_NIGHT) or for the whole stay (PRICE_PER_STAY). Defaults to PRICE_PER_NIGHT when a price is given but this is omitted."
+                  },
+                  "maxPrice": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "format": "int32",
+                    "description": "Maximum price, in major units of the resolved currency (e.g. 150 for $150). Omit for no maximum."
+                  },
+                  "minPrice": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "format": "int32",
+                    "description": "Minimum price, in major units of the resolved currency (e.g. 50 for $50). Omit for no minimum."
+                  }
+                },
+                "description": "Optional price filter. minPrice/maxPrice are in major units of the resolved currency (e.g. 100 for $100). When both are given, minPrice must be strictly less than maxPrice. budgetType (PRICE_PER_NIGHT or PRICE_PER_STAY) chooses whether the bounds apply per night or for the whole stay, and defaults to PRICE_PER_NIGHT."
+              }
+            },
+            "required": [
+              "query",
+              "arrival",
+              "departure"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema"
+          },
+          "annotations": {
+            "title": "Search hotels on trivago",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          },
+          "_meta": {
+            "ui": {
+              "resourceUri": "ui://widget/accommodation-list.html"
+            },
+            "openai/outputTemplate": "ui://widget/accommodation-list.html",
+            "openai/toolInvocation/invoking": "Searching accommodations on trivago…",
+            "openai/toolInvocation/invoked": "Found accommodations"
+          }
+        },
+        {
+          "name": "trivago-destination-price-trends",
+          "title": "Forecast hotel prices on trivago",
+          "description": "Forecast monthly hotel price trends for a destination — average, minimum, and maximum nightly rate by star rating, across a date window. Use for planning questions like \"when is the cheapest month to visit X\" or \"how do prices change through the year\" — this is a forecasting tool, not a live-availability search.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "\nDestination query. Accepts two formats:\n- Free-text destination name, e.g. \"Berlin\", \"Paris\", \"New York\".\n- Coordinate pair in the format lat:<latitude>,long:<longitude>, e.g. \"lat:52.52,long:13.405\". The nearest destination to those coordinates is used. Latitude must be in [-90, 90] and longitude in [-180, 180].\n"
+              },
+              "start_month": {
+                "type": "string",
+                "description": "Optional start year-month in YYYY-MM format (e.g. 2026-06). When omitted, the bridge defaults to the current month plus the next two months. It must be set when end_month is set."
+              },
+              "end_month": {
+                "type": "string",
+                "description": "Optional end year-month in YYYY-MM format (e.g. 2026-12). Must not be before start_month. Requires start_month to also be set."
+              },
+              "country": {
+                "type": "string",
+                "enum": [
+                  "AD",
+                  "AE",
+                  "AF",
+                  "AG",
+                  "AI",
+                  "AL",
+                  "AM",
+                  "AO",
+                  "AR",
+                  "AS",
+                  "AT",
+                  "AU",
+                  "AW",
+                  "AX",
+                  "AZ",
+                  "BA",
+                  "BB",
+                  "BD",
+                  "BE",
+                  "BF",
+                  "BG",
+                  "BH",
+                  "BI",
+                  "BJ",
+                  "BL",
+                  "BM",
+                  "BN",
+                  "BO",
+                  "BQ",
+                  "BR",
+                  "BS",
+                  "BT",
+                  "BW",
+                  "BY",
+                  "BZ",
+                  "CA",
+                  "CC",
+                  "CD",
+                  "CF",
+                  "CG",
+                  "CH",
+                  "CI",
+                  "CK",
+                  "CL",
+                  "CM",
+                  "CN",
+                  "CO",
+                  "CR",
+                  "CU",
+                  "CV",
+                  "CW",
+                  "CX",
+                  "CY",
+                  "CZ",
+                  "DE",
+                  "DJ",
+                  "DK",
+                  "DM",
+                  "DO",
+                  "DZ",
+                  "EC",
+                  "EE",
+                  "EG",
+                  "ER",
+                  "ES",
+                  "ET",
+                  "FI",
+                  "FJ",
+                  "FK",
+                  "FM",
+                  "FO",
+                  "FR",
+                  "GA",
+                  "GB",
+                  "GD",
+                  "GE",
+                  "GF",
+                  "GG",
+                  "GH",
+                  "GI",
+                  "GL",
+                  "GM",
+                  "GN",
+                  "GP",
+                  "GQ",
+                  "GR",
+                  "GT",
+                  "GU",
+                  "GW",
+                  "GY",
+                  "HK",
+                  "HN",
+                  "HR",
+                  "HT",
+                  "HU",
+                  "ID",
+                  "IE",
+                  "IL",
+                  "IM",
+                  "IN",
+                  "IQ",
+                  "IS",
+                  "IT",
+                  "JE",
+                  "JM",
+                  "JO",
+                  "JP",
+                  "KE",
+                  "KG",
+                  "KH",
+                  "KM",
+                  "KN",
+                  "KR",
+                  "KW",
+                  "KY",
+                  "KZ",
+                  "LA",
+                  "LB",
+                  "LC",
+                  "LI",
+                  "LK",
+                  "LR",
+                  "LS",
+                  "LT",
+                  "LU",
+                  "LV",
+                  "LY",
+                  "MA",
+                  "MC",
+                  "MD",
+                  "ME",
+                  "MF",
+                  "MG",
+                  "MH",
+                  "MK",
+                  "ML",
+                  "MM",
+                  "MN",
+                  "MO",
+                  "MP",
+                  "MQ",
+                  "MR",
+                  "MS",
+                  "MT",
+                  "MU",
+                  "MV",
+                  "MW",
+                  "MX",
+                  "MY",
+                  "MZ",
+                  "NA",
+                  "NC",
+                  "NE",
+                  "NF",
+                  "NG",
+                  "NI",
+                  "NL",
+                  "NO",
+                  "NP",
+                  "NR",
+                  "NU",
+                  "NZ",
+                  "OM",
+                  "PA",
+                  "PE",
+                  "PF",
+                  "PG",
+                  "PH",
+                  "PK",
+                  "PL",
+                  "PM",
+                  "PR",
+                  "PS",
+                  "PT",
+                  "PW",
+                  "PY",
+                  "QA",
+                  "RE",
+                  "RO",
+                  "RS",
+                  "RW",
+                  "SA",
+                  "SB",
+                  "SC",
+                  "SD",
+                  "SE",
+                  "SG",
+                  "SH",
+                  "SI",
+                  "SK",
+                  "SL",
+                  "SM",
+                  "SN",
+                  "SO",
+                  "SR",
+                  "SS",
+                  "ST",
+                  "SV",
+                  "SX",
+                  "SY",
+                  "SZ",
+                  "TC",
+                  "TD",
+                  "TG",
+                  "TH",
+                  "TJ",
+                  "TL",
+                  "TM",
+                  "TN",
+                  "TO",
+                  "TR",
+                  "TT",
+                  "TW",
+                  "TZ",
+                  "UA",
+                  "UG",
+                  "US",
+                  "UY",
+                  "UZ",
+                  "VA",
+                  "VC",
+                  "VE",
+                  "VG",
+                  "VI",
+                  "VN",
+                  "VU",
+                  "WS",
+                  "XK",
+                  "YE",
+                  "YT",
+                  "ZA",
+                  "ZM",
+                  "ZW"
+                ],
+                "description": "The user's own market as an ISO alpha-2 country code: where the user lives or browses from, NOT the destination's country. It determines market-specific pricing and content. Use ONLY one of the listed values; if the user's country is not listed, pick the closest listed market (same region or language). Omit it when you know nothing about the user. Default: US."
+              },
+              "currency": {
+                "type": "string",
+                "enum": [
+                  "AED",
+                  "ARS",
+                  "AUD",
+                  "AZN",
+                  "BGN",
+                  "BHD",
+                  "BRL",
+                  "CAD",
+                  "CHF",
+                  "CLP",
+                  "CNY",
+                  "COP",
+                  "CZK",
+                  "DKK",
+                  "DZD",
+                  "EGP",
+                  "EUR",
+                  "GBP",
+                  "HKD",
+                  "HRK",
+                  "HUF",
+                  "IDR",
+                  "ILS",
+                  "INR",
+                  "JOD",
+                  "JPY",
+                  "KRW",
+                  "KWD",
+                  "KZT",
+                  "LBP",
+                  "MAD",
+                  "MDL",
+                  "MXN",
+                  "MYR",
+                  "NGN",
+                  "NOK",
+                  "NZD",
+                  "OMR",
+                  "PEN",
+                  "PHP",
+                  "PLN",
+                  "QAR",
+                  "RON",
+                  "RSD",
+                  "RUB",
+                  "SAR",
+                  "SEK",
+                  "SGD",
+                  "THB",
+                  "TND",
+                  "TRY",
+                  "TWD",
+                  "UAH",
+                  "USD",
+                  "UYU",
+                  "VND",
+                  "ZAR"
+                ],
+                "description": "ISO 4217 code of the currency the user wants to see prices in: the one they ask for, or else the currency of their own country, NOT the destination's unless the user asks for it. Use ONLY one of the listed values; if the user's currency is not listed, pick the closest listed one (the most used currency in their region, else USD or EUR). Omit it when you know nothing about the user. Default: USD."
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "AR145",
+                  "CS_CZ",
+                  "DA_DK",
+                  "DE_AT",
+                  "DE_CH",
+                  "DE_DE",
+                  "EL_GR",
+                  "EN_AU",
+                  "EN_GB",
+                  "EN_HK",
+                  "EN_IE",
+                  "EN_IN",
+                  "EN_NZ",
+                  "EN_PH",
+                  "EN_SG",
+                  "EN_US",
+                  "EN_ZA",
+                  "ES_AR",
+                  "ES_CL",
+                  "ES_CO",
+                  "ES_ES",
+                  "ES_MX",
+                  "ES_PE",
+                  "FI_FI",
+                  "FR_BE",
+                  "FR_CH",
+                  "FR_FR",
+                  "HE_IL",
+                  "HU_HU",
+                  "ID_ID",
+                  "IT_IT",
+                  "JA_JP",
+                  "KO_KR",
+                  "MS_MY",
+                  "NL_BE",
+                  "NL_NL",
+                  "NO_NO",
+                  "PL_PL",
+                  "PT_BR",
+                  "PT_PT",
+                  "RO_RO",
+                  "RU_RU",
+                  "SV_SE",
+                  "TH_TH",
+                  "TR_TR",
+                  "VI_VN",
+                  "ZH_HANS_CN",
+                  "ZH_HANT_HK",
+                  "ZH_HANT_TW"
+                ],
+                "description": "Language for translated content: the language the user writes in. Their country only picks the regional variant, never the language (e.g. a German speaker in Switzerland → DE_CH, an English speaker in Germany → EN_GB or EN_US, not DE_DE). Use ONLY one of the listed values, written exactly as listed (e.g. EN_US, DE_DE, ZH_HANS_CN), never a tag such as \"en\" or \"en-US\". If there is no exact match, pick the closest listed value: the same language in another region (e.g. Canadian French → FR_FR), else EN_US. Default: EN_US."
+              },
+              "hotel_rating": {
+                "type": "object",
+                "properties": {
+                  "3star": {
+                    "type": "boolean",
+                    "description": "Include 3-star hotels in the price statistics"
+                  },
+                  "4star": {
+                    "type": "boolean",
+                    "description": "Include 4-star hotels in the price statistics"
+                  },
+                  "5star": {
+                    "type": "boolean",
+                    "description": "Include 5-star hotels in the price statistics"
+                  }
+                },
+                "description": "The hotel star ratings to include in the price statistics. Only 3, 4, and 5-star hotels are supported — forecasted price statistics are not available for 1 or 2-star hotels. Set true or false for each rating. Multiple ratings can be selected. When no rating is selected, the results default to 3-star hotels only."
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "currency": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "ISO 4217 currency code used to format prices in the response."
+              },
+              "destinations": {
+                "description": "Destinations matching the query, each with a list of monthly price statistics.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "monthly_prices": {
+                      "description": "Monthly price statistics for this destination, ordered by month.",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "month": {
+                            "type": "string",
+                            "description": "Year and month in YYYY-MM format."
+                          },
+                          "star_rating_prices": {
+                            "description": "Per-star-rating price statistics for this month.",
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "average_price": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ],
+                                  "description": "Average forecasted nightly price for the month, formatted in the requested currency."
+                                },
+                                "maximum_price": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ],
+                                  "description": "Maximum forecasted nightly price for the month, formatted in the requested currency."
+                                },
+                                "minimum_price": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ],
+                                  "description": "Minimum forecasted nightly price for the month, formatted in the requested currency."
+                                },
+                                "star_rating": {
+                                  "type": "integer",
+                                  "format": "int32",
+                                  "description": "Hotel star classification rating (1–5)."
+                                }
+                              },
+                              "required": [
+                                "star_rating"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "month",
+                          "star_rating_prices"
+                        ]
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the destination."
+                    }
+                  },
+                  "required": [
+                    "monthly_prices",
+                    "name"
+                  ]
+                }
+              },
+              "error": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The error if the tool failed to execute."
+              },
+              "query": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The original destination query echoed back from the bridge."
+              },
+              "system_message": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Presentation guidance for the LLM. Summarize the price trend across months, calling out the cheapest and most expensive months."
+              },
+              "validation_errors": {
+                "description": "The validation errors if the tool failed to execute.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "argument": {
+                      "type": "string",
+                      "description": "The argument that caused the error."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "The error message."
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "The value that caused the error."
+                    }
+                  },
+                  "required": [
+                    "argument",
+                    "message",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema"
+          },
+          "annotations": {
+            "title": "Forecast hotel prices on trivago",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
+        }
+      ]
+    }
+  }
+}
