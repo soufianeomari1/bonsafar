@@ -142,7 +142,7 @@ export default function DevAgentPage() {
           <table className="w-full border-collapse text-left">
             <thead className="sticky top-0 bg-white">
               <tr>
-                {["id", "offer", "original", "MAD", "rate", "source", "fetched", "link"].map((h) => (
+                {["id", "offer", "original", "MAD", "MAD shown", "rate", "source", "fetched", "link"].map((h) => (
                   <th key={h} className="border-b p-1">{h}</th>
                 ))}
               </tr>
@@ -154,6 +154,7 @@ export default function DevAgentPage() {
                   <td className="border-b p-1">{offer.destination} · {describeOffer(offer)}</td>
                   <td className="border-b p-1 text-right">{amount(offer.price, offer.currency)}</td>
                   <td className="border-b p-1 text-right">{amount(offer.price_mad, "MAD")}</td>
+                  <td className="border-b p-1 text-right">{offer.price_mad_display}</td>
                   <td className="border-b p-1">{offer.fx ? `${offer.fx.rate} (${offer.fx.date})` : "-"}</td>
                   <td className="border-b p-1">{offer.source}</td>
                   <td className="border-b p-1">{time(offer.fetched_at)}</td>

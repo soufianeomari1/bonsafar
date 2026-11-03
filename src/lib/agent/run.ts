@@ -358,6 +358,7 @@ export async function runAgent({
       flight_id: result.recommended.flight_id,
       hotel_id: result.recommended.hotel_id,
       total_mad: result.recommended.totals.total_mad,
+      total_display_mad: result.recommended.totals.total_display_mad,
     },
   });
 

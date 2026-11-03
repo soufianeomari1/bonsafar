@@ -1,6 +1,6 @@
 import type { KiwiLeg, KiwiSearch } from "@/lib/mcp/kiwi";
 import type { PriceTrends, TrivagoHotel } from "@/lib/mcp/trivago";
-import { toMad, type FxRate } from "./money";
+import { toDisplayMad, toMad, type FxRate } from "./money";
 
 /**
  * The server-side price store. Every amount shown to anyone comes from here,
@@ -16,8 +16,10 @@ type OfferBase = {
   /** Amount as returned by the provider, in `currency`. */
   price: number;
   currency: string;
-  /** Same amount in dirhams, converted by code. */
+  /** Same amount in dirhams, converted by code, to the centime (detail view). */
   price_mad: number;
+  /** Whole dirhams, rounded to the nearest: the amount shown on a price line. */
+  price_mad_display: number;
   /** The rate used when `currency` is not MAD. */
   fx: FxRate | null;
   source: OfferSource;
@@ -30,7 +32,8 @@ type OfferBase = {
 export type FlightAttrs = {
   outbound: KiwiLeg;
   inbound: KiwiLeg | null;
-  total_duration_s: number;
+  /** Whole minutes, outbound plus inbound. */
+  total_duration_min: number;
   baggage: { personal_item: number; cabin_bag: number; checked_bag: number };
   /** Passengers the price covers, as returned by Kiwi.com. */
   passengers: { adults: number; children: number; infants: number };
@@ -92,10 +95,14 @@ export class PriceStore {
     return `${PREFIX[kind]}${this.counters[kind]}`;
   }
 
-  private convert(amount: number, currency: string): { price_mad: number; fx: FxRate | null } {
+  private convert(
+    amount: number,
+    currency: string,
+  ): { price_mad: number; price_mad_display: number; fx: FxRate | null } {
     const mad = toMad(amount, currency, this.fx);
-    if (mad == null) throw new Error(`No conversion from ${currency} to MAD.`);
-    return { price_mad: mad, fx: currency === "MAD" ? null : this.fx };
+    const display = toDisplayMad(amount, currency, this.fx);
+    if (mad == null || display == null) throw new Error(`No conversion from ${currency} to MAD.`);
+    return { price_mad: mad, price_mad_display: display, fx: currency === "MAD" ? null : this.fx };
   }
 
   addFlights(search: KiwiSearch, destination: string, fetchedAt: string): FlightOffer[] {
@@ -113,7 +120,7 @@ export class PriceStore {
         attrs: {
           outbound: it.outbound,
           inbound: it.inbound,
-          total_duration_s: it.total_duration_s,
+          total_duration_min: it.total_duration_min,
           baggage: it.baggage,
           passengers: search.passengers,
           query: search.query,

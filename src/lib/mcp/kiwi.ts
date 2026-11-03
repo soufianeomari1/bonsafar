@@ -66,7 +66,8 @@ export type KiwiLeg = {
   to: string;
   departure: string;
   arrival: string;
-  duration_s: number;
+  /** Whole minutes, from Kiwi.com's durationSeconds. */
+  duration_min: number;
   stops: number;
   route: string[];
   flights: string[];
@@ -78,7 +79,8 @@ export type KiwiItinerary = {
   /** Total for all passengers in `currency`, as returned by Kiwi.com. */
   price: number;
   booking_url: string | null;
-  total_duration_s: number;
+  /** Whole minutes, outbound plus inbound. */
+  total_duration_min: number;
   baggage: { personal_item: number; cabin_bag: number; checked_bag: number };
   outbound: KiwiLeg;
   inbound: KiwiLeg | null;
@@ -108,6 +110,10 @@ function kiwiDate(iso: string): string {
   return `${d}/${m}/${y}`;
 }
 
+function toMinutes(seconds: number): number {
+  return Math.round(seconds / 60);
+}
+
 function toLeg(leg: z.infer<typeof Leg> | null): KiwiLeg | null {
   if (!leg?.departureTime || !leg.arrivalTime || !leg.from || !leg.to) return null;
   return {
@@ -115,7 +121,7 @@ function toLeg(leg: z.infer<typeof Leg> | null): KiwiLeg | null {
     to: leg.to,
     departure: leg.departureTime,
     arrival: leg.arrivalTime,
-    duration_s: leg.durationSeconds ?? 0,
+    duration_min: toMinutes(leg.durationSeconds ?? 0),
     stops: leg.stops ?? Math.max(0, leg.segments.length - 1),
     route: leg.route,
     flights: leg.segments.flatMap((s) => (s.flightNumber ? [s.flightNumber] : [])),
@@ -167,8 +173,10 @@ export async function searchFlights(params: FlightSearchParams, log: RunLog): Pr
         kiwi_id: it.id ?? null,
         price: it.price,
         booking_url: it.bookingUrl ?? null,
-        total_duration_s:
-          it.totalDurationSeconds ?? outbound.duration_s + (inbound?.duration_s ?? 0),
+        total_duration_min:
+          it.totalDurationSeconds != null
+            ? toMinutes(it.totalDurationSeconds)
+            : outbound.duration_min + (inbound?.duration_min ?? 0),
         baggage: {
           personal_item: it.baggage?.personalItem ?? 0,
           cabin_bag: it.baggage?.cabinBag ?? 0,

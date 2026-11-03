@@ -120,10 +120,6 @@ function monthOf(iso: string, offset = 0): string {
   return date.toISOString().slice(0, 7);
 }
 
-function hours(seconds: number): number {
-  return Math.round((seconds / 3600) * 10) / 10;
-}
-
 function clock(iso: string): string {
   return iso.slice(11, 16);
 }
@@ -217,7 +213,9 @@ export class AgentContext {
             price: o.price,
             currency: o.currency,
             price_mad: o.price_mad,
+            price_mad_display: o.price_mad_display,
             stops: totalStops(o),
+            duration_min: o.attrs.total_duration_min,
             departure: o.attrs.outbound.departure,
             arrival: o.attrs.outbound.arrival,
             carriers: o.attrs.outbound.carriers,
@@ -283,6 +281,8 @@ export class AgentContext {
             name: o.attrs.name,
             price: o.price,
             currency: o.currency,
+            price_mad: o.price_mad,
+            price_mad_display: o.price_mad_display,
             stars: o.attrs.stars,
             review_rating: o.attrs.review_rating,
           })),
@@ -410,7 +410,7 @@ export class AgentContext {
   private flightView(offers: FlightOffer[]) {
     const ranks = priceRanks(offers);
     const byPrice = [...offers].sort((a, b) => a.price_mad - b.price_mad);
-    const byTime = [...offers].sort((a, b) => a.attrs.total_duration_s - b.attrs.total_duration_s);
+    const byTime = [...offers].sort((a, b) => a.attrs.total_duration_min - b.attrs.total_duration_min);
     const direct = byPrice.filter((o) => totalStops(o) === 0);
     const picked = [...new Set([...byPrice.slice(0, 6), ...byTime.slice(0, 2), ...direct.slice(0, 2)])].slice(0, 10);
     return picked.map((o) => {
@@ -424,7 +424,7 @@ export class AgentContext {
           depart: clock(out.departure),
           arrive: clock(out.arrival),
           arrive_next_day: out.arrival.slice(0, 10) > out.departure.slice(0, 10),
-          hours: hours(out.duration_s),
+          minutes: out.duration_min,
           stops: out.stops,
           flights: out.flights.join(" "),
           airlines: out.carriers,
@@ -434,7 +434,7 @@ export class AgentContext {
               route: back.route.join("-"),
               depart: clock(back.departure),
               arrive: clock(back.arrival),
-              hours: hours(back.duration_s),
+              minutes: back.duration_min,
               stops: back.stops,
               flights: back.flights.join(" "),
               airlines: back.carriers,

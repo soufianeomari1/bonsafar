@@ -24,6 +24,7 @@ async function pickBase() {
 }
 
 const mad = (n) => `${new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(n)} MAD`;
+const dh = (n) => `${new Intl.NumberFormat("en").format(n)} DH`;
 const usd = (n) => `$${n.toFixed(4)}`;
 
 async function run(base, name) {
@@ -76,11 +77,29 @@ async function run(base, name) {
     const leg = (l) => `${l.route.join("-")} ${l.departure.slice(11, 16)}-${l.arrival.slice(11, 16)} ${l.flights.join("/")}`;
     return [
       `${option.flight_id} ${f ? `${leg(f.attrs.outbound)} | back ${leg(f.attrs.inbound)}` : "?"}`,
-      `${f ? `${f.price} ${f.currency} = ${mad(f.price_mad)} (${f.source})` : ""}`,
-      `${option.hotel_id} ${h ? `${h.attrs.name}, ${h.attrs.stars}*, ${h.attrs.review_rating}/10, ${mad(h.price_mad)} (${h.source})` : "?"}`,
-      `total ${mad(option.totals.total_mad)} for ${option.totals.passengers} passengers`,
+      `${f ? `${f.price} ${f.currency} = ${mad(f.price_mad)}, shown ${dh(f.price_mad_display)} (${f.source})` : ""}`,
+      `${option.hotel_id} ${h ? `${h.attrs.name}, ${h.attrs.stars}*, ${h.attrs.review_rating}/10, ${mad(h.price_mad)}, shown ${dh(h.price_mad_display)} (${h.source})` : "?"}`,
+      `total shown ${dh(option.totals.total_display_mad)} (exact ${mad(option.totals.total_mad)}) for ${option.totals.passengers} passengers`,
     ].map((line) => `    ${line}`).join("\n");
   };
+
+  // Every displayed total must be the sum of the displayed (whole dirham) lines.
+  const options = [["recommended", result.recommended], ...result.alternatives.map((a) => [a.label, a])];
+  const roundingErrors = options.flatMap(([label, option]) => {
+    const t = option.totals;
+    const lines = [offers.get(option.flight_id)?.price_mad_display, offers.get(option.hotel_id)?.price_mad_display];
+    const problems = [];
+    if (![t.total_display_mad, t.flight.price_mad_display, t.hotel.price_mad_display].every(Number.isInteger)) {
+      problems.push("display amounts are not whole dirhams");
+    }
+    if (lines[0] !== t.flight.price_mad_display || lines[1] !== t.hotel.price_mad_display) {
+      problems.push(`lines ${lines.join(" + ")} differ from the store`);
+    }
+    if (t.total_display_mad !== lines[0] + lines[1]) {
+      problems.push(`total_display_mad ${t.total_display_mad} != ${lines[0]} + ${lines[1]}`);
+    }
+    return problems.map((p) => `${label}: ${p}`);
+  });
 
   console.log(`  status: ${result.status}  notices: ${result.notices.join(", ") || "none"}`);
   if (result.requested.entry) {
@@ -97,12 +116,20 @@ async function run(base, name) {
   console.log(
     `  smart tip: ${result.smart_tip.kind}${
       d
-        ? ` ${d.compare_id} vs ${d.base_id}: ${d.extra ? `${signed(d.extra.amount)} ${d.extra.currency}` : ""} = ${signed(Math.round(d.extra_mad))} MAD, ${signed(+(d.saved_s.total / 3600).toFixed(2))} h saved`
+        ? ` ${d.compare_id} vs ${d.base_id}: ${d.extra ? `${signed(d.extra.amount)} ${d.extra.currency}` : ""} = ${signed(d.extra_display_mad)} DH shown, ${signed(d.saved_minutes)} min saved (out ${d.saved_minutes_by_leg.outbound}, back ${d.saved_minutes_by_leg.inbound})`
         : ""
     }`,
   );
   console.log(`  why: ${result.why.map((w) => w.en).join(" | ")}`);
   console.log(`  rate: 1 EUR = ${result.fx.rate} MAD (${result.fx.date}), prices captured ${result.prices_captured_at}`);
+  if (d && !(Number.isInteger(d.saved_minutes) && Number.isInteger(d.extra_display_mad))) {
+    roundingErrors.push("smart tip: saved_minutes or extra_display_mad is not an integer");
+  }
+  if (roundingErrors.length) {
+    console.log(`  ROUNDING CHECK FAILED:\n    ${roundingErrors.join("\n    ")}`);
+    return { ok: false, ms: end?.total_ms ?? 0, cost: end?.cost_usd ?? 0 };
+  }
+  console.log(`  rounding check: ${options.length}/3 options, total_display_mad = sum of displayed lines`);
   return { ok: true, ms: end?.total_ms ?? 0, cost: end?.cost_usd ?? 0 };
 }
 

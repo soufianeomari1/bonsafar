@@ -17,10 +17,24 @@ export function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-export function toMad(amount: number, currency: string, fx: FxRate): number | null {
-  if (currency === "MAD") return round2(amount);
-  if (currency === "EUR") return round2(amount * fx.rate);
+function madValue(amount: number, currency: string, fx: FxRate): number | null {
+  if (currency === "MAD") return amount;
+  if (currency === "EUR") return amount * fx.rate;
   return null;
+}
+
+export function toMad(amount: number, currency: string, fx: FxRate): number | null {
+  const value = madValue(amount, currency, fx);
+  return value == null ? null : round2(value);
+}
+
+/**
+ * Whole dirhams shown on a price line, rounded from the unrounded conversion
+ * so a value is never rounded twice. Displayed totals add these up.
+ */
+export function toDisplayMad(amount: number, currency: string, fx: FxRate): number | null {
+  const value = madValue(amount, currency, fx);
+  return value == null ? null : Math.round(value);
 }
 
 /**
