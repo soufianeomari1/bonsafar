@@ -23,15 +23,31 @@ export const darijaArab: Dictionary = {
   "common.privacy": "الخصوصية",
   "common.terms": "الشروط",
 
-  "welcome.tagline": "طريق سلامة",
-  "welcome.title": "وكالة ديال السفر\nف جيبك.",
-  "welcome.subtitle": "هضر على السفر ديالك، وحنا نوجدو كلشي، بالثمن الحقيقي.",
-  "welcome.perk.language": "هضر بالدارجة، بالفرنسية ولا بالعربية",
-  "welcome.perk.live": "طيارات وأوتيلات ديريكت، ثمن واحد بالدرهم",
-  "welcome.perk.checks": "الفيزا، الباگاج، الفلوس: كلشي متحقق قبل ما تمشي",
-  "welcome.noAccount": "كمل بلا حساب",
-  "welcome.footnote": "من بعد، 4 أسئلة ف 30 ثانية باش نعرفوك مزيان.",
+  "welcome.tagline": "trik slama",
+  "welcome.title": "ڭولها بالدارجة.\nو حنا نوجدو ليك السفر.",
+  // TODO: review this translation
+  "welcome.subtitle":
+    "الطيارات، الأوطيل، الفيزا والباگاج متحققين ليك، بالثمن الحقيقي. كتخلص عند الشريك، والو زايد.",
+  "welcome.start": "يلاه، نبداو",
   "welcome.signInError": "Google ما خدامش دابا.",
+  "welcome.language.change": "بدل اللغة، دابا {language}",
+  "welcome.legal":
+    "بلا حساب، البروفيل ديالك كيبقا ف هاد التيليفون. إلا كملتي، راك قبلتي [[terms]] و [[privacy]].",
+  "welcome.legal.terms": "الشروط",
+  "welcome.legal.privacy": "الخصوصية",
+  "welcome.demo.label": "ديمو",
+  "welcome.demo.duration": "0:07",
+  "welcome.demo.transcript":
+    "« Bghit nsafer l'[[Istanbul]] m3a rajli f [[nouss décembre]]… »",
+  "welcome.demo.understood": "بونسافار فهم",
+  "welcome.demo.route": "CMN → IST",
+  "welcome.demo.city": "Istanbul",
+  "welcome.demo.dates": "15 → 22 دجنبر",
+  "welcome.demo.adults": "2 كبار",
+  "welcome.demo.breakfast": "الفطور",
+  "welcome.demo.visa": "بلا فيزا",
+  "welcome.demo.price": "أثمنة ديريكت · **مجموع واحد بالدرهم**",
+
 
   "onboarding.step": "خطوة {current} من {total}",
   "onboarding.hello": "سلام {name}",

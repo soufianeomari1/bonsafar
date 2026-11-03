@@ -26,17 +26,30 @@ export const en = {
   "common.privacy": "Privacy",
   "common.terms": "Terms",
 
-  // 0 · Welcome and sign-in
+  // 0 · Welcome
   "welcome.tagline": "trik slama",
-  "welcome.title": "A travel agency\nin your pocket.",
+  "welcome.title": "Say it in darija.\nWe'll handle the trip.",
   "welcome.subtitle":
-    "Say your trip out loud. We prepare everything, at the real price.",
-  "welcome.perk.language": "Speak in darija, French or Arabic",
-  "welcome.perk.live": "Live flights and hotels, one single price in dirhams",
-  "welcome.perk.checks": "Visa, baggage, money: all checked before you leave",
-  "welcome.noAccount": "Continue without an account",
-  "welcome.footnote": "Then 4 questions, 30 seconds, to tailor your trips.",
+    "Flights, hotel, visa and baggage checked for you, at the real price. You pay on the partner's site, nothing more.",
+  "welcome.start": "Yallah, let's go",
   "welcome.signInError": "Google sign-in is not available right now.",
+  "welcome.language.change": "Change language, currently {language}",
+  "welcome.legal":
+    "Without an account, your profile stays on this phone. By continuing, you accept the [[terms]] and the [[privacy]].",
+  "welcome.legal.terms": "terms",
+  "welcome.legal.privacy": "privacy",
+  "welcome.demo.label": "Demo",
+  "welcome.demo.duration": "0:07",
+  "welcome.demo.transcript":
+    "« Bghit nsafer l'[[Istanbul]] m3a rajli f [[nouss décembre]]… »",
+  "welcome.demo.understood": "BONSAFAR UNDERSTOOD",
+  "welcome.demo.route": "CMN → IST",
+  "welcome.demo.city": "Istanbul",
+  "welcome.demo.dates": "15 → 22 Dec.",
+  "welcome.demo.adults": "2 adults",
+  "welcome.demo.breakfast": "Breakfast",
+  "welcome.demo.visa": "No visa",
+  "welcome.demo.price": "Live prices · **one total in dirhams**",
 
   // 1 · Profile, 4 steps
   "onboarding.step": "Step {current} of {total}",

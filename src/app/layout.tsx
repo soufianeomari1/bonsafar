@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-ibm-plex-arabic",
   subsets: ["arabic", "latin"],
-  weight: ["400", "600"],
+  weight: ["400", "600", "700"],
   display: "swap",
 });
 

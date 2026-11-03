@@ -23,17 +23,31 @@ export const ar: Dictionary = {
   "common.privacy": "الخصوصية",
   "common.terms": "الشروط",
 
-  "welcome.tagline": "طريق السلامة",
-  "welcome.title": "وكالة أسفار\nفي جيبك.",
+  "welcome.tagline": "trik slama",
+  "welcome.title": "قُلها بالدارجة.\nونحن نتكفّل بالرحلة.",
+  // TODO: review this translation
   "welcome.subtitle":
-    "تحدث عن رحلتك بصوتك، ونحن نجهز كل شيء، بالسعر الحقيقي.",
-  "welcome.perk.language": "تحدث بالدارجة أو الفرنسية أو العربية",
-  "welcome.perk.live": "رحلات وفنادق مباشرة، سعر واحد بالدرهم",
-  "welcome.perk.checks":
-    "التأشيرة والأمتعة والمال: كل شيء يُتحقق منه قبل السفر",
-  "welcome.noAccount": "المتابعة بدون حساب",
-  "welcome.footnote": "بعد ذلك، 4 أسئلة في 30 ثانية لتخصيص رحلاتك.",
+    "الرحلات والفندق والتأشيرة والأمتعة مُتحقق منها لك، بالسعر الحقيقي. تدفع لدى الشريك، ولا شيء زيادة.",
+  "welcome.start": "يلاه، لنبدأ",
   "welcome.signInError": "تسجيل الدخول عبر Google غير متاح حاليًا.",
+  "welcome.language.change": "تغيير اللغة، حاليا {language}",
+  "welcome.legal":
+    "بدون حساب، يبقى ملفك على هذا الهاتف. بالمتابعة، أنت توافق على [[terms]] و[[privacy]].",
+  "welcome.legal.terms": "الشروط",
+  "welcome.legal.privacy": "الخصوصية",
+  "welcome.demo.label": "عرض",
+  "welcome.demo.duration": "0:07",
+  "welcome.demo.transcript":
+    "« Bghit nsafer l'[[Istanbul]] m3a rajli f [[nouss décembre]]… »",
+  "welcome.demo.understood": "بون سفار فهم",
+  "welcome.demo.route": "CMN → IST",
+  "welcome.demo.city": "Istanbul",
+  "welcome.demo.dates": "15 → 22 ديسمبر",
+  "welcome.demo.adults": "بالغان",
+  "welcome.demo.breakfast": "الإفطار",
+  "welcome.demo.visa": "بدون تأشيرة",
+  "welcome.demo.price": "أسعار مباشرة · **مجموع واحد بالدرهم**",
+
 
   "onboarding.step": "الخطوة {current} من {total}",
   "onboarding.hello": "مرحبا {name}",

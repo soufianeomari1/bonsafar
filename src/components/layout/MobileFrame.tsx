@@ -26,6 +26,7 @@ export function MobileFrame({
       {...props}
     >
       <div
+        data-phone-root=""
         className={cn(
           "relative flex h-dvh w-full flex-col overflow-hidden bg-bg md:h-[844px] md:w-[390px] md:rounded-[44px] md:shadow-soft",
           surfaceClassName

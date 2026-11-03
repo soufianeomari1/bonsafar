@@ -24,15 +24,30 @@ export const darijaLatn: Dictionary = {
   "common.terms": "Conditions",
 
   "welcome.tagline": "trik slama",
-  "welcome.title": "Wkala dyal safar\nf jibek.",
+  "welcome.title": "Gulha b ddarija.\nW 7na nwjjdo lik safar.",
+  // TODO: review this translation
   "welcome.subtitle":
-    "Hder 3la safar dyalek, w7na nwejdou kolchi, b taman l7a9i9i.",
-  "welcome.perk.language": "Hder b darija, b franssawiya wla b 3arabiya",
-  "welcome.perk.live": "Tiyarat w otelat direct, taman wa7ed b derham",
-  "welcome.perk.checks": "Visa, bagaj, flous : kolchi mverifi 9bel ma tmchi",
-  "welcome.noAccount": "Kmel bla compte",
-  "welcome.footnote": "Men be3d, 4 as2ila f 30 taniya bach n3arfouk mezyan.",
+    "Tiyarat, otel, visa w bagaj mverifiyin lik, b taman l7a9i9i. Katkhelles 3nd lpartenaire, walo zayed.",
+  "welcome.start": "Yallah, nbdaw",
   "welcome.signInError": "Google ma khddamch daba.",
+  "welcome.language.change": "Beddel lgha, daba {language}",
+  "welcome.legal":
+    "Bla compte, lprofil dyalek kaybqa f had telephone. Ila kmelti, rak qbelti [[terms]] w [[privacy]].",
+  "welcome.legal.terms": "churut",
+  "welcome.legal.privacy": "lkhossossiya",
+  "welcome.demo.label": "Dimo",
+  "welcome.demo.duration": "0:07",
+  "welcome.demo.transcript":
+    "« Bghit nsafer l'[[Istanbul]] m3a rajli f [[nouss décembre]]… »",
+  "welcome.demo.understood": "BONSAFAR FHEM",
+  "welcome.demo.route": "CMN → IST",
+  "welcome.demo.city": "Istanbul",
+  "welcome.demo.dates": "15 → 22 dic.",
+  "welcome.demo.adults": "2 kbar",
+  "welcome.demo.breakfast": "Ftour",
+  "welcome.demo.visa": "Bla visa",
+  "welcome.demo.price": "Atman direct · **majmo3 wahed b derham**",
+
 
   "onboarding.step": "Khatwa {current} men {total}",
   "onboarding.hello": "Salam {name}",

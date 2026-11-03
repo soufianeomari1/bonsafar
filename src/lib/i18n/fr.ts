@@ -24,17 +24,29 @@ export const fr: Dictionary = {
   "common.terms": "Conditions",
 
   "welcome.tagline": "trik slama",
-  "welcome.title": "L'agence de voyage\ndans ta poche.",
+  "welcome.title": "Dis-le en darija.\nOn s'occupe du voyage.",
   "welcome.subtitle":
-    "Tu expliques ton voyage à voix haute. On prépare tout, au vrai prix.",
-  "welcome.perk.language": "Parle en darija, en français ou en arabe",
-  "welcome.perk.live": "Vols et hôtels en direct, un seul prix en dirhams",
-  "welcome.perk.checks":
-    "Visa, bagage, argent : tout est vérifié avant de partir",
-  "welcome.noAccount": "Continuer sans compte",
-  "welcome.footnote":
-    "Ensuite, 4 questions en 30 secondes pour adapter tes voyages.",
+    "Vols, hôtel, visa et bagages vérifiés pour toi, au vrai prix. Tu paies chez le partenaire, rien de plus.",
+  "welcome.start": "Yallah, on commence",
   "welcome.signInError": "La connexion Google n'est pas disponible pour l'instant.",
+  "welcome.language.change": "Changer de langue, actuellement {language}",
+  "welcome.legal":
+    "Sans compte, ton profil reste sur ce téléphone. En continuant, tu acceptes les [[terms]] et la [[privacy]].",
+  "welcome.legal.terms": "conditions",
+  "welcome.legal.privacy": "confidentialité",
+  "welcome.demo.label": "Démonstration",
+  "welcome.demo.duration": "0:07",
+  "welcome.demo.transcript":
+    "« Bghit nsafer l'[[Istanbul]] m3a rajli f [[nouss décembre]]… »",
+  "welcome.demo.understood": "BONSAFAR A COMPRIS",
+  "welcome.demo.route": "CMN → IST",
+  "welcome.demo.city": "Istanbul",
+  "welcome.demo.dates": "15 → 22 déc.",
+  "welcome.demo.adults": "2 adultes",
+  "welcome.demo.breakfast": "Petit déj",
+  "welcome.demo.visa": "Sans visa",
+  "welcome.demo.price": "Prix en direct · **un seul total en dirhams**",
+
 
   "onboarding.step": "Étape {current} sur {total}",
   "onboarding.hello": "Salam {name}",
