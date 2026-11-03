@@ -69,7 +69,7 @@ export function chipsFor(intent: Intent, lang: Lang, t: Translate): IntentChipMo
     slot: "dates",
     label: dates,
     icon: CalendarBlank,
-    tone: "bg-orange-soft text-orange",
+    tone: "bg-green-soft text-green",
   });
 
   const adults = t(intent.adults === 1 ? "chip.adults.one" : "chip.adults.other", {
@@ -86,7 +86,7 @@ export function chipsFor(intent: Intent, lang: Lang, t: Translate): IntentChipMo
     slot: "travelers",
     label: children ? `${adults}, ${children}` : adults,
     icon: Users,
-    tone: "bg-green-soft text-green",
+    tone: "bg-blue-soft text-blue",
   });
 
   if (intent.budget_mad) {
@@ -96,7 +96,7 @@ export function chipsFor(intent: Intent, lang: Lang, t: Translate): IntentChipMo
       slot: "budget",
       label: t("chip.budget", { amount: formatAmount(intent.budget_mad, lang) }),
       icon: Wallet,
-      tone: "bg-yellow-soft text-yellow-ink",
+      tone: "bg-orange-soft text-orange",
     });
   }
 
@@ -107,7 +107,7 @@ export function chipsFor(intent: Intent, lang: Lang, t: Translate): IntentChipMo
       slot: "wish",
       label: wish.label.charAt(0).toLocaleUpperCase(lang === "en" ? "en" : "fr") + wish.label.slice(1),
       icon: WISH_ICONS[wish.kind],
-      tone: "bg-red-soft text-rust",
+      tone: "bg-orange-soft text-orange",
       wishIndex: index,
     });
   });

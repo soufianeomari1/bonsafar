@@ -7,8 +7,7 @@ import { formatClock } from "@/lib/format";
 import { useT } from "@/lib/i18n/provider";
 import type { TranscriptPart } from "./chips";
 
-const HIGHLIGHT_COLOR = "color-mix(in srgb, var(--color-card) 24%, transparent)";
-const HIGHLIGHT = `linear-gradient(${HIGHLIGHT_COLOR}, ${HIGHLIGHT_COLOR})`;
+const HIGHLIGHT = "linear-gradient(var(--color-yellow), var(--color-yellow))";
 
 /** Darija mixes scripts mid-sentence: follow the dominant one, not the first letter. */
 function textDir(text: string): "rtl" | "ltr" {
@@ -55,7 +54,7 @@ export function TranscriptBubble({
     : [];
 
   return (
-    <div className="flex w-[80%] max-w-[312px] flex-col gap-2.5 self-end rounded-[22px] rounded-ee-md bg-blue px-3.5 py-3 text-card">
+    <div className="flex w-[80%] max-w-[312px] flex-col gap-2.5 self-end rounded-[22px] rounded-ee-md bg-blue px-3.5 py-3 text-card shadow-[0_8px_24px_color-mix(in_srgb,var(--color-blue)_22%,transparent)]">
       {audioUrl && (
         <div className="flex items-center gap-2.5">
           <button
@@ -67,7 +66,7 @@ export function TranscriptBubble({
               if (element.paused) void element.play();
               else element.pause();
             }}
-            className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-card text-blue"
+            className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-card/20 text-card"
           >
             {playing ? <Pause size={13} weight="fill" /> : <Play size={13} weight="fill" />}
           </button>
@@ -95,9 +94,22 @@ export function TranscriptBubble({
       )}
 
       {pending !== null ? (
-        <p dir={pending ? textDir(pending) : undefined} className="text-base leading-[1.6]" aria-live="polite">
+        <p dir={pending ? textDir(pending) : undefined} className="text-[15px] font-medium leading-[1.45]" aria-live="polite">
           {pending ? (
-            <span className="opacity-90">{pending}</span>
+            pending
+              .trim()
+              .split(/\s+/)
+              .map((word, index) => (
+                <motion.span
+                  key={index}
+                  className="me-[0.28em] inline-block"
+                  initial={reduced ? false : { opacity: 0, y: 6, filter: "blur(3px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "none" }}
+                  transition={{ duration: reduced ? 0.2 : 0.45, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  {word}
+                </motion.span>
+              ))
           ) : (
             <span className="shimmer [--color-muted:var(--color-card)] [--color-line:var(--color-blue-soft)]">
               {t("understood.transcribing")}
@@ -105,15 +117,16 @@ export function TranscriptBubble({
           )}
         </p>
       ) : (
-        <p dir={textDir(text)} className="text-base leading-[1.6]">
+        <p dir={textDir(text)} className="text-[15px] font-medium leading-[1.45]">
+          {textDir(text) === "ltr" && <span aria-hidden>« </span>}
           {(parts ?? [{ text, keyword: null }]).map((part, index) => {
             if (part.keyword === null) return <span key={index}>{part.text}</span>;
             const chipId = flying?.get(part.keyword);
             return (
               <span key={index} className="relative font-bold">
                 <motion.span
-                  className="rounded-md bg-no-repeat px-[5px] py-px [box-decoration-break:clone]"
-                  style={{ backgroundImage: HIGHLIGHT }}
+                  className="rounded bg-no-repeat px-[3px] py-px text-ink [box-decoration-break:clone]"
+                  style={{ backgroundImage: HIGHLIGHT, backgroundPosition: "0 90%" }}
                   initial={false}
                   animate={{ backgroundSize: highlighted ? "100% 100%" : "0% 100%" }}
                   transition={{ duration: reduced ? 0 : 0.4, delay: reduced ? 0 : 0.06 * part.keyword }}
@@ -130,6 +143,7 @@ export function TranscriptBubble({
               </span>
             );
           })}
+          {textDir(text) === "ltr" && <span aria-hidden> »</span>}
         </p>
       )}
 

@@ -191,6 +191,13 @@ export const en = {
 
   // 4 · BonSafar understood
   "understood.title": "BonSafar understood",
+  "understood.safar": "Mfhoum ! Hadchi li fhemt :",
+  // TODO: translated by the agent, not taken from the mockup.
+  "understood.safarGloss": "Understood! Here is what I kept.",
+  "understood.originLead": "Leaving from {city}",
+  "understood.originTail": ", from your profile.",
+  "understood.noQuestion": "Nothing left to ask you.",
+  "understood.tapHint": "Tap a detail to correct it.",
   "understood.editHint": "tap to edit",
   "understood.enToggle": "EN everywhere",
   "understood.transcribing": "Writing down your words…",

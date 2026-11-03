@@ -181,6 +181,13 @@ export const darijaLatn: Dictionary = {
   "voice.send": "Sifet l vocal",
 
   "understood.title": "BonSafar fhem",
+  "understood.safar": "Mfhoum ! Hadchi li fhemt :",
+  // TODO: translated by the agent, not taken from the mockup.
+  "understood.safarGloss": "Fhemt! Hada li 7fedt.",
+  "understood.originLead": "Khrouj mn {city}",
+  "understood.originTail": ", 7sab profil dyalek.",
+  "understood.noQuestion": "Walo ma bqa ntsqek.",
+  "understood.tapHint": "Dghhet 3la chi 7aja bach tbeddelha.",
   "understood.editHint": "brek bach tbeddel",
   "understood.enToggle": "EN partout",
   "understood.transcribing": "Kanktb klamek…",

@@ -178,6 +178,13 @@ export const ar: Dictionary = {
   "voice.send": "إرسال الرسالة الصوتية",
 
   "understood.title": "BonSafar فهم",
+  "understood.safar": "مفهوم! هذا ما فهمته:",
+  // TODO: translated by the agent, not taken from the mockup.
+  "understood.safarGloss": "فهمت! هذا ما احتفظت به.",
+  "understood.originLead": "المغادرة من {city}",
+  "understood.originTail": "، حسب ملفك.",
+  "understood.noQuestion": "لا سؤال آخر.",
+  "understood.tapHint": "المس معلومة لتصحيحها.",
   "understood.editHint": "المس للتعديل",
   "understood.enToggle": "EN في كل مكان",
   "understood.transcribing": "أكتب كلامك…",

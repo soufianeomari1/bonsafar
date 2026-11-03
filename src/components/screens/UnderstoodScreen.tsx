@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, CaretLeft, WarningCircle } from "@phosphor-icons/react";
+import { CaretLeft, Check, MagnifyingGlass } from "@phosphor-icons/react";
 import { Button } from "@/components/bs/Button";
-import { Logo } from "@/components/bs/Brand";
+import { Safar, SafarBubble } from "@/components/bs/Safar";
 import { ChipEditor } from "@/components/trip/ChipEditor";
 import { QuestionCard } from "@/components/trip/QuestionCard";
 import { TranscriptBubble } from "@/components/trip/TranscriptBubble";
@@ -19,8 +19,11 @@ import {
 import { formatAmount } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import { hasIndispensableInfo } from "@/lib/intent/edits";
+import type { Intent } from "@/lib/intent/schema";
 import { useLanguage } from "@/lib/i18n/provider";
 import { PRESS_SCALE, PRESS_TRANSITION } from "@/lib/motion";
+import type { Airport } from "@/lib/profile/schema";
+import { useProfile } from "@/lib/profile/useProfile";
 import { answerTrip, retryTrip } from "@/lib/trip/store";
 import { useTrip } from "@/lib/trip/useTrip";
 import { cn } from "@/lib/utils";
@@ -28,12 +31,18 @@ import { cn } from "@/lib/utils";
 /** Time the highlighted words stay in the sentence before flying (A2). */
 const FLIGHT_DELAY_MS = 650;
 
-/** Screen 4, mockup 04-Compris. */
+function originFromProfile(intent: Intent, airport: Airport | null): boolean {
+  if (!airport || intent.origin_iata !== airport) return false;
+  return !intent.keywords.some((keyword) => keyword.slot === "origin");
+}
+
+/** Screen 4. Look: design/motion/screens/04-understood.html. */
 export function UnderstoodScreen() {
   const { t, lang, jury } = useLanguage();
   const router = useRouter();
   const reduced = useReducedMotion();
   const job = useTrip();
+  const { profile } = useProfile();
   const [english, setEnglish] = useState<boolean | null>(null);
   const [landedRev, setLandedRev] = useState(0);
   const [editing, setEditing] = useState<IntentChipModel | null>(null);
@@ -76,36 +85,42 @@ export function UnderstoodScreen() {
       : null;
   const transcribing = job.phase === "transcribing";
   const understanding = job.phase === "understanding";
+  const failed = job.phase === "error";
   const canSearch = job.phase === "ready" && !!intent && hasIndispensableInfo(intent);
   /** Nothing to retry: the take itself was too short or silent. */
   const dead = job.error === "short" || job.error === "empty";
+  const showChips = !!intent && landed && !failed;
+  const asking = showChips && !!intent.question && !understanding && !transcribing;
+  const showFound = showChips && !intent.question && !understanding && !transcribing;
+  const fromProfile = !!intent && originFromProfile(intent, profile.home_airport);
+  const home = profile.home_airport;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-bg">
-      <header className="flex h-[60px] shrink-0 items-center gap-2.5 border-b border-line bg-card pe-4 ps-2">
+      <header className="flex items-center gap-3 px-5 pt-[18px]">
         <button
           type="button"
           aria-label={t("common.back")}
           onClick={() => router.push("/home")}
-          className="flex size-10 items-center justify-center text-ink"
+          className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-card text-ink"
         >
-          <CaretLeft size={20} weight="bold" className="rtl:-scale-x-100" />
+          <CaretLeft size={18} weight="bold" className="rtl:-scale-x-100" />
         </button>
-        <Logo size="sm" />
-        <span className="flex-1 text-[17px] font-bold" dir="ltr">
-          BonSafar
-        </span>
+        <h1 className="min-w-0 flex-1 text-xl font-extrabold tracking-[-0.02em]">
+          {t("understood.title")}
+        </h1>
         <button
           type="button"
           role="switch"
           aria-checked={showEnglish}
+          aria-label={t("understood.enToggle")}
           onClick={() => {
             haptic("select");
             setEnglish(!showEnglish);
           }}
-          className="flex h-8 items-center gap-2 rounded-pill bg-fill pe-1.5 ps-3 text-[13px] font-semibold"
+          className="flex h-8 shrink-0 items-center rounded-pill bg-card pe-1.5 ps-1.5 shadow-soft"
         >
-          {t("understood.enToggle")}
+          <span className="sr-only">{t("understood.enToggle")}</span>
           <span
             aria-hidden
             className={cn(
@@ -124,7 +139,7 @@ export function UnderstoodScreen() {
       </header>
 
       <LayoutGroup>
-        <div className="flex min-h-0 flex-1 flex-col gap-3 scroll-quiet overflow-y-auto px-3.5 pb-3 pt-3.5">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 scroll-quiet overflow-y-auto px-5 pb-3 pt-5">
           <TranscriptBubble
             audioUrl={job.audioUrl}
             durationMs={job.durationMs}
@@ -142,38 +157,51 @@ export function UnderstoodScreen() {
             <p className="self-end text-xs text-muted">{t("understood.fallback")}</p>
           )}
 
-          {job.phase === "error" ? (
-            <div role="alert" className="flex flex-col gap-3 rounded-card bg-card p-3.5">
-              <span className="flex items-start gap-2 text-[15px] leading-[1.45]">
-                <WarningCircle size={20} weight="fill" className="shrink-0 text-red" aria-hidden />
-                {job.error === "short"
-                  ? t("home.tooShort")
-                  : job.error === "empty"
-                    ? t("understood.nothingHeard")
-                    : t("understood.error")}
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                {!dead && (
-                  <Button variant="quiet" onClick={() => void retryTrip()} className="h-12">
-                    {t("common.retry")}
+          {failed ? (
+            <div className="flex items-start gap-2">
+              <Safar state="oops" size={64} className="shrink-0" />
+              <div role="alert" className="flex min-w-0 flex-1 flex-col gap-3 rounded-card bg-card p-3.5 shadow-soft">
+                <span className="text-[15px] leading-[1.45]">
+                  {job.error === "short"
+                    ? t("home.tooShort")
+                    : job.error === "empty"
+                      ? t("understood.nothingHeard")
+                      : t("understood.error")}
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {!dead && (
+                    <Button variant="quiet" onClick={() => void retryTrip()} className="h-12">
+                      {t("common.retry")}
+                    </Button>
+                  )}
+                  <Button
+                    variant="secondary"
+                    onClick={() => router.push("/home")}
+                    className={cn("h-12", dead && "col-span-2")}
+                  >
+                    {t("understood.backHome")}
                   </Button>
-                )}
-                <Button
-                  variant="secondary"
-                  onClick={() => router.push("/home")}
-                  className={cn("h-12", dead && "col-span-2")}
-                >
-                  {t("understood.backHome")}
-                </Button>
+                </div>
               </div>
             </div>
           ) : (
-            <section className="flex flex-col gap-2.5 rounded-card bg-card p-3.5">
-              <span className="flex items-baseline justify-between gap-2">
-                <span className="text-[19px] font-extrabold">{t("understood.title")}</span>
-                {intent && <span className="text-[13px] text-muted">{t("understood.editHint")}</span>}
-              </span>
-              {intent && landed ? (
+            <>
+              {showFound && (
+                <SafarBubble state="found" size={64} className="-ms-2">
+                  <p className="text-base font-bold">{t("understood.safar")}</p>
+                  <p className="mt-0.5 text-[13px] text-muted">{t("understood.safarGloss")}</p>
+                </SafarBubble>
+              )}
+
+              {!showFound && !asking && (
+                <SafarBubble state="thinking" size={64} className="-ms-2">
+                  <p className="shimmer text-[15px] font-semibold" aria-live="polite">
+                    {transcribing ? t("understood.transcribing") : t("understood.thinking")}
+                  </p>
+                </SafarBubble>
+              )}
+
+              {showChips && (
                 <div className="flex flex-wrap gap-2">
                   {chips.map((chip, index) => {
                     const flies = !reduced && flyingIds.has(chip.id);
@@ -182,77 +210,78 @@ export function UnderstoodScreen() {
                         key={chip.id}
                         type="button"
                         layoutId={flies ? `${layoutPrefix}-${chip.id}` : undefined}
-                        initial={flies || reduced ? false : { opacity: 0, y: 10, scale: 0.9 }}
+                        initial={flies || reduced ? false : { opacity: 0, y: -18, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{
                           type: "spring",
                           duration: 0.55,
                           bounce: 0.15,
-                          delay: flies ? 0 : 0.2 + index * 0.06,
+                          delay: flies ? 0 : 0.6 + index * 0.15,
                         }}
                         whileTap={reduced ? undefined : { scale: PRESS_SCALE, transition: PRESS_TRANSITION }}
                         onClick={() => {
                           haptic("select");
                           setEditing(chip);
                         }}
-                        className="flex h-11 items-center gap-2 rounded-pill border border-line bg-card pe-3.5 ps-1.5 text-[15px] font-semibold text-ink"
+                        className="flex h-11 items-center gap-2 rounded-pill border border-line bg-card pe-3.5 ps-2 text-[15px] font-bold text-ink"
                       >
-                        <span className={cn("flex size-8 items-center justify-center rounded-pill", chip.tone)}>
-                          <chip.icon size={17} weight="fill" aria-hidden />
+                        <span className={cn("flex size-[30px] items-center justify-center rounded-pill", chip.tone)}>
+                          <chip.icon size={16} weight="fill" aria-hidden />
                         </span>
                         <bdi>{chip.label}</bdi>
                       </motion.button>
                     );
                   })}
                 </div>
-              ) : (
-                <span className="shimmer text-[15px] font-semibold" aria-live="polite">
-                  {transcribing ? t("understood.transcribing") : t("understood.thinking")}
-                </span>
               )}
-            </section>
-          )}
 
-          <AnimatePresence mode="wait" initial={false}>
-            {intent?.question && job.phase !== "error" &&
-              (understanding ? (
-                <motion.div
-                  key="question-thinking"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: reduced ? 0.2 : 0.3 }}
-                  className="rounded-card bg-card p-3.5"
-                >
-                  <span className="shimmer text-[15px] font-semibold">{t("understood.thinking")}</span>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key={`question-${intent.question.field}`}
-                  initial={false}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: reduced ? 0.2 : 0.35, ease: [0.23, 1, 0.32, 1] }}
-                >
-                  <QuestionCard
-                    question={intent.question}
-                    onAnswer={(question, answer) => void answerTrip(question, answer)}
-                  />
-                </motion.div>
-              ))}
-          </AnimatePresence>
+              {showChips && fromProfile && home && job.phase === "ready" && (
+                <div className="flex items-center gap-2.5 rounded-[18px] bg-green-soft px-3.5 py-3">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-green-bright text-card">
+                    <Check size={12} weight="bold" aria-hidden />
+                  </span>
+                  <span className="text-sm leading-snug">
+                    <strong className="font-bold">
+                      {t("understood.originLead", { city: t(`airport.${home}`) })} (<bdi dir="ltr">{home}</bdi>)
+                    </strong>
+                    {t("understood.originTail")}
+                    {!intent?.question && <> {t("understood.noQuestion")}</>}
+                  </span>
+                </div>
+              )}
+
+              <AnimatePresence mode="wait" initial={false}>
+                {asking && intent.question && (
+                  <motion.div
+                    key={`question-${intent.question.field}`}
+                    initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: reduced ? 0.2 : 0.35, ease: [0.23, 1, 0.32, 1] }}
+                    className="flex items-start gap-2"
+                  >
+                    <div className="w-16 shrink-0 pt-1">
+                      <Safar state="thinking" size={64} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <QuestionCard
+                        question={intent.question}
+                        onAnswer={(question, answer) => void answerTrip(question, answer)}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
         </div>
       </LayoutGroup>
 
-      <div className="px-3.5 pb-[22px] pt-3">
-        <Button
-          full
-          disabled={!canSearch}
-          onClick={() => router.push("/trip/search")}
-          className="gap-2.5"
-        >
+      <div className="flex flex-col gap-2.5 px-5 pb-[22px] pt-2">
+        <p className="text-center text-[13px] text-muted">{t("understood.tapHint")}</p>
+        <Button full disabled={!canSearch} onClick={() => router.push("/trip/search")} className="font-bold">
+          <MagnifyingGlass size={18} weight="bold" aria-hidden />
           {t("understood.go")}
-          <ArrowRight size={18} weight="bold" className="rtl:-scale-x-100" aria-hidden />
         </Button>
       </div>
 

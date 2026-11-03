@@ -180,7 +180,13 @@ export const fr: Dictionary = {
   "voice.delete": "Supprimer le vocal",
   "voice.send": "Envoyer le vocal",
 
-  "understood.title": "BonSafar fhem",
+  "understood.title": "BonSafar a compris",
+  "understood.safar": "Mfhoum ! Hadchi li fhemt :",
+  "understood.safarGloss": "Compris ! Voilà ce que j'ai retenu.",
+  "understood.originLead": "Départ de {city}",
+  "understood.originTail": ", d'après ton profil.",
+  "understood.noQuestion": "Aucune question à te poser.",
+  "understood.tapHint": "Touche une info pour la corriger.",
   "understood.editHint": "touche pour modifier",
   "understood.enToggle": "EN partout",
   "understood.transcribing": "Kanktb · J'écris tes mots…",
@@ -188,7 +194,7 @@ export const fr: Dictionary = {
   "understood.questionBadge": "1 QUESTION",
   "understood.otherAnswer": "Autre réponse",
   "understood.answerPlaceholder": "Écris ta réponse…",
-  "understood.go": "Yallah, qelleb ! · C'est bon, cherche",
+  "understood.go": "Yallah, qelleb !",
   "understood.error":
     "Je n'ai pas réussi à comprendre cette fois. Réessaie, ou écris ta demande.",
   "understood.nothingHeard": "Je n'ai rien entendu. Parle plus près du micro, ou écris ta demande.",

@@ -179,6 +179,13 @@ export const darijaArab: Dictionary = {
   "voice.send": "صيفط الفوكال",
 
   "understood.title": "BonSafar فهم",
+  "understood.safar": "مفهوم! هادشي اللي فهمت:",
+  // TODO: translated by the agent, not taken from the mockup.
+  "understood.safarGloss": "فهمت! هادا اللي حفظت.",
+  "understood.originLead": "الخروج من {city}",
+  "understood.originTail": "، على حساب البروفيل ديالك.",
+  "understood.noQuestion": "والو ما بقا نتسقّك.",
+  "understood.tapHint": "دغّط على شي حاجة باش تبدلها.",
   "understood.editHint": "برك باش تبدل",
   "understood.enToggle": "EN ف كلشي",
   "understood.transcribing": "كنكتب الكلام ديالك…",
