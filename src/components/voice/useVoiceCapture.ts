@@ -70,20 +70,37 @@ export const micHoldStyle: CSSProperties = {
   WebkitTapHighlightColor: "transparent",
 };
 
-const MIC_HOLD_CSS = `.bs-mic-hold{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}`;
+const MIC_HOLD_CSS = `.bs-mic-hold{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.bs-mic-screen{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}`;
 
 /** The compiled stylesheet strips the WebKit properties, so the page adds them itself. */
 function ensureMicHoldCss(): void {
-  if (document.getElementById("bs-mic-hold-css")) return;
-  const style = document.createElement("style");
-  style.id = "bs-mic-hold-css";
+  let style = document.getElementById("bs-mic-hold-css");
+  if (style instanceof HTMLStyleElement && style.textContent === MIC_HOLD_CSS) return;
+  if (!style) {
+    style = document.createElement("style");
+    style.id = "bs-mic-hold-css";
+    document.head.appendChild(style);
+  }
   style.textContent = MIC_HOLD_CSS;
-  document.head.appendChild(style);
 }
 
 /**
- * Stops the Android long-press callout. React's onTouchStart is passive, so
- * preventDefault there is ignored: this listener is not.
+ * Vocal screen backdrop: block the long-press callout, but do not call
+ * preventDefault. Doing that on the whole screen swallows every button click
+ * while the recording keeps running.
+ */
+export function bindMicSurface(node: HTMLElement | null): void {
+  if (!node) return;
+  ensureMicHoldCss();
+  node.style.setProperty("user-select", "none");
+  node.style.setProperty("-webkit-user-select", "none");
+  node.style.setProperty("-webkit-touch-callout", "none");
+  node.style.setProperty("-webkit-tap-highlight-color", "transparent");
+}
+
+/**
+ * Stops the Android long-press callout on the mic button only. React's
+ * onTouchStart is passive, so preventDefault there is ignored: this listener is not.
  */
 export function bindMicHold(node: HTMLElement | null): void | (() => void) {
   if (!node) return;
@@ -204,13 +221,15 @@ export function useVoiceCapture({
 
   const lock = useCallback(() => {
     if (captureRef.current.status !== "recording" || captureRef.current.locked) return;
+    // The press is over. Drop the capture so Retour, pause and send receive taps.
+    releasePointer();
     haptic("lock");
     setCaptureState((current) =>
       current.status === "recording" && !current.locked
         ? { ...current, locked: true, dragX: 0, dragY: 0 }
         : current,
     );
-  }, [setCaptureState]);
+  }, [releasePointer, setCaptureState]);
 
   const tick = useCallback(() => {
     const active = recorder.current;

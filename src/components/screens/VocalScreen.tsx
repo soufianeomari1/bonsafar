@@ -12,7 +12,7 @@ import {
   Trash,
 } from "@phosphor-icons/react";
 import { VoiceRadar } from "@/components/bs/VoiceRadar";
-import { bindMicHold, micHoldStyle, type CaptureState } from "@/components/voice/useVoiceCapture";
+import { bindMicSurface, micHoldStyle, type CaptureState } from "@/components/voice/useVoiceCapture";
 import { formatClock } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -45,10 +45,9 @@ export function VocalScreen({
 
   return (
     <motion.div
-      ref={bindMicHold}
+      ref={bindMicSurface}
       onContextMenu={(event) => event.preventDefault()}
-      style={micHoldStyle}
-      className="bs-mic-hold absolute inset-0 z-30 flex flex-col bg-card"
+      className="bs-mic-screen absolute inset-0 z-30 flex flex-col bg-card"
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
