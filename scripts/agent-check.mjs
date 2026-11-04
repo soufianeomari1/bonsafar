@@ -11,6 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FATIMA, SCENARIOS } from "../src/lib/agent/scenarios.ts";
+import { juryCookie } from "./jury-cookie.mjs";
 
 const args = process.argv.slice(2);
 const urlArg = args.find((a) => /^https?:\/\//.test(a));
@@ -132,11 +133,15 @@ async function checkArabic(base, result) {
   return problems.filter(Boolean);
 }
 
+let cookie;
+
 async function run(base, name, replay, arabic) {
+  // Replays need the signed jury cookie.
+  cookie ??= (await juryCookie(base)) ?? "";
   const started = performance.now();
   const response = await fetch(`${base}/api/agent`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(cookie ? { Cookie: cookie } : {}) },
     body: JSON.stringify(
       replay
         ? { replay: true, scenario: name }

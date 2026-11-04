@@ -1,3 +1,4 @@
+import { JURY_UI_COOKIE } from "@/lib/jury/flags";
 import { DEFAULT_LANG, JURY_LANG, isLang, type Lang } from "./index";
 
 /**
@@ -14,9 +15,36 @@ let juryCache: boolean | null = null;
 
 const listeners = new Set<() => void>();
 
+/** The proxy keeps this flag in step with the signed, httpOnly jury cookie. */
+export function readJuryAccess(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.split(";").some((part) => part.trim() === `${JURY_UI_COOKIE}=1`);
+}
+
+/** `?jury=1` does nothing without jury access. */
 function detectJury(): boolean {
   if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("jury") === "1";
+  return readJuryAccess() && new URLSearchParams(window.location.search).get("jury") === "1";
+}
+
+let embeddedCache: boolean | null = null;
+
+/** The app running inside the phone frame of /jury. */
+export function readJuryEmbedded(): boolean {
+  if (embeddedCache !== null) return embeddedCache;
+  if (typeof window === "undefined") return false;
+  let embedded = false;
+  try {
+    embedded = readJury() && window.self !== window.top && window.parent.location.pathname === "/jury";
+  } catch {
+    embedded = false;
+  }
+  embeddedCache = embedded;
+  return embedded;
+}
+
+export function readServerJuryEmbedded(): boolean {
+  return false;
 }
 
 function detectLang(): Lang {
@@ -31,7 +59,7 @@ function detectLang(): Lang {
   return DEFAULT_LANG;
 }
 
-/** `?jury=1`: English UI and bilingual agent messages. */
+/** `?jury=1` with jury access: English UI and bilingual agent messages. */
 export function readJury(): boolean {
   if (juryCache === null) juryCache = detectJury();
   return juryCache;

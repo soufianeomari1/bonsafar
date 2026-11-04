@@ -1,4 +1,9 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
+import { readJuryEmbedded, readServerJuryEmbedded } from "@/lib/i18n/store";
 import { cn } from "@/lib/utils";
+import { MobileFrame } from "./MobileFrame";
 
 export type JuryFrameProps = {
   /** The phone, 390px wide, on the left. */
@@ -9,9 +14,12 @@ export type JuryFrameProps = {
   className?: string;
 };
 
+const subscribe = () => () => {};
+
 /**
  * J2, the 1440px desktop frame the judges see: phone on the left, live
- * "Under the hood" panel on the right. Always English.
+ * "Under the hood" panel on the right. Always English. Inside the phone of
+ * /jury, which brings its own panel, it is the phone alone.
  */
 export function JuryFrame({
   children,
@@ -19,6 +27,8 @@ export function JuryFrame({
   header,
   className,
 }: JuryFrameProps) {
+  const embedded = useSyncExternalStore(subscribe, readJuryEmbedded, readServerJuryEmbedded);
+  if (embedded) return <MobileFrame>{children}</MobileFrame>;
   return (
     <div className={cn("min-h-dvh bg-fill", className)}>
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-8 py-8">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/layout/LegalPage";
+import { LiveCreditsSection } from "@/components/layout/LiveCreditsSection";
 
 export const metadata: Metadata = {
   title: "Privacy · BonSafar",
@@ -51,6 +52,8 @@ export default function PrivacyPage() {
         All understanding, planning and writing runs on Meta models through the
         Meta Model API. We do not use any other AI provider.
       </p>
+
+      <LiveCreditsSection />
 
       <h2>Deleting your data</h2>
       <p>

@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { RunLog } from "@/lib/ai/events";
 import { replayRun } from "@/lib/agent/replay";
 import { AgentError, runAgent } from "@/lib/agent/run";
@@ -8,12 +9,21 @@ import {
   type AgentStreamEvent,
   type RecordedFrame,
 } from "@/lib/agent/schema";
+import { isJuryRequest } from "@/lib/jury/access";
+import { JURY_LABELS } from "@/lib/jury/scenarios";
+import { admitLiveRun, recordUsage } from "@/lib/usage/guard";
 import { RUN_ID_HEADER } from "@/lib/voice/protocol";
 
 export const maxDuration = 60;
 
 /** The run must finish (package and save) a little before maxDuration. */
 const RUN_BUDGET_MS = 55_000;
+
+/**
+ * An SSE comment on a quiet stream. Model calls can stay silent for more than
+ * 15 s, so the jury's silence watchdog only fires when the connection is gone.
+ */
+const KEEPALIVE_MS = 5_000;
 
 type Emit = (event: AgentStreamEvent) => void;
 
@@ -22,17 +32,20 @@ function sse(produce: (emit: Emit, signal: AbortSignal) => Promise<void>, signal
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let open = true;
-      const emit: Emit = (event) => {
+      const write = (chunk: string) => {
         if (!open) return;
         try {
-          controller.enqueue(encoder.encode(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`));
+          controller.enqueue(encoder.encode(chunk));
         } catch {
           open = false;
         }
       };
+      const emit: Emit = (event) => write(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
+      const keepalive = setInterval(() => write(": keepalive\n\n"), KEEPALIVE_MS);
       try {
         await produce(emit, signal);
       } finally {
+        clearInterval(keepalive);
         open = false;
         try {
           controller.close();
@@ -57,6 +70,7 @@ function sse(produce: (emit: Emit, signal: AbortSignal) => Promise<void>, signal
  * every run-log event, new offers from the price store, then the package.
  * With `replay: true` and a scenario, the latest saved run of that scenario
  * is streamed again instead, with the same events in the same order.
+ * Replays, jury scenario labels and the jury flag need the signed jury cookie.
  */
 export async function POST(request: Request) {
   let body: unknown;
@@ -66,7 +80,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
 
+  const jury = await isJuryRequest(request);
+
   if (body && typeof body === "object" && (body as { replay?: unknown }).replay === true) {
+    if (!jury) return Response.json({ error: "forbidden" }, { status: 403 });
     const replay = AgentReplayRequestSchema.safeParse(body);
     if (!replay.success) return Response.json({ error: "invalid_request" }, { status: 400 });
     return sse((emit, signal) => replayRun({ scenario: replay.data.scenario, emit, signal }), request.signal);
@@ -76,9 +93,21 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return Response.json({ error: "invalid_request" }, { status: 400 });
   }
+  const agentRequest = {
+    ...parsed.data,
+    jury: parsed.data.jury && jury,
+    // Only jury runs are labelled, so a tester's run never becomes a judges' replay.
+    scenario: jury && parsed.data.scenario && JURY_LABELS.includes(parsed.data.scenario) ? parsed.data.scenario : null,
+  };
+
+  const blocked = await admitLiveRun(request, jury);
+  if (blocked) {
+    return Response.json({ error: blocked }, { status: blocked === "rate_limited" ? 429 : 503 });
+  }
 
   const started = performance.now();
   const log = new RunLog(request.headers.get(RUN_ID_HEADER) ?? undefined);
+  after(() => recordUsage(log.totalCostUsd(), 1));
 
   return sse(async (send) => {
     const frames: RecordedFrame[] = [];
@@ -90,7 +119,7 @@ export async function POST(request: Request) {
 
     try {
       const result = await runAgent({
-        request: parsed.data,
+        request: agentRequest,
         log,
         emit,
         deadline: started + RUN_BUDGET_MS,
@@ -100,8 +129,8 @@ export async function POST(request: Request) {
       try {
         saved = await saveRun({
           id: log.runId,
-          scenario: parsed.data.scenario,
-          intent: parsed.data.intent,
+          scenario: agentRequest.scenario,
+          intent: agentRequest.intent,
           events: log.list(),
           offers: result.offers,
           package: result.package,

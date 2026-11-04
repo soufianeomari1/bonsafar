@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { LanguageProvider } from "@/lib/i18n/provider";
 import { HapticRing } from "@/components/bs/HapticRing";
 import { IconDefaults } from "@/components/bs/IconDefaults";
+import { JuryBridge } from "@/components/jury/JuryBridge";
 import { InstallRegistrar } from "@/components/pwa/InstallRegistrar";
 import { PartnerReturn } from "@/components/trip/PartnerReturn";
 import { TOKENS } from "@/lib/tokens";
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <HapticRing />
             <InstallRegistrar />
             <PartnerReturn />
+            <JuryBridge />
           </IconDefaults>
         </LanguageProvider>
       </body>

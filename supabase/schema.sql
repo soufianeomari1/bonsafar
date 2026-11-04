@@ -117,6 +117,79 @@ alter table public.usage enable row level security;
 -- The "RLS enabled, no policy" advisor notice is expected and wanted here.
 
 -- ---------------------------------------------------------------------------
+-- usage_daily and usage_ip_hourly: spend cap and live-run limits (migration add_usage_guards)
+-- Written only by the server through the two functions below. The app keeps
+-- working (no cap, no limit) until this migration is applied.
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.usage_daily (
+  day date primary key,
+  cost_usd numeric(12, 6) not null default 0 check (cost_usd >= 0),
+  runs integer not null default 0 check (runs >= 0),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.usage_daily enable row level security;
+-- No policy: only the server, with SUPABASE_SECRET_KEY, reads and writes it.
+
+-- Live agent runs per hashed IP and per clock hour. The IP is an HMAC with a
+-- server-side salt, never the address itself.
+create table if not exists public.usage_ip_hourly (
+  ip_hash text not null check (char_length(ip_hash) = 64),
+  hour timestamptz not null,
+  runs integer not null default 0 check (runs >= 0),
+  primary key (ip_hash, hour)
+);
+
+create index if not exists usage_ip_hourly_hour_idx on public.usage_ip_hourly (hour);
+
+alter table public.usage_ip_hourly enable row level security;
+-- No policy: only the server, with SUPABASE_SECRET_KEY, reads and writes it.
+
+-- Adds the measured cost of a live request (and its agent runs) to today's row (UTC).
+create or replace function public.usage_add(p_cost numeric, p_runs integer)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  insert into public.usage_daily as u (day, cost_usd, runs)
+  values ((now() at time zone 'utc')::date, greatest(p_cost, 0), greatest(p_runs, 0))
+  on conflict (day) do update
+    set cost_usd = u.cost_usd + excluded.cost_usd,
+        runs = u.runs + excluded.runs,
+        updated_at = now();
+$$;
+
+-- Takes one live-run slot for this hour. False when the hour is already full.
+create or replace function public.usage_take_run(p_ip_hash text, p_limit integer)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  taken integer;
+begin
+  insert into public.usage_ip_hourly as u (ip_hash, hour, runs)
+  values (p_ip_hash, date_trunc('hour', now()), 1)
+  on conflict (ip_hash, hour) do update
+    set runs = u.runs + 1
+    where u.runs < p_limit
+  returning runs into taken;
+
+  delete from public.usage_ip_hourly where hour < now() - interval '2 days';
+
+  return taken is not null;
+end;
+$$;
+
+revoke execute on function public.usage_add(numeric, integer) from public, anon, authenticated;
+revoke execute on function public.usage_take_run(text, integer) from public, anon, authenticated;
+grant execute on function public.usage_add(numeric, integer) to service_role;
+grant execute on function public.usage_take_run(text, integer) to service_role;
+
+-- ---------------------------------------------------------------------------
 -- runs: successful agent runs, saved for the honest replay (migration add_runs)
 -- ---------------------------------------------------------------------------
 

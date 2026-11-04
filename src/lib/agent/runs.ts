@@ -120,6 +120,7 @@ const StoredRunSchema = z.object({
   scenario: z.string(),
   created_at: z.string(),
   prices_captured_at: z.string(),
+  intent: z.unknown(),
   offers: z.array(StoredOffer),
   package: StoredPackage,
   stream: z
@@ -134,6 +135,8 @@ export type StoredRun = {
   scenario: string;
   created_at: string;
   prices_captured_at: string;
+  /** As saved; parse it before use. */
+  intent: unknown;
   package: AgentPackage;
   stream: RecordedFrame[];
 };
@@ -145,7 +148,7 @@ const CANDIDATES = 5;
 export async function loadLatestRun(scenario: string): Promise<StoredRun | null> {
   const { data, error } = await adminClient()
     .from("runs")
-    .select("id, scenario, created_at, prices_captured_at, offers, package, stream")
+    .select("id, scenario, created_at, prices_captured_at, intent, offers, package, stream")
     .eq("scenario", scenario)
     .not("stream", "is", null)
     .order("created_at", { ascending: false })
@@ -162,6 +165,7 @@ export async function loadLatestRun(scenario: string): Promise<StoredRun | null>
       scenario: run.scenario,
       created_at: run.created_at,
       prices_captured_at: run.prices_captured_at,
+      intent: run.intent,
       package: run.package,
       stream: run.stream,
     };

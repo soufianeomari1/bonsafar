@@ -9,6 +9,11 @@ import { z } from "zod";
  *   message inside the route that needs it instead of breaking `next build`.
  */
 
+/** An optional variable copied empty from .env.example counts as unset. */
+function blankToUndefined<T extends z.ZodType>(schema: T) {
+  return z.preprocess((value) => (value === "" ? undefined : value), schema);
+}
+
 const serverSchema = z.object({
   // Meta Model API
   META_API_KEY: z.string().min(1),
@@ -33,13 +38,20 @@ const serverSchema = z.object({
   // App settings
   DOTATION_MAD: z.coerce.number().positive(),
   SPEND_LIMIT_USD: z.coerce.number().positive(),
-  JURY_REPLAY_AFTER_MS: z.coerce.number().int().positive(),
+  /** Jury live run: switch to the recorded run after this long without a byte on the stream. */
+  JURY_SILENCE_MS: blankToUndefined(z.coerce.number().int().positive().default(15_000)),
+  /** Unlocks /jury?k=<key>. Without it the jury mode stays closed. */
+  JURY_ACCESS_KEY: blankToUndefined(z.string().min(12).optional()),
+  /** Salt for the hashed IP of the live-run limit. Derived from the secret key when absent. */
+  IP_HASH_SALT: blankToUndefined(z.string().min(16).optional()),
 });
 
 const publicSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   NEXT_PUBLIC_SITE_URL: z.url(),
+  /** The 3-minute demo video. The link is hidden while empty. */
+  NEXT_PUBLIC_DEMO_VIDEO_URL: z.url().optional().or(z.literal("")),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
@@ -55,6 +67,7 @@ const rawPublicEnv = {
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  NEXT_PUBLIC_DEMO_VIDEO_URL: process.env.NEXT_PUBLIC_DEMO_VIDEO_URL,
 };
 
 function describe(error: z.ZodError, scope: string): string {

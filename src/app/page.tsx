@@ -1,20 +1,34 @@
-import { Suspense } from "react";
+import type { Metadata } from "next";
 import { MobileFrame } from "@/components/layout/MobileFrame";
-import { JuryPlaceholder } from "@/components/screens/JuryPlaceholder";
 import { WelcomeScreen } from "@/components/screens/WelcomeScreen";
 
-/** Screen 0, or the judges' entry point on `/?jury=1`. */
-export default function Page({ searchParams }: PageProps<"/">) {
+const TITLE = "BonSafar, your travel agent that understands Moroccan darija";
+const DESCRIPTION =
+  "Send a voice note in darija, get a real trip back: live flights and hotels, one price in dirhams, visa checked before you go.";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "BonSafar",
+    title: TITLE,
+    description: DESCRIPTION,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+};
+
+/** Screen 0. The judges' board lives on /jury, behind its key. */
+export default function Page() {
   return (
     <MobileFrame>
-      <Suspense fallback={null}>
-        <Entry searchParams={searchParams} />
-      </Suspense>
+      <WelcomeScreen />
     </MobileFrame>
   );
-}
-
-async function Entry({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
-  const { jury } = await searchParams;
-  return jury === "1" ? <JuryPlaceholder /> : <WelcomeScreen />;
 }

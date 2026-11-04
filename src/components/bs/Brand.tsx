@@ -1,5 +1,6 @@
 import { AirplaneTilt, Play } from "@phosphor-icons/react/dist/ssr";
 import type React from "react";
+import { JuryOnly } from "@/components/jury/JuryOnly";
 import { cn } from "@/lib/utils";
 
 const LOGO_SIZES = {
@@ -98,8 +99,8 @@ export function Logo({
 }
 
 /**
- * "Mode jury" pill. A plain link on purpose: `?jury=1` is read once per page
- * load, so the judges' mode needs a full navigation.
+ * "Mode jury" pill, shown only to a browser that opened /jury with its key.
+ * A plain link on purpose: the judges' board needs a full navigation.
  */
 export function JuryPill({
   label,
@@ -114,19 +115,20 @@ export function JuryPill({
   className?: string;
 }) {
   return (
-    // eslint-disable-next-line @next/next/no-html-link-for-pages -- needs a full page load
-    <a
-      href="/?jury=1"
-      className={cn(
-        "flex shrink-0 items-center gap-1.5 rounded-pill bg-card font-semibold text-ink shadow-[0_1px_2px_rgba(0,0,0,0.06),0_6px_16px_rgba(0,0,0,0.06)]",
-        withIcon ? "h-9 px-3.5 text-sm" : "h-[34px] px-3 text-[13px]",
-        className
-      )}
-    >
-      {dot && <span aria-hidden className="size-[7px] rounded-pill bg-blue" />}
-      {withIcon && <Play size={14} weight="fill" className="text-blue" aria-hidden />}
-      {label}
-    </a>
+    <JuryOnly>
+      <a
+        href="/jury"
+        className={cn(
+          "flex shrink-0 items-center gap-1.5 rounded-pill bg-card font-semibold text-ink shadow-[0_1px_2px_rgba(0,0,0,0.06),0_6px_16px_rgba(0,0,0,0.06)]",
+          withIcon ? "h-9 px-3.5 text-sm" : "h-[34px] px-3 text-[13px]",
+          className
+        )}
+      >
+        {dot && <span aria-hidden className="size-[7px] rounded-pill bg-blue" />}
+        {withIcon && <Play size={14} weight="fill" className="text-blue" aria-hidden />}
+        {label}
+      </a>
+    </JuryOnly>
   );
 }
 

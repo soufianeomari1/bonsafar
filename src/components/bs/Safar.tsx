@@ -27,6 +27,8 @@ export type SafarProps = {
   tilt?: number;
   /** Voice volume, 0 to 1. Drives the listening arcs only. */
   level?: number;
+  /** The pose without any loop, as with reduced motion. For a second Safar on a screen. */
+  still?: boolean;
   className?: string;
 };
 
@@ -178,10 +180,11 @@ export function Safar({
   size = 112,
   tilt = -12,
   level = 1,
+  still = false,
   className,
 }: SafarProps) {
   const t = useT();
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotion() || still;
   const controls = useAnimation();
   const previous = useRef<{ state: SafarState; tilt: number } | null>(null);
   const volume = clamp01(level);
@@ -665,6 +668,7 @@ export type SafarBubbleProps = {
   size?: number;
   tilt?: number;
   level?: number;
+  still?: boolean;
   className?: string;
   bubbleClassName?: string;
 };
@@ -679,12 +683,13 @@ export function SafarBubble({
   size = 96,
   tilt,
   level,
+  still,
   className,
   bubbleClassName,
 }: SafarBubbleProps) {
   return (
     <div className={cn("flex items-end gap-2.5", className)}>
-      <Safar state={state} size={size} tilt={tilt} level={level} className="shrink-0" />
+      <Safar state={state} size={size} tilt={tilt} level={level} still={still} className="shrink-0" />
       <div
         className={cn(
           "mb-3.5 min-w-0 flex-1 bg-card px-4 py-3.5 shadow-soft",

@@ -9,6 +9,8 @@ import type { Offer } from "@/lib/prices/store";
 import { profileForLang } from "@/lib/profile/schema";
 import { readProfileState } from "@/lib/profile/store";
 import { readTrip } from "@/lib/trip/store";
+import { playRecordedRun, type ReplayableRun } from "@/lib/agent/replay-frames";
+import type { GuardCode } from "@/lib/jury/copy";
 import { parseStreamEvent } from "./parse";
 
 /**
@@ -25,6 +27,8 @@ export type RunMeta = {
   fx: FxRate;
   replay: boolean;
   captured_at?: string;
+  /** Browser clock when the run event arrived: a replay's started_at is the recording's. */
+  received_at?: number;
 };
 
 export type StepState = {
@@ -54,9 +58,13 @@ export type AgentRunError = {
     | "agent_invalid_output"
     | "agent_failed"
     | "replay_unavailable"
-    | "interrupted";
+    | "interrupted"
+    | GuardCode;
   detail?: string;
 };
+
+/** Why a jury live run handed over to its recorded run. */
+export type ReplayFallback = "silence" | "error" | "network" | "limit";
 
 export type AgentRunRequest = AgentRequest | AgentReplayRequest;
 
@@ -79,6 +87,10 @@ export type AgentRunSnapshot = {
   request: AgentRunRequest | null;
   /** "Good to know" notes by run and language, fetched as soon as the package is in. */
   goodToKnow: Record<string, unknown>;
+  /** Set when a jury live run switched to the recorded run of its scenario. */
+  fallback: ReplayFallback | null;
+  /** The silence that triggered it, for the message. */
+  silenceMs: number | null;
 };
 
 function emptySteps(): Record<AgentStep, StepState> {
@@ -106,6 +118,8 @@ const EMPTY: AgentRunSnapshot = {
   showGloss: true,
   request: null,
   goodToKnow: {},
+  fallback: null,
+  silenceMs: null,
 };
 
 let snapshot: AgentRunSnapshot = EMPTY;
@@ -189,6 +203,7 @@ function applyEvent(draft: AgentRunSnapshot, event: AgentStreamEvent) {
         fx: event.fx,
         replay: event.replay,
         captured_at: event.captured_at,
+        received_at: Date.now(),
       };
       break;
     case "step": {
@@ -241,13 +256,18 @@ function applyEvent(draft: AgentRunSnapshot, event: AgentStreamEvent) {
   }
 }
 
-async function readFrames(response: Response, onEvent: (event: AgentStreamEvent) => void) {
+async function readFrames(
+  response: Response,
+  onEvent: (event: AgentStreamEvent) => void,
+  onChunk?: () => void,
+) {
   if (!response.body) throw new Error("Empty response.");
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   for (;;) {
     const { value, done } = await reader.read();
     if (done) break;
+    onChunk?.();
     buffer += value;
     let boundary = buffer.indexOf("\n\n");
     while (boundary !== -1) {
@@ -270,8 +290,46 @@ async function readFrames(response: Response, onEvent: (event: AgentStreamEvent)
   }
 }
 
-export function startAgentRun(request: AgentRunRequest, scenario: string | null) {
-  hydrated = true;
+/** Set by the /jury phone bridge: the jury label of the run and the silence watchdog. */
+export type JuryRunContext = { scenario: string | null; silenceMs: number };
+
+let juryContext: JuryRunContext | null = null;
+
+export function configureJuryRun(context: JuryRunContext | null) {
+  juryContext = context;
+}
+
+export type RecordedRun = ReplayableRun & { intent: unknown; legacy: boolean; created_at: string };
+
+/** The recorded run of a jury scenario, in one piece (jury cookie required). */
+export async function fetchRecordedRun(scenario: string, signal?: AbortSignal): Promise<RecordedRun | null> {
+  try {
+    const response = await fetch(`/api/jury/replay?scenario=${encodeURIComponent(scenario)}`, {
+      cache: "no-store",
+      signal,
+    });
+    if (!response.ok) return null;
+    const body = (await response.json()) as RecordedRun | null;
+    return body && Array.isArray(body.stream) && body.stream.length > 1 ? body : null;
+  } catch {
+    return null;
+  }
+}
+
+function applyAndCommit(mine: number, event: AgentStreamEvent) {
+  if (mine !== token) return;
+  const next = structuredClone(snapshot);
+  applyEvent(next, event);
+  commit(next);
+}
+
+function guardCode(body: unknown): GuardCode | null {
+  const error = (body as { error?: unknown } | null)?.error;
+  return error === "rate_limited" || error === "spend_limit" ? error : null;
+}
+
+/** Plays the recorded run in the browser, from the copy fetched when the live run started. */
+function playFallback(scenario: string, reason: ReplayFallback, recorded: Promise<RecordedRun | null>) {
   controller?.abort();
   controller = new AbortController();
   const mine = ++token;
@@ -280,9 +338,64 @@ export function startAgentRun(request: AgentRunRequest, scenario: string | null)
     ...EMPTY,
     status: "running",
     scenario,
+    request: { replay: true, scenario },
+    showGloss: snapshot.showGloss,
+    fallback: reason,
+    silenceMs: juryContext?.silenceMs ?? null,
+  });
+  void (async () => {
+    const run = (await recorded) ?? (await fetchRecordedRun(scenario, signal));
+    if (mine !== token) return;
+    if (!run) {
+      commit({ ...snapshot, status: "error", error: { code: "replay_unavailable" } });
+      return;
+    }
+    await playRecordedRun({ run, emit: (event) => applyAndCommit(mine, event), signal });
+  })();
+}
+
+/**
+ * A jury live run keeps going as long as bytes arrive. A fatal error, a
+ * refused request, a dropped connection or `silenceMs` without a byte hands
+ * over to the recorded run of the same scenario, marked replay.
+ */
+export function startAgentRun(input: AgentRunRequest, inputScenario: string | null) {
+  hydrated = true;
+  controller?.abort();
+  controller = new AbortController();
+  const mine = ++token;
+  const signal = controller.signal;
+  const live = !("replay" in input && input.replay === true);
+  const jury = live ? juryContext : null;
+  const request: AgentRunRequest = jury ? { ...(input as AgentRequest), scenario: jury.scenario } : input;
+  const scenario = jury ? jury.scenario : inputScenario;
+  commit({
+    ...EMPTY,
+    status: "running",
+    scenario,
     request,
     showGloss: snapshot.showGloss,
   });
+
+  const fallbackScenario = jury?.scenario ?? null;
+  // Fetched now, without the run's signal: it must survive the network dropping later.
+  const recorded = fallbackScenario ? fetchRecordedRun(fallbackScenario) : null;
+  let lastChunk = Date.now();
+  let handedOver = false;
+  const watchdog =
+    jury && fallbackScenario
+      ? setInterval(() => {
+          if (mine !== token) clearInterval(watchdog);
+          else if (Date.now() - lastChunk > jury.silenceMs) handOver("silence");
+        }, 500)
+      : undefined;
+  const handOver = (reason: ReplayFallback): boolean => {
+    if (!fallbackScenario || !recorded || handedOver || mine !== token) return false;
+    handedOver = true;
+    clearInterval(watchdog);
+    playFallback(fallbackScenario, reason, recorded);
+    return true;
+  };
 
   void (async () => {
     try {
@@ -294,16 +407,31 @@ export function startAgentRun(request: AgentRunRequest, scenario: string | null)
       });
       if (mine !== token) return;
       if (!response.ok || !response.body) {
-        commit({ ...snapshot, status: "error", error: { code: "agent_failed", detail: `HTTP ${response.status}` } });
+        const guard = guardCode(await response.json().catch(() => null));
+        if (handOver(guard ? "limit" : "error")) return;
+        clearInterval(watchdog);
+        commit({
+          ...snapshot,
+          status: "error",
+          error: guard ? { code: guard } : { code: "agent_failed", detail: `HTTP ${response.status}` },
+        });
         return;
       }
-      await readFrames(response, (event) => {
-        if (mine !== token) return;
-        const next = structuredClone(snapshot);
-        applyEvent(next, event);
-        commit(next);
-      });
+      lastChunk = Date.now();
+      await readFrames(
+        response,
+        (event) => {
+          if (mine !== token) return;
+          if (event.type === "error" && handOver("error")) return;
+          applyAndCommit(mine, event);
+        },
+        () => {
+          lastChunk = Date.now();
+        },
+      );
       if (mine !== token) return;
+      if (snapshot.status === "running" && !snapshot.result && handOver("error")) return;
+      clearInterval(watchdog);
       if (snapshot.status === "running") {
         commit({
           ...snapshot,
@@ -313,9 +441,25 @@ export function startAgentRun(request: AgentRunRequest, scenario: string | null)
       }
     } catch {
       if (signal.aborted || mine !== token) return;
+      if (handOver("network")) return;
+      clearInterval(watchdog);
       commit({ ...snapshot, status: "error", error: snapshot.error ?? { code: "agent_failed" } });
     }
   })();
+}
+
+/** Starts the recorded run of a jury scenario, streamed by the server (Watch replay). */
+export function startJuryReplay(scenario: string) {
+  startAgentRun({ replay: true, scenario }, scenario);
+}
+
+/** Back to no run at all, and no session copy. */
+export function resetAgentRun() {
+  hydrated = true;
+  controller?.abort();
+  controller = null;
+  token += 1;
+  commit({ ...EMPTY, showGloss: snapshot.showGloss });
 }
 
 /** Appends measured events from a later call (good to know, poster) to the session log. */

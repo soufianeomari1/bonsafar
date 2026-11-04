@@ -3,7 +3,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { setHapticsEnabled } from "@/lib/haptics";
-import { readJury, readLang, writeLang } from "@/lib/i18n/store";
+import { FATIMA } from "@/lib/agent/scenarios";
+import { readJury, readJuryEmbedded, readLang, writeLang } from "@/lib/i18n/store";
 import {
   DEFAULT_PROFILE,
   PROFILE_COLUMNS,
@@ -140,6 +141,12 @@ async function syncWithAccount() {
 function start() {
   if (started || typeof window === "undefined") return;
   started = true;
+  if (readJuryEmbedded()) {
+    // The judges play Fatima: in memory only, the visitor's own profile is never touched.
+    setState({ status: "ready", profile: FATIMA, user: null });
+    applySideEffects(FATIMA);
+    return;
+  }
   try {
     supabase = createClient();
   } catch {
@@ -188,6 +195,7 @@ export async function updateProfile(patch: ProfilePatch): Promise<void> {
   if (patch.ui_lang && !readJury()) writeLang(next.ui_lang);
   if (patch.haptics !== undefined) setHapticsEnabled(next.haptics);
 
+  if (readJuryEmbedded()) return;
   if (state.user && supabase) {
     const { error } = await supabase
       .from("profiles")
