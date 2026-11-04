@@ -3,7 +3,7 @@
 // with the jury label (jury-istanbul, jury-paris, jury-sea), saved by the
 // server like any live run. Needs a running server and JURY_ACCESS_KEY.
 // Stops before any call when a voice note is missing.
-// Usage: npm run record:jury -- [http://localhost:3001] [istanbul|paris|sea ...]
+// Usage: npm run record:jury -- [http://localhost:3000] [istanbul|paris|sea ...]
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { FATIMA } from "../src/lib/agent/scenarios.ts";
@@ -89,10 +89,10 @@ async function record(scenario) {
   console.log(`  transcript: ${final.text}`);
   console.log(`  ${final.model}${final.fallback ? " (fallback)" : ""}, ${sec(final.latency_ms)}, ${usd(final.cost_usd)}`);
 
-  // The judge answers the one question with a quick reply; the script takes the first one.
+  // One question at most: the first option already names the city and the dates.
   const answers = [];
   let intent = await understand(final.text, runId, answers);
-  while (intent.question && answers.length < 2) {
+  while (intent.question && answers.length < 1) {
     const option = intent.question.options[0];
     if (!option) break;
     console.log(`  question: ${intent.question.en} -> ${option.en}`);
@@ -102,7 +102,10 @@ async function record(scenario) {
   if (!intent.destination || !intent.depart_date || !intent.return_date) {
     throw new Error(`intent incomplete: ${JSON.stringify({ destination: intent.destination, depart: intent.depart_date, back: intent.return_date })}`);
   }
-  console.log(`  intent: ${intent.origin_iata} -> ${intent.destination.city}, ${intent.depart_date} to ${intent.return_date}, ${intent.adults} adult(s)`);
+  const budget = intent.budget_mad ?? intent.budget_per_night_mad;
+  console.log(
+    `  intent: ${intent.origin_iata} -> ${intent.destination.city}, ${intent.depart_date} to ${intent.return_date}, ${intent.adults} adult(s), ${intent.children} child(ren), budget ${budget ?? "none"}`,
+  );
 
   const response = await fetch(`${base}/api/agent`, {
     method: "POST",
@@ -122,7 +125,10 @@ async function record(scenario) {
   });
   if (error || !result) throw new Error(`agent: ${error ?? "no package"}`);
   if (!saved) throw new Error("agent: the run finished but was not saved (check SUPABASE_SECRET_KEY and the runs table)");
-  console.log(`  package: ${result.destination.city}, status ${result.status}, prices captured ${result.prices_captured_at}`);
+  const total = result.recommended?.totals?.total_display_mad;
+  console.log(
+    `  package: ${result.destination.city}, status ${result.status}, total ${total ?? "?"} DH, prices captured ${result.prices_captured_at}`,
+  );
   console.log(`  recorded: agent ${sec(end.total_ms)}, ${usd(end.cost_usd)}`);
 }
 

@@ -4,6 +4,7 @@ import type { RunLog } from "@/lib/ai/events";
 import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { serverEnv } from "@/lib/env";
 import { containsMoney, guardModelText, scrubMoney } from "@/lib/prices/guardrail";
+import { fillBudgetMarker } from "./budget-marker";
 
 const TranslateSchema = z.object({
   translation_en: z.string().max(600),
@@ -32,7 +33,7 @@ const SYSTEM_PROMPT = `You translate one travel request into natural English for
 
 Rules:
 - One or two short sentences. Faithful. Add nothing.
-- Never write an amount of money, a currency word, or a price. Where a budget is said, write the token {budget}.
+- Never write an amount of money, a currency word, or a price. Where a budget is said, write only the token {budget}, with no amount and no extra word around it. Example: "with {budget}".
 - Keep city names, dates and how many people are travelling.`;
 
 const SYSTEM_PROMPT_AR = `You translate one short line of a travel app into Modern Standard Arabic (fusha) for an Arabic-speaking traveller. Return only the JSON object.
@@ -92,7 +93,9 @@ const ENGLISH: Target = {
       status: blocked ? "blocked" : "passed",
       note: blocked ? "translation carried an amount, removed" : "1 model text field scanned",
     });
-    return blocked ? scrubMoney(text, "{budget}").replace(/\s{2,}/g, " ").trim() : text;
+    const cleaned = blocked ? scrubMoney(text, "{budget}") : text;
+    // {budget} stays until the intent amount is known. Every other brace marker goes.
+    return cleaned.replace(/\{(?!budget\})[^{}]+\}/g, "").replace(/\s{2,}/g, " ").trim();
   },
 };
 
@@ -182,9 +185,17 @@ async function translate(text: string, target: Target, log: RunLog): Promise<str
   throw new Error("The translation did not match the schema after one repair.");
 }
 
-/** English gloss of a darija transcript. */
+/** English gloss of a darija transcript. `{budget}` is still a token here. */
 export function translateTranscript(transcript: string, log: RunLog): Promise<string> {
   return translate(transcript, ENGLISH, log);
+}
+
+/**
+ * Puts the traveller's budget into an English gloss. English amounts read
+ * "15,000 DH". With no budget, the token becomes "a budget". No `{marker}` remains.
+ */
+export function presentEnglish(text: string, budgetMad: number | null): string {
+  return fillBudgetMarker(text, budgetMad);
 }
 
 /** Modern Standard Arabic version of one model line, for replays recorded without it. */

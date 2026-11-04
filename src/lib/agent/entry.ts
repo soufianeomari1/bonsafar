@@ -153,9 +153,9 @@ function aboutOtherCountry(source: { url: string; title?: string }, allowed: Set
 /**
  * Cited pages, pages the model opened, then the raw search hits. Pages about
  * another country and other governments' pages are dropped; the
- * destination's own official sites rank first, then other official pages,
- * and only when there is none, the first hits. At most two. With a JSON
- * output the model rarely cites inline.
+ * destination's own official sites rank first, then other official pages.
+ * A third-party page is never a source. At most two. With a JSON output
+ * the model rarely cites inline.
  */
 function extractSources(
   response: Response,
@@ -211,11 +211,12 @@ function extractSources(
 
   // Stable sort: within a rank, cited and opened pages stay ahead of hits.
   ranked.sort((a, b) => a.rank - b.rank);
-  const best = ranked[0]?.rank ?? 30;
   // One source per site: two pages of the same portal add nothing.
+  // Rank 30 is everything that is not a government, europa.eu, or the
+  // destination's own visa site. Those pages are not shown.
   const sites = new Set<string>();
   return ranked
-    .filter((s) => (best < 30 ? s.rank < 30 : true))
+    .filter((s) => s.rank < 30)
     .filter((s) => {
       if (sites.has(s.host)) return false;
       sites.add(s.host);
@@ -284,30 +285,59 @@ export async function checkEntryRequirements({
     arabic ? `Also write the notes in Modern Standard Arabic ("ar").` : `Leave "ar" out of the notes.`,
   ].join("\n");
 
-  const { response, finalText } = await callResponses({
-    log,
-    step: "entry_requirements",
-    note: `${country}, web_search`,
-    timeoutMs: 30_000,
-    params: {
-      model: env.MODEL_SPARK,
-      reasoning: { effort: "minimal" },
-      instructions: SYSTEM_PROMPT,
-      input,
-      tools: [{ type: "web_search", search_context_size: "low" }],
-      include: ["web_search_call.results"],
-      text: {
-        format: { type: "json_schema", name: "EntryRequirements", schema: arabic ? JSON_SCHEMA_AR : JSON_SCHEMA },
-      },
-      max_output_tokens: 3000,
-    },
-  });
-
   const schema: z.ZodType<z.infer<typeof EntryModelSchema>> = arabic ? EntryModelSchemaAr : EntryModelSchema;
-  const parsed = schema.safeParse(parseJson(finalText));
-  if (!parsed.success) throw new Error("Entry requirements did not match the schema.");
+  const passportCodes = profile.passport_country ? PASSPORT_CODES[profile.passport_country] : [];
 
-  const result = parsed.data;
+  async function search(text: string, note: string) {
+    const { response, finalText } = await callResponses({
+      log,
+      step: "entry_requirements",
+      note,
+      timeoutMs: 30_000,
+      params: {
+        model: env.MODEL_SPARK,
+        reasoning: { effort: "minimal" },
+        instructions: SYSTEM_PROMPT,
+        input: text,
+        tools: [{ type: "web_search", search_context_size: "low" }],
+        include: ["web_search_call.results"],
+        text: {
+          format: { type: "json_schema", name: "EntryRequirements", schema: arabic ? JSON_SCHEMA_AR : JSON_SCHEMA },
+        },
+        max_output_tokens: 3000,
+      },
+    });
+    const parsed = schema.safeParse(parseJson(finalText));
+    if (!parsed.success) throw new Error("Entry requirements did not match the schema.");
+    const checkedAt = new Date().toISOString();
+    return {
+      result: parsed.data,
+      sources: extractSources(response, checkedAt, code, passportCodes),
+      checkedAt,
+    };
+  }
+
+  const primary = official?.sites[0];
+  const citesPrimary = (url: string) => {
+    const host = hostOf(url);
+    return !!primary && !!host && (host === primary || host.endsWith(`.${primary}`));
+  };
+
+  let found = await search(input, `${country}, web_search`);
+  // No page on the destination's own visa site: one more search, on that site only.
+  if (official && primary && !found.sources.some((source) => citesPrimary(source.url))) {
+    const again = await search(
+      [
+        input,
+        `Search once more, and only on ${official.sites.join(" and ")}. Open the page about: ${official.topic}, for a ${passport}. Do not use any other website.`,
+      ].join("\n\n"),
+      `${country}, official site`,
+    );
+    if (again.sources.some((source) => citesPrimary(source.url))) found = again;
+    else if (found.sources.length === 0) found = again;
+  }
+
+  const result = found.result;
   const verdict = guardModelText(result.notes, log, "entry notes");
   if (!verdict.passed) {
     const { ar } = result.notes;
@@ -319,19 +349,13 @@ export async function checkEntryRequirements({
     };
   }
 
-  const checkedAt = new Date().toISOString();
   return {
     ...result,
     country,
     country_code: countryCode,
     passport: profile.passport_country ?? "unknown",
     has_schengen: profile.has_schengen,
-    sources: extractSources(
-      response,
-      checkedAt,
-      code,
-      profile.passport_country ? PASSPORT_CODES[profile.passport_country] : [],
-    ),
-    checked_at: checkedAt,
+    sources: found.sources,
+    checked_at: found.checkedAt,
   };
 }

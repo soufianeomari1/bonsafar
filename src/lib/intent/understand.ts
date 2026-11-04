@@ -8,6 +8,7 @@ import { airportCity } from "@/lib/airports";
 import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { profileTravellers, type Profile } from "@/lib/profile/schema";
 import { applyLocks } from "./edits";
+import { spokenBudgetMad } from "./spoken-budget";
 import {
   IntentSchema,
   QuestionSchemaAr,
@@ -103,13 +104,13 @@ const SYSTEM_PROMPT = `You are the understanding step of BonSafar, a travel agen
 Rules:
 1. destination: the city to visit, its country in English and its main airport IATA code. If no precise city is named (only a wish like "somewhere with the sea"), use null.
 2. origin_iata: the profile home airport, unless the traveller names another departure city.
-3. Dates are always in the future, relative to today. "nouss"/"mi-"/"mid" a month = the 15th. "bdyat"/"début"/"early" = the 1st. "lekher"/"fin"/"late" = the 24th. A month alone = the 15th. "chi semaine"/"une semaine"/"a week" = 7 nights; "weekend" = Friday to Sunday. With a start and a length, return_date = depart_date + nights. A season alone ("f l'été", "summer") or nothing at all is too vague: dates and nights null.
+3. Dates are always in the future, relative to today. "nouss"/"mi-"/"mid" a month = the 15th. "bdyat"/"début"/"early" = the 1st. "lekher"/"fin"/"late" = the 24th. A month alone = the 15th. "chi semaine"/"une semaine"/"1 semaine"/"a week"/"one week" = 7 nights; "weekend" = Friday to Sunday. With a start and a length, return_date = depart_date + nights. A season alone ("f l'été", "summer") or nothing at all is too vague: dates and nights null.
 4. adults and children: from the words ("m3a rajli" = with my husband = 2 adults), otherwise from the profile; 2 adults if still unknown.
-5. Money, only if the traveller says an amount in dirhams (dh, dirham, "alf" = thousand). Never guess, and never write an amount in a sentence. A cap per night ("la nuit", "par nuit", "l lila", "per night", "لليلة") goes in budget_per_night_mad and budget_mad stays null. A total for the trip goes in budget_mad and budget_per_night_mad stays null. If they say neither, both are null.
+5. Money, only if the traveller says an amount in dirhams (dh, dirham, "alf" = thousand). Never guess. The amount goes only in budget_mad or budget_per_night_mad, never in a sentence: it is the traveller's own figure, not a price. Spoken amounts count, in darija, Arabic or French. "خمستاش الاف درهم" = 15000, "عشرين ألف درهم" = 20000, "khamstach alf" = 15000, "15 alf dh" = 15000, "quinze mille dirhams" = 15000. A cap per night ("la nuit", "par nuit", "l lila", "per night", "لليلة") goes in budget_per_night_mad and budget_mad stays null. A total for the trip goes in budget_mad and budget_per_night_mad stays null. If they say neither, both are null.
 6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). label: 1 to 3 words in the label language.
 7. keywords: EXACT substrings copied from the transcript (same spelling, accents and case) that carry each extracted fact, with the slot they fill. At most 2 per slot, most telling first.
 8. Do not translate the transcript and do not write an English gloss of it. Another call does that.
-9. question: null unless something indispensable is missing: the destination, or dates too vague to search. Then ask ONE short, friendly question about the most important gap, never about the departure city, travellers or papers. Set field to the gap you ask about: destination, dates, nights, travelers or budget. darija in the given script, plus French and English, and Modern Standard Arabic in "ar" (fusha, never darija) when the user message asks for it. Give 2 to 4 short answer options, each in the same languages. Each language is complete on its own, with no word of another language inside it. Latin digits only. No amounts of money anywhere.
+9. question: null when the destination and the dates are both precise enough to search. If the city, the dates, or both are missing, ask ONE short, friendly question and never a second one. Each quick answer must by itself fill every missing fact: the city, the departure day, and the return day or the number of nights. Do not split that across two questions, and do not ask again once an answer gave them. For "somewhere by the sea this summer" with a Moroccan passport, offer for example "Agadir · 1 week in early July", "Tangier · 1 week in mid-July", "Hammamet · 1 week in August" (darija, French and English; each language complete on its own). Set field to destination when the city is missing, otherwise to dates. Never ask about the departure city, travellers or papers. 2 to 4 options. Latin digits only. No amounts of money anywhere. Modern Standard Arabic in "ar" (fusha, never darija) only when the user message asks for it.
 
 ${SCRIPT_RULES}`;
 
@@ -222,17 +223,32 @@ function enforce(
   } else if (intent.depart_date && intent.nights) {
     intent.return_date = addDays(intent.depart_date, intent.nights);
   }
+  // A departure with no return and no length would block the search. One week.
+  if (intent.depart_date && !intent.return_date) {
+    const nights = intent.nights != null && intent.nights >= 1 ? intent.nights : 7;
+    intent.nights = nights;
+    intent.return_date = addDays(intent.depart_date, nights);
+  }
 
   const spoken = [transcript, ...answers.map((answer) => answer.answer)].join("\n");
-  if (!SPOKEN_NUMBER.test(spoken)) {
+  // The figure they said is theirs. Read it from the words; never let the price guardrail drop it.
+  const said = spokenBudgetMad(spoken);
+  const mentioned = said != null || SPOKEN_NUMBER.test(spoken);
+  if (!mentioned) {
     intent.budget_mad = null;
     intent.budget_per_night_mad = null;
   } else if (PER_NIGHT.test(spoken)) {
-    const nightly = intent.budget_per_night_mad ?? intent.budget_mad;
+    const nightly = said ?? intent.budget_per_night_mad ?? intent.budget_mad;
     intent.budget_per_night_mad = nightly;
     if (intent.budget_mad != null && intent.budget_mad === nightly) intent.budget_mad = null;
   } else {
     intent.budget_per_night_mad = null;
+    if (said != null) intent.budget_mad = said;
+  }
+
+  // One question, then stop: once an answer has filled the city and the dates, do not ask again.
+  if (answers.length > 0 && intent.destination && intent.depart_date && intent.return_date) {
+    intent.question = null;
   }
 
   const travellersKnown = profile.companions !== null && profile.companions !== "friends";

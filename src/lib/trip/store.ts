@@ -13,6 +13,7 @@ import {
 import type { Intent, QuestionField } from "@/lib/intent/schema";
 import { profileForLang } from "@/lib/profile/schema";
 import { readProfileState } from "@/lib/profile/store";
+import { fillBudgetMarker } from "@/lib/intent/budget-marker";
 import { fetchIntent, fetchTranslate, transcribeWav, VoiceApiError } from "@/lib/voice/client";
 import type { TranscribeFinal } from "@/lib/voice/protocol";
 import { toWav24k } from "@/lib/voice/wav";
@@ -110,7 +111,7 @@ function applyTranslation(id: number, text: string, events: RunEvent[]) {
   }
   set(
     {
-      intent: { ...latest.intent, translation_en: text },
+      intent: { ...latest.intent, translation_en: fillBudgetMarker(text, latest.intent.budget_mad) },
       events: events.length ? [...latest.events, ...events] : latest.events,
     },
     id,
@@ -156,7 +157,7 @@ async function understandJob(id: number, unlock?: QuestionField) {
     let intent = latest.intent ? mergeIntent(response.intent, latest.intent, edited) : response.intent;
     const carried =
       latest.intent?.translation_en || (heldTranslation?.id === id ? heldTranslation.text : "");
-    if (carried) intent = { ...intent, translation_en: carried };
+    if (carried) intent = { ...intent, translation_en: fillBudgetMarker(carried, intent.budget_mad) };
     if (heldTranslation?.id === id) heldTranslation = null;
     const userEdited =
       unlock && (unlock !== "destination" || intent.destination)

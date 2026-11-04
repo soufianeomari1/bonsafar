@@ -15,7 +15,7 @@ import {
   Wheelchair,
   type Icon,
 } from "@phosphor-icons/react";
-import { dateRangeParts, formatAmount, formatDay } from "@/lib/format";
+import { dateRangeParts, formatDay, formatMadNumber } from "@/lib/format";
 import { placeName } from "@/lib/airports";
 import type { Lang, TranslateValues, TranslationKey } from "@/lib/i18n";
 import type { Intent, KeywordSlot, WishKind } from "@/lib/intent/schema";
@@ -116,7 +116,7 @@ export function chipsFor(
       id: "budget-night",
       kind: "budgetNight",
       slot: "budget",
-      label: t("chip.budgetNight", { amount: formatAmount(intent.budget_per_night_mad, lang) }),
+      label: t("chip.budgetNight", { amount: formatMadNumber(intent.budget_per_night_mad) }),
       icon: Wallet,
       tone: "bg-orange-soft text-orange",
     });
@@ -127,7 +127,7 @@ export function chipsFor(
       id: "budget",
       kind: "budget",
       slot: "budget",
-      label: t("chip.budget", { amount: formatAmount(intent.budget_mad, lang) }),
+      label: t("chip.budget", { amount: formatMadNumber(intent.budget_mad) }),
       icon: Wallet,
       tone: "bg-orange-soft text-orange",
     });

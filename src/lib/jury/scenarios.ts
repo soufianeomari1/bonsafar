@@ -29,9 +29,10 @@ export const JURY_SCENARIOS: JuryScenario[] = [
     title: "Istanbul in December",
     status: { label: "No visa needed", tone: "done" },
     audio: "/jury/scenario-1-istanbul.wav",
-    darija: "Bghit nsafer l'Istanbul m3a rajli f nouss décembre, chi semaine, budget 15 000 dh, bghina otel mzyan b ftour.",
+    darija:
+      "Bghit nsafer l'Istanbul m3a rajli f n-nass dyal décembre, chi simana, l-budget khamstach alf derhem, w bghina hotel ykun mzyan w b l-ftour.",
     english:
-      "I want to go to Istanbul with my husband in mid-December, about a week, budget 15,000 dh, a good hotel with breakfast.",
+      "I want to travel to Istanbul with my husband in mid-December for a week with 15,000 DH. We want a good hotel with breakfast included.",
     legacy: "istanbul",
   },
   {
@@ -41,8 +42,8 @@ export const JURY_SCENARIOS: JuryScenario[] = [
     title: "Paris for a weekend",
     status: { label: "Schengen visa needed", tone: "warn" },
     audio: "/jury/scenario-2-paris.wav",
-    darija: "Bghit nmchi Paris weekend m3a bnti, f janvier.",
-    english: "I want to go to Paris for a weekend with my daughter, in January.",
+    darija: "Bghit nemshi l Paris ghir week-end m3a benti f janvier.",
+    english: "I want to go to Paris for just a weekend with my daughter in January.",
     legacy: "paris",
   },
   {
@@ -52,8 +53,8 @@ export const JURY_SCENARIOS: JuryScenario[] = [
     title: "A sea trip, no details",
     status: { label: "Asks 1 question", tone: "running" },
     audio: "/jury/scenario-3-sea.wav",
-    darija: "Bghit chi blasa fiha lb7er f l'été, ana w rajli.",
-    english: "Somewhere by the sea this summer, me and my husband.",
+    darija: "Bghit nsafer chi blasa fiha l-b7ar f ssif, ana w rajli.",
+    english: "I want to travel somewhere by the sea in the summer, me and my husband.",
     legacy: null,
   },
 ];

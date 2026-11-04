@@ -17,7 +17,7 @@ import {
   splitTranscript,
   type IntentChipModel,
 } from "@/components/trip/chips";
-import { formatAmount } from "@/lib/format";
+import { fillBudgetMarker } from "@/lib/intent/budget-marker";
 import { haptic } from "@/lib/haptics";
 import { hasIndispensableInfo } from "@/lib/intent/edits";
 import type { Intent } from "@/lib/intent/schema";
@@ -81,10 +81,7 @@ export function UnderstoodScreen() {
   const flyingIds = new Set(pairs?.values() ?? []);
   const translation =
     showEnglish && intent?.translation_en
-      ? intent.translation_en.replaceAll(
-          "{budget}",
-          intent.budget_mad ? `${formatAmount(intent.budget_mad, "en")} DH` : ""
-        )
+      ? fillBudgetMarker(intent.translation_en, intent.budget_mad)
       : null;
   const transcribing = job.phase === "transcribing";
   const understanding = job.phase === "understanding";
