@@ -151,7 +151,7 @@ export function HomeScreen() {
           <p className="mb-3 px-5 font-mono text-xs font-semibold tracking-[0.1em] text-muted">
             {visaFree ? t("home.ideasVisa") : t("home.ideasLabel")}
           </p>
-          <div className="flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto scroll-quiet px-5 pb-6 pe-8">
+          <div className="flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto scroll-quiet ps-5 pe-5 scroll-px-5 pb-6">
             {ideas.map(({ idea, sub }) => {
               const free = !idea.schengen || sub === idea.subFree;
               return (
