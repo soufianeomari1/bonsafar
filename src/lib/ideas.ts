@@ -78,17 +78,38 @@ export function schengenFree(profile: Profile): boolean {
   );
 }
 
+/** Green subtitle on an idea card: the card is visa-free for this profile. */
+export function cardVisaFree(idea: Idea, sub: TranslationKey): boolean {
+  return !idea.schengen || sub === idea.subFree;
+}
+
+function subFor(idea: Idea, profile: Profile): TranslationKey {
+  return schengenFree(profile) && idea.subFree ? idea.subFree : idea.sub;
+}
+
 /**
  * Without Schengen access, visa-free ideas come first and a single Schengen
  * dream stays, with the visa named in its subtitle (docs section 5).
  */
 export function ideasFor(profile: Profile): { idea: Idea; sub: TranslationKey }[] {
-  const free = schengenFree(profile);
-  const order: Idea["id"][] = free
+  const order: Idea["id"][] = schengenFree(profile)
     ? ["paris", "istanbul", "barcelona"]
     : ["istanbul", "paris", "omra"];
   return order.map((id) => {
     const idea = IDEAS[id];
-    return { idea, sub: free && idea.subFree ? idea.subFree : idea.sub };
+    return { idea, sub: subFor(idea, profile) };
   });
+}
+
+/** Home-carousel ideas whose card is visa-free for this profile, in that order. */
+export function visaFreeHomeIds(profile: Profile): Idea["id"][] {
+  return ideasFor(profile)
+    .filter(({ idea, sub }) => cardVisaFree(idea, sub))
+    .map(({ idea }) => idea.id);
+}
+
+/** A catalog idea (including ones the carousel hides) under the same card rule. */
+export function knownIdeaVisaFree(id: Idea["id"], profile: Profile): boolean {
+  const idea = IDEAS[id];
+  return cardVisaFree(idea, subFor(idea, profile));
 }

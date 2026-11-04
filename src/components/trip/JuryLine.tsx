@@ -29,19 +29,25 @@ export function JuryLine({
 }
 
 /** A button label: the interface language, plus the darija proof under it in jury mode. */
-export function JuryLabel({ k }: { k: TranslationKey }) {
+export function JuryLabel({
+  k,
+  values,
+}: {
+  k: TranslationKey;
+  values?: Record<string, string | number>;
+}) {
   const { t } = useLanguage();
   const { jury, lang, arabic } = useJuryDarija();
-  if (!jury) return <>{t(k)}</>;
+  if (!jury) return <>{t(k, values)}</>;
   return (
     <span className="flex flex-col items-center leading-tight">
-      <span>{t(k)}</span>
+      <span>{t(k, values)}</span>
       <span
         className={arabic ? "font-arabic text-[11px] font-medium opacity-75" : "text-[11px] font-medium opacity-75"}
         dir={arabic ? "rtl" : undefined}
         lang={arabic ? "ar" : undefined}
       >
-        {translate(lang, k)}
+        {translate(lang, k, values)}
       </span>
     </span>
   );

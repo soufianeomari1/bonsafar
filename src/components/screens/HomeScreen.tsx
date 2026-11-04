@@ -17,7 +17,7 @@ import { micHoldStyle, useVoiceCapture, type CaptureError } from "@/components/v
 import { haptic } from "@/lib/haptics";
 import { translate, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
-import { ideasFor } from "@/lib/ideas";
+import { cardVisaFree, ideasFor } from "@/lib/ideas";
 import { useProfile } from "@/lib/profile/useProfile";
 import { startTextTrip, startVoiceTrip } from "@/lib/trip/store";
 import { useLocalFlag } from "@/lib/useLocalFlag";
@@ -32,7 +32,7 @@ const ERROR_KEYS: Record<CaptureError, TranslationKey> = {
 };
 
 /** Screen 2. Look: design/motion/screens/02-home-v2.html. */
-export function HomeScreen() {
+export function HomeScreen({ visaFreeOnly = false }: { visaFreeOnly?: boolean }) {
   const { t, lang, jury } = useLanguage();
   const router = useRouter();
   const { ready, profile, user } = useProfile();
@@ -69,7 +69,8 @@ export function HomeScreen() {
   }
 
   const ideas = ideasFor(profile);
-  const visaFree = ideas.every(({ idea, sub }) => !idea.schengen || sub === idea.subFree);
+  const shownIdeas = visaFreeOnly ? ideas.filter(({ idea, sub }) => cardVisaFree(idea, sub)) : ideas;
+  const visaFree = shownIdeas.every(({ idea, sub }) => cardVisaFree(idea, sub));
   const name = profile.first_name?.trim() ?? "";
   const initial = name ? name.charAt(0).toLocaleUpperCase(lang === "ar" ? "ar" : "fr") : "";
   const oops = error === "denied" || error === "unsupported" || error === "failed";
@@ -163,8 +164,8 @@ export function HomeScreen() {
             {visaFree ? t("home.ideasVisa") : t("home.ideasLabel")}
           </p>
           <div className="flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto scroll-quiet ps-5 pe-5 scroll-px-5 pb-6">
-            {ideas.map(({ idea, sub }) => {
-              const free = !idea.schengen || sub === idea.subFree;
+            {shownIdeas.map(({ idea, sub }) => {
+              const free = cardVisaFree(idea, sub);
               return (
                 <motion.button
                   key={idea.id}

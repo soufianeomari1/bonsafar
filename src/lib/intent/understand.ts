@@ -7,6 +7,7 @@ import type { Lang } from "@/lib/i18n";
 import { airportCity } from "@/lib/airports";
 import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { profileTravellers, type Profile } from "@/lib/profile/schema";
+import { applyVisaPolicy } from "@/lib/visa/policy";
 import { applyLocks } from "./edits";
 import { spokenBudgetMad } from "./spoken-budget";
 import {
@@ -316,7 +317,8 @@ function enforce(
       : `${modelText.length} model text fields scanned`,
   });
 
-  return locks ? applyLocks(intent, locks) : intent;
+  const checked = applyVisaPolicy(intent, profile, spoken);
+  return locks ? applyLocks(checked, locks) : checked;
 }
 
 export async function understand({

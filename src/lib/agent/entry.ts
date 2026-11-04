@@ -6,6 +6,7 @@ import { callResponses } from "@/lib/ai/responses";
 import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { guardModelText, scrubMoney } from "@/lib/prices/guardrail";
 import type { Profile } from "@/lib/profile/schema";
+import { SCHENGEN_CODES } from "@/lib/visa/schengen";
 import { EntryModelSchema, EntryModelSchemaAr, type EntryRequirements } from "./schema";
 
 function jsonSchema(schema: z.ZodType): Record<string, unknown> {
@@ -43,8 +44,7 @@ function sourceDate(iso: string): string {
 const OFFICIAL =
   /(^|\.)(gov|gouv|go|gob|mfa|diplomatie|europa|service-public|france-visas|consulat|evisa)\.|\.gov(\.[a-z]{2})?$|\.gouv\.[a-z]{2}$|\.gc\.ca$/i;
 
-/** Schengen members among BonSafar destinations: europa.eu pages are relevant there. */
-const SCHENGEN = new Set(["FR", "ES", "PT", "IT", "NL", "BE", "DE", "AT", "CH", "GR"]);
+/** europa.eu pages are on-topic for a Schengen destination. */
 
 /** The destination's own official entry pages, searched first and ranked first. */
 const OFFICIAL_SITES: Record<string, { sites: string[]; topic: string }> = {
@@ -189,7 +189,7 @@ function extractSources(
   const titles = new Map(hits.filter((h) => h.title).map((h) => [h.url, h.title]));
   const allowed = new Set([...(destinationCode ? [destinationCode] : []), ...passportCodes]);
   const ownSites = destinationCode ? (OFFICIAL_SITES[destinationCode]?.sites ?? []) : [];
-  const schengen = destinationCode != null && SCHENGEN.has(destinationCode);
+  const schengen = destinationCode != null && SCHENGEN_CODES.has(destinationCode);
 
   const ranked: { url: string; host: string; title: string; rank: number }[] = [];
   for (const c of [...candidates, ...hits]) {

@@ -47,6 +47,8 @@ export type TripJob = {
   userEdited: UserEdit[];
   /** Bumped on each model answer, not on hand edits: drives the A2 flight. */
   rev: number;
+  /** Schengen city the traveller chose to keep after a no-visa request. */
+  visaKeptCity: string | null;
   answers: TripAnswer[];
   events: RunEvent[];
   error: TripError | null;
@@ -92,6 +94,7 @@ function begin(fields: Pick<TripJob, "source" | "audioUrl" | "durationMs" | "lev
     intent: null,
     userEdited: [],
     rev: 0,
+    visaKeptCity: null,
     answers: [],
     events: [],
     error: null,
@@ -278,6 +281,12 @@ export async function retryTrip(): Promise<void> {
   if (!job) return;
   if (!job.transcript && job.wav) await transcribeJob(job.id);
   else if (job.transcript) await understandJob(job.id);
+}
+
+/** Accept a Schengen city after a no-visa request. The usual visa warning still applies later. */
+export function keepVisaDestination(city: string): void {
+  if (!job || !city.trim()) return;
+  set({ visaKeptCity: city }, job.id);
 }
 
 /** Edits made by hand on a chip. Nights always follow the dates, and the edit wins over the model. */

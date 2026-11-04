@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
-import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react";
+import { CaretLeft, MagnifyingGlass, SealCheck } from "@phosphor-icons/react";
 import { Button } from "@/components/bs/Button";
 import { Safar, SafarBubble } from "@/components/bs/Safar";
 import { ChipEditor } from "@/components/trip/ChipEditor";
 import { JuryLabel, JuryLine } from "@/components/trip/JuryLine";
 import { QuestionCard } from "@/components/trip/QuestionCard";
 import { TranscriptBubble } from "@/components/trip/TranscriptBubble";
+import { VisaConflictChoices, VisaIdeaChoices, VisaWarningNote } from "@/components/trip/VisaFollowUp";
 import {
   chipsFor,
   flightPairs,
@@ -25,8 +26,9 @@ import { useLanguage } from "@/lib/i18n/provider";
 import { PRESS_SCALE, PRESS_TRANSITION } from "@/lib/motion";
 import { profileForLang, type Airport } from "@/lib/profile/schema";
 import { useProfile } from "@/lib/profile/useProfile";
-import { scenarioFor, startAgentRun, replayFromLocation, withTripSearch } from "@/lib/agent-client/store";
-import { answerTrip, retryTrip } from "@/lib/trip/store";
+import { replayFromLocation, scenarioFor, startAgentRun, withTripSearch } from "@/lib/agent-client/store";
+import { answerTrip, keepVisaDestination, retryTrip } from "@/lib/trip/store";
+import { applyVisaPolicy, assessVisa } from "@/lib/visa/policy";
 import { useTrip } from "@/lib/trip/useTrip";
 import { cn } from "@/lib/utils";
 
@@ -60,9 +62,12 @@ export function UnderstoodScreen() {
     return () => clearTimeout(timer);
   }, [intent, rev, landedRev]);
 
-  const fromProfile = !!intent && originFromProfile(intent, profile.home_airport);
-  const chips = intent ? chipsFor(intent, lang, t, { originFromProfile: fromProfile }) : [];
-  const pairs = intent ? flightPairs(intent, chips) : null;
+  const corpus = job ? [job.transcript, ...job.answers.map((answer) => answer.answer)].join("\n") : "";
+  const shownIntent = intent ? applyVisaPolicy(intent, profile, corpus) : null;
+  const visa = shownIntent ? assessVisa({ intent: shownIntent, profile, corpus, keptCity: job?.visaKeptCity }) : null;
+  const fromProfile = !!shownIntent && originFromProfile(shownIntent, profile.home_airport);
+  const chips = shownIntent ? chipsFor(shownIntent, lang, t, { originFromProfile: fromProfile }) : [];
+  const pairs = shownIntent ? flightPairs(shownIntent, chips) : null;
   const parts =
     intent && job?.transcript ? splitTranscript(job.transcript, intent.keywords) : null;
 
@@ -86,12 +91,15 @@ export function UnderstoodScreen() {
   const transcribing = job.phase === "transcribing";
   const understanding = job.phase === "understanding";
   const failed = job.phase === "error";
-  const canSearch = job.phase === "ready" && !!intent && hasIndispensableInfo(intent);
+  const visaHold = !!visa && (visa.conflictOpen || visa.ideaIds !== null);
+  const canSearch =
+    job.phase === "ready" && !!shownIntent && hasIndispensableInfo(shownIntent) && !visa?.conflictOpen;
   /** Nothing to retry: the take itself was too short or silent. */
   const dead = job.error === "short" || job.error === "empty";
   const showChips = !!intent && landed && !failed;
-  const asking = showChips && !!intent.question && !understanding && !transcribing;
-  const showFound = showChips && !intent.question && !understanding && !transcribing;
+  const asking = showChips && !!intent.question && !visaHold && !understanding && !transcribing;
+  const showFound = showChips && !intent.question && !visaHold && !understanding && !transcribing;
+  const showVisaFollowUp = showChips && visaHold && !understanding && !transcribing;
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-bg">
       <header className="flex items-center gap-3 px-5 pt-[18px]">
@@ -190,7 +198,7 @@ export function UnderstoodScreen() {
                 </SafarBubble>
               )}
 
-              {!showFound && !asking && (
+              {!showFound && !asking && !showVisaFollowUp && (
                 <SafarBubble state="thinking" size={64} className="-ms-2">
                   <p className="shimmer text-[15px] font-semibold" aria-live="polite">
                     {transcribing ? t("understood.transcribing") : t("understood.thinking")}
@@ -234,10 +242,70 @@ export function UnderstoodScreen() {
                       </motion.button>
                     );
                   })}
+                  {visa?.showVisaFreeChip && (
+                    <div className="flex min-h-11 items-center gap-2 rounded-pill border border-line bg-card pe-3.5 ps-2 text-[15px] font-bold text-ink">
+                      <span className="flex size-[30px] items-center justify-center rounded-pill bg-green-soft text-green">
+                        <SealCheck size={16} weight="light" aria-hidden />
+                      </span>
+                      <bdi>{t("understood.visaFree")}</bdi>
+                    </div>
+                  )}
                 </div>
               )}
 
+              {showChips && visa?.warning && <VisaWarningNote warning={visa.warning} />}
+
               <AnimatePresence mode="wait" initial={false}>
+                {showVisaFollowUp && visa?.ideaIds && (
+                  <motion.div
+                    key="visa-ideas"
+                    initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: reduced ? 0.2 : 0.35, ease: [0.23, 1, 0.32, 1] }}
+                    className="flex items-start gap-2"
+                  >
+                    <div className="w-16 shrink-0 pt-1">
+                      <Safar state="thinking" size={64} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <VisaIdeaChoices
+                        ids={visa.ideaIds}
+                        onPick={(answer) => void answerTrip(t("understood.visaWhere"), answer)}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+                {showVisaFollowUp && visa?.conflictOpen && shownIntent?.destination && (
+                  <motion.div
+                    key="visa-conflict"
+                    initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: reduced ? 0.2 : 0.35, ease: [0.23, 1, 0.32, 1] }}
+                    className="flex items-start gap-2"
+                  >
+                    <div className="w-16 shrink-0 pt-1">
+                      <Safar state="thinking" size={64} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <VisaConflictChoices
+                        city={shownIntent.destination.city}
+                        onIdeas={() => {
+                          haptic("select");
+                          const path = withTripSearch("/home");
+                          const url = new URL(path, window.location.origin);
+                          url.searchParams.set("ideas", "visa-free");
+                          router.push(`${url.pathname}${url.search}`);
+                        }}
+                        onKeep={() => {
+                          haptic("select");
+                          keepVisaDestination(shownIntent.destination?.city ?? "");
+                        }}
+                      />
+                    </div>
+                  </motion.div>
+                )}
                 {asking && intent.question && (
                   <motion.div
                     key={`question-${intent.question.field}`}
@@ -272,9 +340,9 @@ export function UnderstoodScreen() {
           onClick={() => {
             const replay = replayFromLocation();
             if (replay) startAgentRun({ replay: true, scenario: replay }, replay);
-            else if (intent) {
-              const scenario = scenarioFor(intent);
-              startAgentRun({ intent, profile: profileForLang(profile, lang), lang, jury, scenario }, scenario);
+            else if (shownIntent) {
+              const scenario = scenarioFor(shownIntent);
+              startAgentRun({ intent: shownIntent, profile: profileForLang(profile, lang), lang, jury, scenario }, scenario);
             }
             router.push(withTripSearch("/trip/plan"));
           }}
