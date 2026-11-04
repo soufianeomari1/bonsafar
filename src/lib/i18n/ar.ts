@@ -24,29 +24,50 @@ export const ar: Dictionary = {
   "common.terms": "الشروط",
 
   "welcome.tagline": "trik slama",
-  "welcome.title": "قُلها بالدارجة.\nونحن نتكفّل بالرحلة.",
-  // TODO: review this translation
-  "welcome.subtitle":
-    "الرحلات والفندق والتأشيرة والأمتعة مُتحقق منها لك، بالسعر الحقيقي. تدفع لدى الشريك، ولا شيء زيادة.",
-  "welcome.start": "يلاه، لنبدأ",
+  // TODO: review before the demo
+  "welcome.step1": "قُلها [[بالدارجة.]]",
+  // TODO: review before the demo
+  "welcome.step2": "ونحن نتكفّل [[بالرحلة.]]",
+  // TODO: review before the demo
+  "welcome.sub": "الطيران والفندق والتأشيرة والأمتعة، بالسعر الحقيقي.",
+  // TODO: review before the demo
+  "welcome.pitch": "رحلتك القادمة جاهزة في دقيقة واحدة.",
+  // TODO: review before the demo
+  "welcome.google": "المتابعة باستخدام Google",
+  // TODO: review before the demo
+  "welcome.free": "مجاني ودون بطاقة بنكية",
+  // TODO: review before the demo
+  "welcome.guest": "المتابعة دون حساب",
+  // TODO: review before the demo
   "welcome.signInError": "تسجيل الدخول عبر Google غير متاح حاليًا.",
+  // TODO: review before the demo
   "welcome.language.change": "تغيير اللغة، حاليا {language}",
-  "welcome.legal":
-    "بدون حساب، يبقى ملفك على هذا الهاتف. بالمتابعة، أنت توافق على [[terms]] و[[privacy]].",
+  // TODO: review before the demo
   "welcome.legal.terms": "الشروط",
+  // TODO: review before the demo
   "welcome.legal.privacy": "الخصوصية",
+  // TODO: review before the demo
   "welcome.demo.label": "عرض",
   "welcome.demo.duration": "0:07",
+  // TODO: review before the demo. Darija sample, Arabic letters.
   "welcome.demo.transcript":
-    "« Bghit nsafer l'[[Istanbul]] m3a rajli f [[nouss décembre]]… »",
-  "welcome.demo.understood": "بون سفار فهم",
-  "welcome.demo.route": "CMN → IST",
-  "welcome.demo.city": "Istanbul",
-  "welcome.demo.dates": "15 → 22 ديسمبر",
-  "welcome.demo.adults": "بالغان",
-  "welcome.demo.breakfast": "الإفطار",
+    "« بغيت نسافر لـ[[إسطنبول]] مع راجلي ف[[نص دجنبر]]… »",
+  // TODO: review before the demo
+  "welcome.demo.understood": "فهم بون سفر طلبك",
+  // TODO: review before the demo
+  "welcome.demo.city": "إسطنبول",
+  // TODO: review before the demo
+  "welcome.demo.country": "تركيا · 7 ليالٍ",
+  // TODO: review before the demo
+  "welcome.demo.dates": "من 15 إلى 22 ديسمبر",
+  // TODO: review before the demo
+  "welcome.demo.when": "منتصف ديسمبر",
+  // TODO: review before the demo
+  "welcome.demo.adults": "شخصان بالغان",
+  // TODO: review before the demo
+  "welcome.demo.breakfast": "فطور",
+  // TODO: review before the demo
   "welcome.demo.visa": "بدون تأشيرة",
-  "welcome.demo.price": "أسعار مباشرة · **مجموع واحد بالدرهم**",
 
 
   "onboarding.step": "الخطوة {current} من {total}",

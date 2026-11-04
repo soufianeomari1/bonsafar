@@ -24,29 +24,47 @@ export const darijaLatn: Dictionary = {
   "common.terms": "Conditions",
 
   "welcome.tagline": "trik slama",
-  "welcome.title": "Gulha b ddarija.\nW 7na nwjjdo lik safar.",
-  // TODO: review this translation
-  "welcome.subtitle":
-    "Tiyarat, otel, visa w bagaj mverifiyin lik, b taman l7a9i9i. Katkhelles 3nd lpartenaire, walo zayed.",
-  "welcome.start": "Yallah, nbdaw",
+  // TODO: review before the demo
+  "welcome.step1": "Golha b [[darija.]]",
+  // TODO: review before the demo
+  "welcome.step2": "[[Safar]] 3lina.",
+  // TODO: review before the demo
+  "welcome.sub": "Tiyara, otel, visa w bagages, kolchi mt7a99e9, b taman l7a9i9i.",
+  // TODO: review before the demo
+  "welcome.pitch": "Safrek jay wajed f d9i9a.",
+  "welcome.google": "Continuer avec Google",
+  // TODO: review before the demo
+  "welcome.free": "Fabor, bla carte bancaire",
+  // TODO: review before the demo
+  "welcome.guest": "kmmel bla compte",
+  // TODO: review before the demo
   "welcome.signInError": "Google ma khddamch daba.",
+  // TODO: review before the demo
   "welcome.language.change": "Beddel lgha, daba {language}",
-  "welcome.legal":
-    "Bla compte, lprofil dyalek kaybqa f had telephone. Ila kmelti, rak qbelti [[terms]] w [[privacy]].",
+  // TODO: review before the demo
   "welcome.legal.terms": "churut",
+  // TODO: review before the demo
   "welcome.legal.privacy": "lkhossossiya",
+  // TODO: review before the demo
   "welcome.demo.label": "Dimo",
   "welcome.demo.duration": "0:07",
+  // TODO: review before the demo
   "welcome.demo.transcript":
     "« Bghit nsafer l'[[Istanbul]] m3a rajli f [[nouss décembre]]… »",
+  // TODO: review before the demo
   "welcome.demo.understood": "BONSAFAR FHEM",
-  "welcome.demo.route": "CMN → IST",
   "welcome.demo.city": "Istanbul",
-  "welcome.demo.dates": "15 → 22 dic.",
+  // TODO: review before the demo
+  "welcome.demo.country": "Turkia · 7 lyali",
+  "welcome.demo.dates": "15 → 22 déc.",
+  // TODO: review before the demo
+  "welcome.demo.when": "nouss décembre",
+  // TODO: review before the demo
   "welcome.demo.adults": "2 kbar",
+  // TODO: review before the demo
   "welcome.demo.breakfast": "Ftour",
+  // TODO: review before the demo
   "welcome.demo.visa": "Bla visa",
-  "welcome.demo.price": "Atman direct · **majmo3 wahed b derham**",
 
 
   "onboarding.step": "Khatwa {current} men {total}",

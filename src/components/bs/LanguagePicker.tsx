@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { CaretDown, Check, Globe } from "@phosphor-icons/react";
+import { JuryPill } from "@/components/bs/Brand";
 import { Sheet } from "@/components/bs/Sheet";
 import { haptic } from "@/lib/haptics";
 import type { Lang, TranslationKey } from "@/lib/i18n";
@@ -27,7 +29,6 @@ const SAMPLE: Record<Lang, TranslationKey> = {
 
 type Option = {
   id: string;
-  code: string;
   lang: Lang;
   /** Darija keeps the script already chosen. */
   matches: (lang: Lang) => boolean;
@@ -35,25 +36,31 @@ type Option = {
   arabic?: boolean;
 };
 
+/** Codes shown on the welcome pill, as in 00-welcome-v11.html. */
+const CODE: Record<Lang, string> = {
+  fr: "FR",
+  en: "EN",
+  ar: "ع",
+  "darija-latn": "DARIJA",
+  "darija-arab": "دارجة",
+};
+
 /** The four languages of screen 0. Script choice stays in onboarding. */
 const OPTIONS: Option[] = [
   {
     id: "fr",
-    code: "FR",
     lang: "fr",
     matches: (lang) => lang === "fr",
     pick: () => "fr",
   },
   {
     id: "darija",
-    code: "DR",
     lang: "darija-latn",
     matches: (lang) => lang === "darija-latn" || lang === "darija-arab",
     pick: (lang) => (lang === "darija-arab" ? "darija-arab" : "darija-latn"),
   },
   {
     id: "ar",
-    code: "AR",
     lang: "ar",
     arabic: true,
     matches: (lang) => lang === "ar",
@@ -61,19 +68,24 @@ const OPTIONS: Option[] = [
   },
   {
     id: "en",
-    code: "EN",
     lang: "en",
     matches: (lang) => lang === "en",
     pick: () => "en",
   },
 ];
 
-function codeFor(lang: Lang): string {
-  return OPTIONS.find((option) => option.matches(lang))?.code ?? "FR";
-}
-
-/** Globe, language code, chevron. Opens a sheet with the four languages. */
-export function LanguagePicker({ className }: { className?: string }) {
+/**
+ * Globe, language code, chevron. Opens a sheet with the four languages.
+ * `legal` adds the judges' pill and the terms links, used on the welcome screen
+ * so they stay one tap from the top without crowding the one-page layout.
+ */
+export function LanguagePicker({
+  className,
+  legal = false,
+}: {
+  className?: string;
+  legal?: boolean;
+}) {
   const { lang, setLang, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const root =
@@ -87,6 +99,13 @@ export function LanguagePicker({ className }: { className?: string }) {
       onClose={() => setOpen(false)}
       title={t("onboarding.language.groupLabel")}
     >
+      {legal && (
+        <JuryPill
+          withIcon
+          label={t("common.juryMode")}
+          className="mt-4 h-11 w-full justify-center text-sm"
+        />
+      )}
       <div
         role="radiogroup"
         aria-label={t("onboarding.language.groupLabel")}
@@ -135,6 +154,24 @@ export function LanguagePicker({ className }: { className?: string }) {
           );
         })}
       </div>
+      {legal && (
+        <nav className="mt-5 flex justify-center gap-4 border-t border-line pt-4 text-[13px]">
+          <Link
+            href="/terms"
+            className="font-semibold text-ink underline underline-offset-2"
+            onClick={() => setOpen(false)}
+          >
+            {t("welcome.legal.terms")}
+          </Link>
+          <Link
+            href="/privacy"
+            className="font-semibold text-ink underline underline-offset-2"
+            onClick={() => setOpen(false)}
+          >
+            {t("welcome.legal.privacy")}
+          </Link>
+        </nav>
+      )}
     </Sheet>
   );
 
@@ -147,13 +184,15 @@ export function LanguagePicker({ className }: { className?: string }) {
         aria-expanded={open}
         onClick={() => setOpen(true)}
         className={cn(
-          "flex h-9 items-center gap-1.5 rounded-pill border border-line bg-card px-3 text-sm font-semibold text-ink",
+          "flex h-[34px] shrink-0 items-center gap-1.5 rounded-pill border border-line bg-card px-3 font-sans text-[13px] font-semibold text-ink",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue",
           className
         )}
       >
         <Globe size={16} weight="bold" aria-hidden />
-        <span dir="ltr">{codeFor(lang)}</span>
+        <span dir="ltr" className={lang === "ar" || lang === "darija-arab" ? "font-arabic" : undefined}>
+          {CODE[lang]}
+        </span>
         <CaretDown size={12} weight="bold" className="text-muted" aria-hidden />
       </button>
       {root ? createPortal(sheet, root) : null}

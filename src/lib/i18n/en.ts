@@ -26,30 +26,32 @@ export const en = {
   "common.privacy": "Privacy",
   "common.terms": "Terms",
 
-  // 0 · Welcome
+  // 0 · Welcome. [[word]] is the painted mark (title, underline, or voice highlight).
   "welcome.tagline": "trik slama",
-  "welcome.title": "Say it in darija.\nWe'll handle the trip.",
-  "welcome.subtitle":
-    "Flights, hotel, visa and baggage checked for you, at the real price. You pay on the partner's site, nothing more.",
-  "welcome.start": "Yallah, let's go",
+  "welcome.step1": "Say it in [[darija.]]",
+  "welcome.step2": "We handle the [[trip.]]",
+  "welcome.sub": "Flights, hotel, visa and bags checked, at the real price.",
+  "welcome.pitch": "Your next trip, ready in 1 minute.",
+  "welcome.google": "Continue with Google",
+  "welcome.free": "Free, no card needed",
+  "welcome.guest": "continue without an account",
   "welcome.signInError": "Google sign-in is not available right now.",
   "welcome.language.change": "Change language, currently {language}",
-  "welcome.legal":
-    "Without an account, your profile stays on this phone. By continuing, you accept the [[terms]] and the [[privacy]].",
-  "welcome.legal.terms": "terms",
-  "welcome.legal.privacy": "privacy",
+  "welcome.legal.terms": "Terms",
+  "welcome.legal.privacy": "Privacy",
   "welcome.demo.label": "Demo",
   "welcome.demo.duration": "0:07",
+  // TODO: review before the demo. Darija sample, kept in Latin script.
   "welcome.demo.transcript":
     "« Bghit nsafer l'[[Istanbul]] m3a rajli f [[nouss décembre]]… »",
   "welcome.demo.understood": "BONSAFAR UNDERSTOOD",
-  "welcome.demo.route": "CMN → IST",
   "welcome.demo.city": "Istanbul",
-  "welcome.demo.dates": "15 → 22 Dec.",
+  "welcome.demo.country": "Turkey · 7 nights",
+  "welcome.demo.dates": "Dec 15 → 22",
+  "welcome.demo.when": "mid-December",
   "welcome.demo.adults": "2 adults",
   "welcome.demo.breakfast": "Breakfast",
   "welcome.demo.visa": "No visa",
-  "welcome.demo.price": "Live prices · **one total in dirhams**",
 
   // 1 · Profile, 4 steps
   "onboarding.step": "Step {current} of {total}",

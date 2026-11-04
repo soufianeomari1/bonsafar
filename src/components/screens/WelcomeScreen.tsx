@@ -1,186 +1,57 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight } from "@phosphor-icons/react";
-import { Button } from "@/components/bs/Button";
 import { LanguagePicker } from "@/components/bs/LanguagePicker";
-import { Safar } from "@/components/bs/Safar";
-import { WelcomeDemo } from "@/components/screens/WelcomeDemo";
+import { SafarGlyph, WelcomeDemo } from "@/components/screens/WelcomeDemo";
 import { haptic } from "@/lib/haptics";
-import { useT } from "@/lib/i18n/provider";
+import { htmlLang } from "@/lib/i18n";
+import { useLanguage } from "@/lib/i18n/provider";
 import { useProfile } from "@/lib/profile/useProfile";
+import { cn } from "@/lib/utils";
+import styles from "./welcome.module.css";
 
-const CLOUDS = [
-  { top: 96, width: 92, opacity: 1, duration: 38, delay: 0 },
-  { top: 214, width: 64, opacity: 0.8, duration: 56, delay: -20 },
-  { top: 330, width: 120, opacity: 0.9, duration: 46, delay: -34 },
-] as const;
+/** Last chip delay (2.76s) plus its drop, or the reduced-motion fade. */
+const CHIP_AT_MS = 2760;
+const CHIP_FALL_MS = 500;
+const CHIP_FADE_MS = 250;
 
-/** Screen 0, design/motion/welcome-v2.html. */
-export function WelcomeScreen() {
-  const t = useT();
-  const router = useRouter();
-  const reduced = useReducedMotion();
-  const { ready, profile, signInWithGoogle } = useProfile();
-  const [signInError, setSignInError] = useState(false);
-  const [pending, setPending] = useState(false);
+/**
+ * Adds `bs-js` on `<html>`, then `seen` on the next frame, so the CSS
+ * sequence plays once. With JavaScript off neither class exists and the
+ * server HTML stays the finished page.
+ */
+function WelcomeMotion({ play }: { play: () => void }) {
+  useLayoutEffect(() => {
+    document.documentElement.classList.add("bs-js");
+    // The next frame starts the sequence. A short timeout covers the case
+    // where the browser never paints a frame (background tab, battery saver).
+    const frame = requestAnimationFrame(play);
+    const backup = window.setTimeout(play, 80);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(
+      () => haptic("tick"),
+      CHIP_AT_MS + (reduced ? CHIP_FADE_MS : CHIP_FALL_MS)
+    );
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(backup);
+      window.clearTimeout(timer);
+    };
+  }, [play]);
 
-  const onboarded = ready && profile.prefs.onboarded;
-  useEffect(() => {
-    if (onboarded) router.replace("/home");
-  }, [onboarded, router]);
-
-  async function google() {
-    setPending(true);
-    setSignInError(false);
-    const error = await signInWithGoogle("/onboarding");
-    if (error) {
-      setSignInError(true);
-      setPending(false);
-    }
-  }
-
-  return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-bg text-ink">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[560px] bg-[linear-gradient(180deg,var(--color-sky)_0%,var(--color-blue-soft)_55%,var(--color-bg)_100%)]"
-      />
-      <WelcomeClouds reduced={!!reduced} />
-
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <header className="flex items-center justify-between gap-2 px-5 pt-[18px]">
-          <div className="flex min-w-0 items-center gap-2">
-            <Safar state="idle" size={34} />
-            <span className="flex min-w-0 items-baseline gap-1.5">
-              <span className="text-[19px] font-extrabold tracking-[-0.02em]" dir="ltr">
-                BonSafar
-              </span>
-              <span className="text-[13px] italic text-muted" dir="ltr">
-                {t("welcome.tagline")}
-              </span>
-            </span>
-          </div>
-          <LanguagePicker className="shrink-0" />
-        </header>
-
-        <WelcomeDemo />
-
-        <section className="px-6 pt-1">
-          <h1 className="whitespace-pre-line text-[34px] font-extrabold leading-[1.06] tracking-[-0.03em]">
-            {t("welcome.title")}
-          </h1>
-          <p className="mt-3 text-[17px] leading-[1.45] text-muted">{t("welcome.subtitle")}</p>
-        </section>
-
-        <div className="min-h-4 flex-1" />
-
-        <section aria-label={t("welcome.start")} className="flex flex-col gap-3 px-5 pb-[22px]">
-          <motion.div
-            className="rounded-button"
-            animate={
-              reduced
-                ? { boxShadow: "0 0 0 0 rgba(10,108,255,0)" }
-                : {
-                    boxShadow: [
-                      "0 0 0 0 rgba(10,108,255,0)",
-                      "0 0 0 6px rgba(10,108,255,0.12)",
-                      "0 0 0 0 rgba(10,108,255,0)",
-                    ],
-                  }
-            }
-            transition={
-              reduced ? { duration: 0.2 } : { duration: 2.6, ease: "easeInOut", repeat: Infinity }
-            }
-          >
-            <Button full className="font-bold" onClick={() => router.push("/onboarding")}>
-              {t("welcome.start")}
-              <ArrowRight size={18} weight="bold" aria-hidden className="rtl:-scale-x-100" />
-            </Button>
-          </motion.div>
-
-          <GoogleButton disabled={pending} reduced={!!reduced} onClick={google}>
-            {t("common.signIn")}
-          </GoogleButton>
-
-          {signInError && (
-            <p role="alert" className="text-center text-sm text-red">
-              {t("welcome.signInError")}
-            </p>
-          )}
-
-          <LegalLine />
-        </section>
-      </div>
-    </div>
-  );
+  return null;
 }
 
-function WelcomeClouds({ reduced }: { reduced: boolean }) {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {CLOUDS.map((cloud) => (
-        <motion.svg
-          key={cloud.top}
-          viewBox="0 0 90 34"
-          width={cloud.width}
-          height={(cloud.width * 34) / 90}
-          className="absolute left-0 text-card"
-          style={{ top: cloud.top, opacity: cloud.opacity }}
-          animate={reduced ? { x: 40 } : { x: [-120, 470] }}
-          transition={
-            reduced
-              ? { duration: 0.2 }
-              : { duration: cloud.duration, delay: cloud.delay, ease: "linear", repeat: Infinity }
-          }
-        >
-          <path
-            d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z"
-            fill="currentColor"
-          />
-        </motion.svg>
-      ))}
-    </div>
-  );
+function at(delay: string): CSSProperties {
+  return { "--t": delay } as CSSProperties;
 }
 
 /**
- * Google's sign-in button. These colours are Google's brand colours:
- * they must not be remapped onto BonSafar tokens, and the G is never recolored.
+ * Google's G. These four colours are Google's, not BonSafar tokens,
+ * and the mark is never recolored.
  */
-function GoogleButton({
-  children,
-  disabled,
-  reduced,
-  onClick,
-}: {
-  children: string;
-  disabled: boolean;
-  reduced: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <motion.button
-      type="button"
-      disabled={disabled}
-      onClick={() => {
-        haptic("tap");
-        onClick();
-      }}
-      whileTap={reduced || disabled ? undefined : { scale: 0.97 }}
-      transition={{ duration: 0.1 }}
-      className="flex h-14 w-full items-center justify-center gap-3 rounded-button border bg-card text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:opacity-40"
-      style={{ borderColor: "#747775", color: "#1F1F1F" }}
-    >
-      <GoogleMark />
-      {children}
-    </motion.button>
-  );
-}
-
 function GoogleMark() {
   return (
     <svg aria-hidden width={20} height={20} viewBox="0 0 48 48">
@@ -204,26 +75,83 @@ function GoogleMark() {
   );
 }
 
-function LegalLine() {
-  const t = useT();
-  const parts = t("welcome.legal").split(/\[\[(terms|privacy)\]\]/g);
+/** Screen 0, design/motion/screens/00-welcome-v11.html. */
+export function WelcomeScreen() {
+  const { t, lang, rtl } = useLanguage();
+  const router = useRouter();
+  const { ready, profile, signInWithGoogle } = useProfile();
+  const [seen, setSeen] = useState(false);
+  const [signInError, setSignInError] = useState(false);
+  const [pending, setPending] = useState(false);
+  const play = useCallback(() => setSeen(true), []);
+
+  const onboarded = ready && profile.prefs.onboarded;
+  useEffect(() => {
+    if (onboarded) router.replace("/home");
+  }, [onboarded, router]);
+
+  async function google() {
+    setPending(true);
+    setSignInError(false);
+    const error = await signInWithGoogle("/onboarding");
+    if (error) {
+      setSignInError(true);
+      setPending(false);
+    }
+  }
 
   return (
-    <p className="mx-2 mt-1 text-center text-[12.5px] leading-[1.45] text-muted">
-      {parts.map((part, index) => {
-        if (part === "terms" || part === "privacy") {
-          return (
-            <Link
-              key={index}
-              href={part === "terms" ? "/terms" : "/privacy"}
-              className="font-semibold text-ink underline hover:text-blue"
-            >
-              {t(part === "terms" ? "welcome.legal.terms" : "welcome.legal.privacy")}
+    <div
+      className={cn(styles.scene, seen && styles.seen)}
+      dir={rtl ? "rtl" : "ltr"}
+      lang={htmlLang(lang)}
+      data-welcome=""
+    >
+      <WelcomeMotion play={play} />
+      <div className={styles.sky} aria-hidden />
+      <div className={styles.wrap} data-wrap="">
+        <header className={styles.head}>
+          <div className={styles.brand}>
+            <SafarGlyph className={styles.wordmark} />
+            <span>BonSafar</span>
+            <em>{t("welcome.tagline")}</em>
+          </div>
+          <LanguagePicker legal />
+        </header>
+
+        <WelcomeDemo />
+
+        <p className={cn(styles.pitch, styles.a)} style={at("2.95s")}>
+          {t("welcome.pitch")}
+        </p>
+        <div className={cn(styles.googleWrap, styles.a)} style={at("3.05s")}>
+          <button
+            type="button"
+            className={styles.google}
+            disabled={pending}
+            onClick={() => {
+              haptic("tap");
+              void google();
+            }}
+          >
+            <GoogleMark />
+            {t("welcome.google")}
+          </button>
+        </div>
+        {signInError ? (
+          <p role="alert" className={styles.error}>
+            {t("welcome.signInError")}
+          </p>
+        ) : (
+          <div className={cn(styles.micro, styles.a)} style={at("3.15s")}>
+            <b>{t("welcome.free")}</b>
+            <span aria-hidden>·</span>
+            <Link href="/onboarding" className={styles.guest} onClick={() => haptic("tap")}>
+              {t("welcome.guest")}
             </Link>
-          );
-        }
-        return <span key={index}>{part}</span>;
-      })}
-    </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
