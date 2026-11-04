@@ -85,6 +85,11 @@ export function FlightPlanScreen() {
     ensureAgentRun();
   }, []);
 
+  // The map on the next screens reads these. Starting now keeps the animation free.
+  useEffect(() => {
+    void import("@/lib/geo/preload").then((mod) => mod.preloadMapData());
+  }, []);
+
   const legIndex = activeLegIndex(run.legs);
   const leg = run.legs[legIndex];
   const step = activeStep(leg);

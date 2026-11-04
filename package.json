@@ -11,6 +11,8 @@
     "agent:check": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/agent-check.mjs",
     "poster:fallback": "node scripts/poster-fallback.mjs",
     "images:generate": "node scripts/generate-images.mjs",
+    "airports:build": "node scripts/build-airports.mjs",
+    "basemap:build": "node scripts/build-basemap.mjs",
     "record:jury": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/record-jury.mjs",
     "i18n:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/i18n-review.mjs"
   },

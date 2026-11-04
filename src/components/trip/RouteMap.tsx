@@ -7,13 +7,17 @@ import type { Feature, FeatureCollection, MultiLineString, MultiPolygon, Polygon
 import type { GeometryCollection, Topology } from "topojson-specification";
 import { SafarLogo } from "@/components/bs/Brand";
 import { airport } from "@/lib/airports";
+import { coordsInBasemapZone, loadBasemapTopology } from "@/lib/geo/preload";
 import { useT } from "@/lib/i18n/provider";
 import type { MapStop } from "@/lib/trip/describe";
 import { cn } from "@/lib/utils";
 
 type Atlas = { land: FeatureCollection<MultiPolygon>; borders: MultiLineString };
 
-let atlasJob: Promise<Atlas> | null = null;
+type World = Topology<{ countries: GeometryCollection }>;
+
+let regionalJob: Promise<Atlas> | null = null;
+let worldJob: Promise<Atlas> | null = null;
 
 /** Antarctica and any shape wider than 200° of longitude would fill the whole map. */
 function keepPolygon(feature: Feature, rings: Position[][]): boolean {
@@ -23,26 +27,42 @@ function keepPolygon(feature: Feature, rings: Position[][]): boolean {
   return span <= 200;
 }
 
-/** Natural Earth (world-atlas, public domain), loaded only by the screens that draw a map. */
-function loadAtlas(): Promise<Atlas> {
-  atlasJob ??= Promise.all([import("world-atlas/countries-50m.json"), import("topojson-client")]).then(
-    ([atlas, topojson]) => {
-      const world = (atlas.default ?? atlas) as unknown as Topology<{ countries: GeometryCollection }>;
-      const countries = topojson.feature(world, world.objects.countries) as FeatureCollection<Polygon | MultiPolygon>;
-      const land: Feature<MultiPolygon>[] = countries.features.flatMap((feature) => {
-        const polygons = feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates;
-        const kept = polygons.filter((rings) => keepPolygon(feature, rings));
-        return kept.length
-          ? [{ type: "Feature", id: feature.id, properties: {}, geometry: { type: "MultiPolygon", coordinates: kept } }]
-          : [];
-      });
-      return {
-        land: { type: "FeatureCollection", features: land },
-        borders: topojson.mesh(world, world.objects.countries, (a, b) => a !== b),
-      };
-    },
+function atlasFrom(
+  world: World,
+  topojson: typeof import("topojson-client"),
+): Atlas {
+  const countries = topojson.feature(world, world.objects.countries) as FeatureCollection<Polygon | MultiPolygon>;
+  const land: Feature<MultiPolygon>[] = countries.features.flatMap((feature) => {
+    const polygons = feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates;
+    const kept = polygons.filter((rings) => keepPolygon(feature, rings));
+    return kept.length
+      ? [{ type: "Feature", id: feature.id, properties: {}, geometry: { type: "MultiPolygon", coordinates: kept } }]
+      : [];
+  });
+  return {
+    land: { type: "FeatureCollection", features: land },
+    borders: topojson.mesh(world, world.objects.countries, (a, b) => a !== b),
+  };
+}
+
+/** Natural Earth 110m, for a route outside the regional basemap. */
+function loadWorldAtlas(): Promise<Atlas> {
+  worldJob ??= Promise.all([import("world-atlas/countries-110m.json"), import("topojson-client")]).then(
+    ([atlas, topojson]) => atlasFrom((atlas.default ?? atlas) as unknown as World, topojson),
   );
-  return atlasJob;
+  return worldJob;
+}
+
+/**
+ * Natural Earth (public domain). The regional file covers Europe, Africa and
+ * the Middle East. A route outside that box uses countries-110m.
+ */
+function loadAtlas(inZone: boolean): Promise<Atlas> {
+  if (!inZone) return loadWorldAtlas();
+  regionalJob ??= Promise.all([loadBasemapTopology(), import("topojson-client")])
+    .then(([world, topojson]) => atlasFrom(world as World, topojson))
+    .catch(() => loadWorldAtlas());
+  return regionalJob;
 }
 
 const round = (n: number) => Math.round(n * 10) / 10;
@@ -82,14 +102,6 @@ export function RouteMap({ stops, height = 250, overlap = 22, showSafar = true, 
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    let alive = true;
-    void loadAtlas().then((value) => alive && setAtlas(value));
-    return () => {
-      alive = false;
-    };
-  }, []);
-
   const known = useMemo(
     () =>
       (JSON.parse(routeKey) as MapStop[]).flatMap((stop) => {
@@ -98,6 +110,15 @@ export function RouteMap({ stops, height = 250, overlap = 22, showSafar = true, 
       }),
     [routeKey],
   );
+  const inZone = coordsInBasemapZone(known.map((stop) => stop.coord));
+
+  useEffect(() => {
+    let alive = true;
+    void loadAtlas(inZone).then((value) => alive && setAtlas(value));
+    return () => {
+      alive = false;
+    };
+  }, [inZone]);
 
   const drawing = useMemo(() => {
     if (!width || known.length < 2) return null;

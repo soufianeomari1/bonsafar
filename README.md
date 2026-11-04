@@ -80,7 +80,7 @@ The judges' board is hidden from regular visitors: it opens once with a private 
 
 - Kiwi.com MCP server (flights)
 - trivago MCP server (hotels and monthly price trends), and trivago hotel photos
-- Natural Earth basemap (public domain) for the route map
+- Natural Earth basemap (public domain) and OurAirports airport positions (public domain) for the route map
 - Supabase (auth, database, poster storage)
 - Vercel (hosting)
 
