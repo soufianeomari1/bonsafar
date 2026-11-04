@@ -165,8 +165,6 @@ export const en = {
   "home.chip.marrakech": "A weekend in Marrakech",
   "home.bubbleWrite": "Write me your trip",
   "home.bubbleWriteHint": "I read darija, French and English.",
-  "home.holdLead": "Press and hold",
-  "home.holdRest": "to speak · darija or French",
   "home.micDenied":
     "The microphone is blocked. Allow it in your browser settings, or write your request below.",
   "home.micUnsupported":

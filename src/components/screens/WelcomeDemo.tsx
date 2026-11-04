@@ -16,8 +16,8 @@ function at(delay: string, extra?: Record<string, string>): CSSProperties {
   return { "--t": delay, ...extra } as CSSProperties;
 }
 
-/** Safar's face. The header holds it still; the voice note tilts and floats it. */
-export function SafarGlyph({ className }: { className?: string }) {
+/** Safar next to the voice note, where he tilts and floats. */
+function SafarGlyph({ className }: { className?: string }) {
   return (
     <svg aria-hidden viewBox="0 0 200 200" className={cn(styles.glyph, className)}>
       <g className="fill-card stroke-ink" strokeWidth={7} strokeLinejoin="round">
@@ -141,14 +141,16 @@ export function WelcomeDemo() {
   const { t, rtl } = useLanguage();
 
   return (
-    <section aria-label={t("welcome.demo.label")}>
-      <div className={cn(styles.step, styles.s1)}>
+    <section aria-label={t("welcome.demo.label")} className={styles.demo}>
+      <div className={cn(styles.sp, styles.spL)} aria-hidden />
+      <div className={styles.step}>
         <Gate delay="0.1s" digits="371" />
         <h1 className={styles.title} data-title="">
           <StepTitle text={t("welcome.step1")} kind="mark" />
         </h1>
       </div>
 
+      <div className={cn(styles.sp, styles.spS)} aria-hidden />
       <div className={styles.talk}>
         <div className={cn(styles.safarBox, styles.a, styles.kPop, styles.ePop)} style={at("0.35s")}>
           <div className={styles.safarFlip}>
@@ -202,7 +204,8 @@ export function WelcomeDemo() {
         </div>
       </div>
 
-      <div className={cn(styles.step, styles.s2)}>
+      <div className={cn(styles.sp, styles.spL)} aria-hidden />
+      <div className={styles.step}>
         <Gate delay="1.6s" digits="842" />
         <h2 className={styles.title} data-title="">
           <StepTitle text={t("welcome.step2")} kind="under" />
@@ -212,6 +215,7 @@ export function WelcomeDemo() {
         {t("welcome.sub")}
       </p>
 
+      <div className={cn(styles.sp, styles.spS)} aria-hidden />
       <div className={cn(styles.passWrap, styles.a)} style={at("1.95s", { "--d": "0.55s" })}>
         <div className={styles.pass}>
           <div className={styles.pTop}>

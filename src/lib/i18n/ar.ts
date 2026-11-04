@@ -184,8 +184,6 @@ export const ar: Dictionary = {
   "home.bubbleWrite": "اكتبها لي",
   // TODO(i18n)
   "home.bubbleWriteHint": "أقرأ الدارجة والفرنسية والإنجليزية.",
-  "home.holdLead": "اضغط باستمرار",
-  "home.holdRest": "للتحدث · الدارجة أو الفرنسية",
   "home.micDenied": "الميكروفون محظور. اسمح به في إعدادات المتصفح، أو اكتب طلبك أدناه.",
   "home.micUnsupported": "هذا المتصفح لا يستطيع التسجيل. اكتب طلبك أدناه.",
   "home.tooShort": "قصير جدًا. أبقِ إصبعك على الزر أثناء الكلام.",

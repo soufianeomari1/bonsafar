@@ -36,7 +36,7 @@ type Option = {
   arabic?: boolean;
 };
 
-/** Codes shown on the welcome pill, as in 00-welcome-v11.html. */
+/** Codes shown on the welcome pill, as in 00-welcome-v12.html. */
 const CODE: Record<Lang, string> = {
   fr: "FR",
   en: "EN",
@@ -184,7 +184,7 @@ export function LanguagePicker({
         aria-expanded={open}
         onClick={() => setOpen(true)}
         className={cn(
-          "flex h-[34px] shrink-0 items-center gap-1.5 rounded-pill border border-line bg-card px-3 font-sans text-[13px] font-semibold text-ink",
+          "flex h-[38px] shrink-0 items-center gap-1.5 rounded-[13px] bg-bg px-3 font-sans text-[13px] font-semibold text-ink",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue",
           className
         )}

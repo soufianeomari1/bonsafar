@@ -202,10 +202,6 @@ export const darijaLatn: Dictionary = {
   "home.bubbleWrite": "Ktebha liya",
   // TODO(i18n)
   "home.bubbleWriteHint": "Kanqra darija, franssawiya w ngliziya.",
-  "home.holdLead": "Brek",
-  // TODO(i18n)
-  "home.holdRest": "w hder · darija wla franssawiya",
-  // TODO(i18n)
   "home.micDenied": "Lmicro msdoud. 7ellou f i3dadat dyal navigateur, wla kteb talab dyalek lta7t.",
   "home.micUnsupported": "Had navigateur ma kaysjjelch. Kteb talab dyalek lta7t.",
   "home.tooShort": "9sir bzzaf. Khelli sbe3 m7tout mli kathder.",

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Clouds } from "@/components/bs/Clouds";
-import { Logo } from "@/components/bs/Brand";
+import { Wordmark } from "@/components/bs/Brand";
 import { translate } from "@/lib/i18n";
 
 const t = (key: Parameters<typeof translate>[1]) => translate("en", key);
@@ -17,11 +17,9 @@ export function JuryPlaceholder() {
         <span className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-blue">
           {t("jury.badge")}
         </span>
-        <Logo size="lg" />
-        <span className="flex items-baseline gap-2">
-          <span className="text-[22px] font-extrabold tracking-[-0.02em]">BonSafar</span>
+        <Wordmark size={24} mark={40}>
           <span className="text-[15px] italic text-muted">trik slama</span>
-        </span>
+        </Wordmark>
         <h1 className="text-[30px] font-extrabold leading-[1.08] tracking-[-0.025em]">
           {t("jury.title")}
         </h1>

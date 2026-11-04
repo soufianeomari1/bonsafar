@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { Wordmark } from "@/components/bs/Brand";
 import { JuryFrame } from "@/components/layout/JuryFrame";
 import { MobileFrame } from "@/components/layout/MobileFrame";
 import { useAgentRun } from "@/lib/agent-client/context";
@@ -40,9 +41,12 @@ function JuryHeader() {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div>
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
-          BonSafar · judges&apos; demo
-        </p>
+        <div className="flex items-center gap-2">
+          <Wordmark size={18} mark={24} />
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
+            · judges&apos; demo
+          </span>
+        </div>
         <p className="text-lg font-extrabold tracking-tight">{scenario}</p>
       </div>
       <ol className="flex flex-wrap gap-2">

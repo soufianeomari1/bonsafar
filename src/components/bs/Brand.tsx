@@ -1,4 +1,5 @@
 import { AirplaneTilt, Play } from "@phosphor-icons/react/dist/ssr";
+import type React from "react";
 import { cn } from "@/lib/utils";
 
 const LOGO_SIZES = {
@@ -7,31 +8,68 @@ const LOGO_SIZES = {
   lg: { box: 64, radius: 18, icon: 36 },
 } as const;
 
-/** Static Safar face used as the wordmark. Not the living mascot: one animated Safar per screen. */
-export function SafarMark({ size = 30, className }: { size?: number; className?: string }) {
+const WING =
+  "M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z";
+
+/** Safar with his wings, at rest. The logo never floats or flaps. */
+export function SafarLogo({ size = 28, className }: { size?: number; className?: string }) {
   return (
     <svg
       aria-hidden
       width={size}
       height={size}
       viewBox="0 0 200 200"
-      className={cn("shrink-0", className)}
+      className={cn("block shrink-0", className)}
     >
-      <g transform="rotate(-12 100 100)">
-        <path
-          d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z"
-          className="fill-blue stroke-ink"
-          strokeWidth={10}
-          strokeLinejoin="round"
-        />
-        <path
-          d="M74,90 Q82,78 90,90 M108,90 Q116,78 124,90 M88,104 Q99,117 110,104"
-          className="fill-none stroke-ink"
-          strokeWidth={9}
-          strokeLinecap="round"
-        />
+      <g className="fill-card stroke-ink" strokeWidth={7} strokeLinejoin="round">
+        <path d={WING} />
+        <g transform="translate(200,-10) scale(-1,1)">
+          <path d={WING} />
+        </g>
       </g>
+      <path
+        d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z"
+        className="fill-blue stroke-ink"
+        strokeWidth={7}
+        strokeLinejoin="round"
+      />
+      <path
+        d="M74,89 Q82,78 90,89 M108,89 Q116,78 124,89 M88,104 Q99,116 110,104"
+        className="fill-none stroke-ink"
+        strokeWidth={7}
+        strokeLinecap="round"
+      />
     </svg>
+  );
+}
+
+/** "BonSafar": Geist 800, tight, "Bon" in ink and "Safar" in Safar blue. */
+export function Wordmark({
+  size = 20,
+  mark = 28,
+  children,
+  className,
+}: {
+  /** Font size of the word, px. */
+  size?: number;
+  /** Size of the static Safar, px. */
+  mark?: number;
+  /** Optional tagline after the word. */
+  children?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <span className={cn("flex min-w-0 items-center gap-2", className)}>
+      <SafarLogo size={mark} />
+      <span
+        dir="ltr"
+        className="shrink-0 font-sans font-extrabold leading-none tracking-[-0.04em] text-ink"
+        style={{ fontSize: size }}
+      >
+        Bon<span className="text-blue">Safar</span>
+      </span>
+      {children}
+    </span>
   );
 }
 

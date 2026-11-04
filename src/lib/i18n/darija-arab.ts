@@ -182,8 +182,6 @@ export const darijaArab: Dictionary = {
   "home.bubbleWrite": "كتبها ليا",
   // TODO(i18n)
   "home.bubbleWriteHint": "كنقرا الدارجة، الفرنسية والإنجليزية.",
-  "home.holdLead": "برك",
-  "home.holdRest": "وهضر · الدارجة ولا الفرنسية",
   "home.micDenied": "الميكرو مسدود. حلو ف إعدادات المتصفح، ولا كتب الطلب ديالك لتحت.",
   "home.micUnsupported": "هاد المتصفح ما كيسجلش. كتب الطلب ديالك لتحت.",
   "home.tooShort": "قصير بزاف. خلي صبعك محطوط ملي كتهضر.",

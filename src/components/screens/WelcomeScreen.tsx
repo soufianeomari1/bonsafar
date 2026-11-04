@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useLayoutEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Wordmark } from "@/components/bs/Brand";
 import { LanguagePicker } from "@/components/bs/LanguagePicker";
-import { SafarGlyph, WelcomeDemo } from "@/components/screens/WelcomeDemo";
+import { WelcomeDemo } from "@/components/screens/WelcomeDemo";
 import { haptic } from "@/lib/haptics";
 import { htmlLang } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -75,7 +76,7 @@ function GoogleMark() {
   );
 }
 
-/** Screen 0, design/motion/screens/00-welcome-v11.html. */
+/** Screen 0, design/motion/screens/00-welcome-v12.html. */
 export function WelcomeScreen() {
   const { t, lang, rtl } = useLanguage();
   const router = useRouter();
@@ -111,16 +112,15 @@ export function WelcomeScreen() {
       <div className={styles.sky} aria-hidden />
       <div className={styles.wrap} data-wrap="">
         <header className={styles.head}>
-          <div className={styles.brand}>
-            <SafarGlyph className={styles.wordmark} />
-            <span>BonSafar</span>
+          <Wordmark size={21} mark={28} className={styles.brand}>
             <em>{t("welcome.tagline")}</em>
-          </div>
+          </Wordmark>
           <LanguagePicker legal />
         </header>
 
         <WelcomeDemo />
 
+        <div className={cn(styles.sp, styles.spL)} aria-hidden />
         <p className={cn(styles.pitch, styles.a)} style={at("2.95s")}>
           {t("welcome.pitch")}
         </p>

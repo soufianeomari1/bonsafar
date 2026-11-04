@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Microphone, UserCircle, WarningCircle } from "@phosphor-icons/react";
-import { JuryPill, SafarMark } from "@/components/bs/Brand";
+import { JuryPill, Wordmark } from "@/components/bs/Brand";
 import { Composer, ComposerDock } from "@/components/bs/Composer";
 import { Clouds } from "@/components/bs/Clouds";
 import { Safar, type SafarState } from "@/components/bs/Safar";
@@ -83,10 +83,7 @@ export function HomeScreen() {
       />
       <div className="relative z-10 flex min-h-0 flex-1 flex-col scroll-quiet overflow-y-auto pb-44">
         <header className="flex items-center justify-between gap-2 px-5 pt-5">
-          <div className="flex min-w-0 items-center gap-2" dir="ltr">
-            <SafarMark />
-            <span className="text-lg font-extrabold tracking-[-0.01em]">BonSafar</span>
-          </div>
+          <Wordmark size={20} mark={30} />
           <div className="flex shrink-0 items-center gap-2">
             <JuryPill dot label={t("common.juryMode")} className="h-9 border border-line px-3.5 text-[13px]" />
             <Link
@@ -106,7 +103,7 @@ export function HomeScreen() {
           <p className="mt-2 max-w-[260px] text-base text-muted">{t("home.subtitle")}</p>
         </section>
 
-        <section aria-label={t("home.micLabel")} className="relative mt-2 h-[250px] shrink-0">
+        <section aria-label={t("home.micLabel")} className="relative mt-2 h-[214px] shrink-0">
           <div className="pointer-events-none absolute inset-x-1 top-7 z-10 flex items-start gap-1.5">
             <Safar state={safarState} size={84} className="shrink-0" />
             <div
@@ -153,9 +150,6 @@ export function HomeScreen() {
               <Microphone size={34} weight="fill" aria-hidden />
             </button>
           </div>
-          <p className="pointer-events-none absolute inset-x-4 top-[214px] text-center text-[13px] text-muted">
-            <span className="font-semibold text-ink">{t("home.holdLead")}</span> {t("home.holdRest")}
-          </p>
         </section>
 
         <section aria-label={t("home.ideasLabel")} className="mt-1.5">
