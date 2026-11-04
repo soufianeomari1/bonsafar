@@ -1,0 +1,32 @@
+{
+  "istanbul": {
+    "prompt": "A wide landscape travel illustration of Istanbul at golden hour. The Bosphorus, a bright blue sky, and warm golden light on simple painted domes and a distant skyline. Luminous, warm, hopeful, painterly, not a photograph. No text, no letters, no numbers, no logos, no watermarks, no signs, no writing on flags, no recognizable people, no faces, no crowd.",
+    "model": "muse-image-1.0",
+    "date": "2026-11-04T10:59:17.790Z",
+    "cost_usd": 0.01
+  },
+  "paris": {
+    "prompt": "A wide landscape travel illustration of Paris at golden hour. A river, bridges and rooftops as simple friendly shapes, a bright blue sky and warm golden light. Luminous, warm, hopeful, painterly, not a photograph. No text, no letters, no numbers, no logos, no watermarks, no signs, no writing, no recognizable people, no faces, no crowd.",
+    "model": "muse-image-1.0",
+    "date": "2026-11-04T10:59:27.651Z",
+    "cost_usd": 0.01
+  },
+  "omra": {
+    "prompt": "A wide landscape illustration of pale stone arches and a vast quiet courtyard at sunrise, seen from far away. A respectful, empty sanctuary, architecture only, soft blue sky warming into golden light. Luminous, calm, painterly, not a photograph. No crowd, no person, no silhouette, no face, no calligraphy, no inscriptions, no letters, no numbers, no logos, no signs, no flags, no text of any kind.",
+    "model": "muse-image-1.0",
+    "date": "2026-11-04T10:59:50.306Z",
+    "cost_usd": 0.01
+  },
+  "tunis": {
+    "prompt": "A wide landscape travel illustration of Tunis by the Mediterranean. White and blue buildings and the sea, a bright blue sky and warm golden light. Luminous, warm, hopeful, painterly, not a photograph. No text, no letters, no numbers, no logos, no watermarks, no signs, no writing, no recognizable people, no faces, no crowd.",
+    "model": "muse-image-1.0",
+    "date": "2026-11-04T11:00:06.012Z",
+    "cost_usd": 0.01
+  },
+  "barcelona": {
+    "prompt": "A wide landscape travel illustration of Barcelona by the sea, seen from a distance. Tiled roofs and the waterfront, a bright blue sky and warm golden light. Luminous, warm, hopeful, painterly, not a photograph. No text, no letters, no numbers, no logos, no watermarks, no signs, no mosaics forming words, no recognizable people, no faces, no crowd.",
+    "model": "muse-image-1.0",
+    "date": "2026-11-04T11:00:22.466Z",
+    "cost_usd": 0.01
+  }
+}

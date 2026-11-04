@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -172,10 +173,23 @@ export function HomeScreen() {
                   onClick={() => submitText(t(idea.title))}
                   className="flex w-[156px] shrink-0 snap-start flex-col overflow-hidden rounded-card bg-card text-start text-ink shadow-soft"
                 >
-                  <span className={`flex h-24 items-end p-2 ${idea.wash}`}>
-                    <span className="rounded-md bg-card/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold">
-                      {t("home.muse")}
-                    </span>
+                  <span className="relative block h-24 overflow-hidden">
+                    {idea.generated ? (
+                      <Image
+                        src={idea.image}
+                        alt={t(idea.title)}
+                        fill
+                        sizes="156px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className={`absolute inset-0 ${idea.wash}`} aria-hidden />
+                    )}
+                    {idea.generated && (
+                      <span className="absolute bottom-2 start-2 rounded-md bg-card/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold">
+                        {t("home.muse")}
+                      </span>
+                    )}
                   </span>
                   <span className="flex flex-1 flex-col px-3 pb-3.5 pt-3">
                     <span className="text-[15px] font-bold">{t(idea.title)}</span>
