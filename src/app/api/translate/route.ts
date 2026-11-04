@@ -1,4 +1,6 @@
+import { after } from "next/server";
 import { RunLog } from "@/lib/ai/events";
+import { recordUsage } from "@/lib/usage/guard";
 import { TranslateRequestSchema, type TranslateResponse } from "@/lib/intent/schema";
 import { translateToArabic, translateToDarijaArab, translateTranscript } from "@/lib/intent/translate";
 import { RUN_ID_HEADER } from "@/lib/voice/protocol";
@@ -25,6 +27,7 @@ export async function POST(request: Request) {
 
   const { transcript, target } = parsed.data;
   const log = new RunLog(request.headers.get(RUN_ID_HEADER) ?? undefined);
+  after(() => recordUsage(log.totalCostUsd()));
   try {
     const translation =
       target === "ar"

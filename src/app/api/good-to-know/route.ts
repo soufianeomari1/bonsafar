@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { after } from "next/server";
 import { RunLog } from "@/lib/ai/events";
+import { recordUsage } from "@/lib/usage/guard";
 import { fetchGoodToKnow } from "@/lib/ai/good-to-know";
 import { wantsArabic } from "@/lib/agent/schema";
 import { LANGUAGES } from "@/lib/i18n";
@@ -28,6 +30,7 @@ export async function POST(request: Request) {
   if (!body.success) return Response.json({ ok: false, error: "invalid_request" }, { status: 400 });
 
   const log = new RunLog(body.data.run_id);
+  after(() => recordUsage(log.totalCostUsd()));
   try {
     const notes = await fetchGoodToKnow(
       {

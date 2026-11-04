@@ -1,4 +1,6 @@
+import { after } from "next/server";
 import { serverEnv } from "@/lib/env";
+import { recordUsage } from "@/lib/usage/guard";
 import { RunLog } from "@/lib/ai/events";
 import { transcribeCostUsd } from "@/lib/ai/pricing";
 import {
@@ -44,6 +46,7 @@ async function readAudio(request: Request): Promise<Buffer> {
 export async function POST(request: Request) {
   const started = performance.now();
   const log = new RunLog(request.headers.get(RUN_ID_HEADER) ?? undefined);
+  after(() => recordUsage(log.totalCostUsd()));
 
   let env: ReturnType<typeof serverEnv>;
   let wavBuffer: Buffer;

@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { after } from "next/server";
 import { RunLog } from "@/lib/ai/events";
+import { recordUsage } from "@/lib/usage/guard";
 import { generatePosterImage, posterPrompt, storePoster } from "@/lib/ai/image";
 
 export const maxDuration = 60;
@@ -25,6 +27,7 @@ export async function POST(request: Request) {
   if (!body.success) return Response.json({ ok: false, error: "invalid_request" }, { status: 400 });
 
   const log = new RunLog(body.data.run_id);
+  after(() => recordUsage(log.totalCostUsd()));
   const prompt = posterPrompt(body.data.city, body.data.country);
   try {
     const image = await generatePosterImage(prompt, log);
