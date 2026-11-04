@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "mcp:tools": "node scripts/mcp-list-tools.mjs",
-    "agent:check": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/agent-check.mjs"
+    "agent:check": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/agent-check.mjs",
+    "poster:fallback": "node scripts/poster-fallback.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -17,6 +18,7 @@
     "@supabase/supabase-js": "^2.118.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
+    "html-to-image": "^1.11.13",
     "motion": "^14.9.0",
     "next": "16.4.5",
     "openai": "^7.48.0",

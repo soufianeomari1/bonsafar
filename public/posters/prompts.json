@@ -1,0 +1,12 @@
+{
+  "istanbul-fallback": {
+    "file": "istanbul-fallback.webp",
+    "prompt": "A vertical travel illustration of Istanbul, Turkey, at golden hour. Warm luminous sky, soft clouds, the skyline and landmarks drawn as simple friendly shapes. Bright, warm, hopeful travel-poster illustration, painterly, not a photograph. No text, no letters, no numbers, no logos, no watermarks, no writing on signs or flags, no recognizable people, no faces.",
+    "date": "2026-11-04T02:35:35.509Z",
+    "cost_usd": 0.01,
+    "size": "1152x2048",
+    "output_format": "webp",
+    "latency_ms": 11831,
+    "model_env": "MODEL_IMAGE"
+  }
+}
