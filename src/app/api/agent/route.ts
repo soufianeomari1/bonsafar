@@ -133,8 +133,16 @@ export async function POST(request: Request) {
       });
       emit({ type: "result", package: result.package });
       let saved = false;
+      const wanted = agentRequest.intent.destination;
+      const got = result.package.destination;
+      const sameDestination =
+        !!wanted &&
+        wanted.iata.toUpperCase() === got.iata.toUpperCase() &&
+        wanted.city.localeCompare(got.city, "en", { sensitivity: "base" }) === 0;
       try {
-        saved = await saveRun({
+        if (!sameDestination) {
+          saved = false;
+        } else saved = await saveRun({
           id: log.runId,
           scenario: agentRequest.scenario,
           intent: agentRequest.intent,

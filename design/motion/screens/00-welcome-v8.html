@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bienvenue v8</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#F2F2F7;--carte:#FFFFFF;--encre:#0B0B0F;--gris:#6B6B76;--ligne:#E5E5EA;
+  --vert:#15803D;--vert-vif:#22C55E;--vert-doux:#E8F7EE;--jaune:#FFC800;--bleu:#0A6CFF;--bleu-doux:#EAF2FF;--orange-doux:#FFF4E0;
+  --ombre:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);
+  --out:cubic-bezier(0.23,1,0.32,1);--pop:cubic-bezier(0.34,1.56,0.64,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#E4E4EA;font-family:Geist,system-ui,sans-serif;color:var(--encre);padding:28px 24px 48px;-webkit-font-smoothing:antialiased}
+.board{display:flex;gap:36px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+.col{display:flex;flex-direction:column;gap:12px;align-items:center}
+.cap{font:600 12px/1.3 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--gris)}
+.cap b{color:var(--encre)}
+.replay-all{font:600 12px Geist;border:1px solid var(--ligne);background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer}
+.phone{position:relative;width:390px;height:844px;border-radius:44px;background:var(--fond);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.05)}
+.status{height:44px;background:#1C181B;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:600 14px Geist}
+.chrome{height:56px;background:#1C181B;display:flex;align-items:center;gap:12px;padding:0 14px}
+.url{flex:1;height:38px;border-radius:19px;background:#3A3438;color:#E8E8EA;display:flex;align-items:center;padding:0 16px;font-size:15px}
+.ic{width:22px;height:22px;border:2px solid #E8E8EA;border-radius:5px}
+.page{position:relative;height:744px;overflow:hidden}
+.sky{position:absolute;inset:0 0 auto 0;height:470px;background:linear-gradient(180deg,#DCEBFF 0%,#E8F1FE 60%,var(--fond) 100%)}
+.fold{position:absolute;left:0;right:0;top:664px;border-top:2px dashed #E0464C}
+.fold span{position:absolute;right:10px;top:6px;font:600 10px 'Geist Mono',monospace;color:#E0464C;letter-spacing:.06em}
+.wrap{position:relative;padding:0 20px}
+
+.head{display:flex;align-items:center;justify-content:space-between;height:54px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:19px}
+.brand em{font:italic 500 14px Geist;color:var(--gris);margin-left:2px}
+.lang{height:34px;padding:0 12px;border-radius:999px;background:var(--carte);border:1px solid var(--ligne);display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
+
+.h{font-size:31px;line-height:1.04;font-weight:800;letter-spacing:-.035em;white-space:nowrap}
+.h1{margin-top:12px}
+.mark{position:relative;z-index:0}
+.mark::after{content:"";position:absolute;left:-3px;right:-3px;bottom:2px;height:.34em;background:var(--jaune);border-radius:5px;z-index:-1;transform-origin:left center}
+.under{position:relative}
+.under::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:4px;background:var(--bleu);border-radius:3px;transform-origin:left center}
+
+/* voice */
+.talk{display:flex;align-items:flex-end;gap:4px;margin-top:12px}
+.safar-box{position:relative;width:74px;height:74px;flex:none}
+.safar{width:74px;height:74px;transform:rotate(-12deg)}
+.arcs{position:absolute;right:-5px;top:19px}
+.spark{position:absolute;left:-2px;top:-6px}
+.voice{flex:1;background:linear-gradient(180deg,#1F7BFF 0%,var(--bleu) 100%);color:#fff;border-radius:20px 20px 20px 6px;padding:10px 13px 11px;box-shadow:0 10px 24px rgba(10,108,255,.26),inset 0 1px 0 rgba(255,255,255,.25)}
+.vrow{display:flex;align-items:center;gap:8px}
+.playbtn{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.wave{display:flex;align-items:center;gap:3px;height:20px;flex:1}
+.wave span{width:3px;height:20px;border-radius:2px;background:#fff;transform-origin:center;transform:scaleY(var(--h))}
+.dur{font:600 11px 'Geist Mono',monospace}
+.tr{margin-top:6px;font-size:13.5px;line-height:1.36;font-weight:500}
+.hl{position:relative;z-index:0;color:var(--encre);font-weight:600;padding:0 3px}
+.hl::before{content:"";position:absolute;inset:0;background:var(--jaune);border-radius:5px;z-index:-1;transform-origin:left center}
+
+/* pass */
+.h2{margin-top:24px}
+.sub{margin-top:6px;font-size:14.5px;color:var(--gris)}
+.pass-wrap{margin-top:12px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.05)) drop-shadow(0 10px 22px rgba(11,11,15,.08))}
+.pass{--perf:98px;position:relative;background:var(--carte);border-radius:22px;overflow:hidden;
+  -webkit-mask:radial-gradient(circle 10px at 0 var(--perf),#0000 98%,#000 100%),radial-gradient(circle 10px at 100% var(--perf),#0000 98%,#000 100%);
+  -webkit-mask-composite:source-in;mask:radial-gradient(circle 10px at 0 var(--perf),#0000 98%,#000 100%),radial-gradient(circle 10px at 100% var(--perf),#0000 98%,#000 100%);mask-composite:intersect}
+.p-top{padding:13px 16px 0;height:98px}
+.p-row{display:flex;align-items:center;justify-content:space-between}
+.lbl{display:flex;align-items:center;gap:7px;font:600 10.5px 'Geist Mono',monospace;letter-spacing:.1em;color:var(--gris)}
+.lbl i{width:7px;height:7px;border-radius:50%;background:var(--vert-vif);box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.gate{height:24px;padding:0 8px;border-radius:7px;background:var(--jaune);display:flex;align-items:center;gap:5px;font:700 11.5px 'Geist Mono',monospace}
+.dest{display:flex;align-items:flex-end;justify-content:space-between;margin-top:10px}
+.city{font-size:28px;line-height:1;font-weight:800;letter-spacing:-.03em;display:flex}
+.city span{display:inline-block}
+.country{margin-top:4px;font-size:12.5px;color:var(--gris);font-weight:500}
+.dates{text-align:right}
+.dates b{display:block;font-size:16px;color:var(--vert);font-weight:700;font-variant-numeric:tabular-nums}
+.dates span{font-size:11.5px;color:var(--gris);font-weight:500}
+.perf{position:absolute;left:13px;right:13px;top:var(--perf);border-top:2px dashed #DADAE2;transform-origin:left center}
+.p-bot{padding:11px 14px 12px}
+.chips{display:flex;gap:6px}
+.chip{height:28px;padding:0 9px 0 4px;border-radius:999px;background:var(--fond);display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip .ico{width:20px;height:20px;flex:none;border-radius:50%;display:grid;place-items:center}
+.chip.ok{background:var(--vert-doux);color:var(--vert)}
+
+/* try it */
+.try{position:relative;margin-top:16px;height:74px;border-radius:22px;padding:0 14px 0 12px;display:flex;align-items:center;gap:12px;color:#fff;overflow:hidden;
+  background:radial-gradient(120% 140% at 90% 0%,#3D8BFF 0%,rgba(61,139,255,0) 60%),linear-gradient(160deg,#0A6CFF 0%,#0646B8 100%);box-shadow:0 10px 24px rgba(10,108,255,.25)}
+.try .dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.14) 1.2px,transparent 1.2px);background-size:14px 14px;pointer-events:none}
+.mic-zone{position:relative;width:50px;height:50px;flex:none}
+.halo{position:absolute;inset:0;border-radius:50%;background:#fff;opacity:.25}
+.mic{position:relative;width:50px;height:50px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 6px 16px rgba(0,0,0,.22)}
+.try-txt{position:relative;flex:1;min-width:0}
+.try-k{font:700 10.5px 'Geist Mono',monospace;letter-spacing:.12em;color:rgba(255,255,255,.75)}
+.try-t{margin-top:3px;font-size:17px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.rot{display:inline-block;height:1.2em;overflow:hidden;vertical-align:bottom}
+.rot span{display:block;height:1.2em;color:var(--jaune)}
+.try-h{position:relative;font-size:12px;font-weight:600;color:rgba(255,255,255,.85);text-align:right;line-height:1.25;flex:none}
+
+/* google */
+.google{margin-top:20px;height:52px;border-radius:16px;background:#131314;color:#fff;display:flex;align-items:center;justify-content:center;gap:12px;font-weight:600;font-size:16px}
+.gsub{margin-top:10px;display:flex;justify-content:center;gap:6px;font-size:13px;color:var(--gris)}
+.gsub a{color:var(--encre);font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#BDBDC6}
+
+/* ===== animation engine: server render = final state; .seen plays once ===== */
+.js .scene:not(.seen) .a{opacity:0}
+.seen .a{animation:var(--k,rise) var(--d,.5s) var(--e,var(--out)) var(--t,0s) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:none}}
+@keyframes drop{0%{opacity:0;transform:translateY(-12px) scale(.96)}100%{opacity:1;transform:none}}
+@keyframes flip{0%{opacity:0;transform:perspective(300px) rotateX(-90deg)}100%{opacity:1;transform:none}}
+@keyframes sweep{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+@keyframes settle{to{transform:scaleY(var(--h))}}
+@keyframes breathe{0%{transform:scale(1);opacity:.3}70%,100%{transform:scale(1.55);opacity:0}}
+@keyframes roll{0%,22%{transform:translateY(0)}25%,47%{transform:translateY(-100%)}50%,72%{transform:translateY(-200%)}75%,97%{transform:translateY(-300%)}100%{transform:translateY(-400%)}}
+@keyframes bob{0%,100%{transform:rotate(-12deg) translateY(0)}50%{transform:rotate(-8deg) translateY(-5px)}}
+@keyframes jump{0%{transform:rotate(-12deg)}35%{transform:rotate(-6deg) translateY(-12px)}70%{transform:rotate(-12deg) scale(1.05,.95)}100%{transform:rotate(-12deg)}}
+.js .scene:not(.seen) .mark::after,.js .scene:not(.seen) .under::after,.js .scene:not(.seen) .hl::before,.js .scene:not(.seen) .perf{transform:scaleX(0)}
+.seen .mark::after{animation:sweep .45s var(--out) .15s both}
+.seen .hl::before{animation:sweep .28s var(--out) var(--t) both}
+.seen .under::after{animation:sweep .45s var(--out) 1.55s both}
+.seen .perf{animation:sweep .4s var(--out) 2.15s both}
+.seen .wave span{animation:wave .3s ease-in-out calc(var(--i) * 35ms + .5s) 3,settle .2s ease-out calc(var(--i) * 35ms + 1.4s) forwards}
+.safar{animation:bob 3.2s ease-in-out infinite}
+.seen .safar{animation:jump .55s var(--out) 1.3s both,bob 3.2s ease-in-out 1.85s infinite}
+.halo{animation:breathe 2.4s var(--out) infinite}
+.rot span{animation:roll 8s var(--out) 3s infinite}
+@media (prefers-reduced-motion:reduce){
+  .seen .a{animation:fade .25s linear var(--t,0s) both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .seen .mark::after,.seen .under::after,.seen .hl::before,.seen .perf{animation:fade .25s linear both}
+  .safar,.seen .safar,.halo,.rot span,.seen .wave span{animation:none}
+}
+
+.notes{width:400px;background:var(--carte);border-radius:22px;box-shadow:var(--ombre);padding:18px 20px;font-size:13px;line-height:1.5;color:#33333A}
+.notes h4{font-size:13px;margin:12px 0 4px}
+.notes h4:first-child{margin-top:0}
+.notes li{margin-left:16px;margin-top:3px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <symbol id="safar" viewBox="0 0 200 200">
+   <g fill="#fff" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round">
+    <path d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z"/>
+    <g transform="translate(200,-10) scale(-1,1)"><path d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z"/></g>
+   </g>
+   <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"/>
+   <path d="M74,89 Q82,78 90,89 M108,89 Q116,78 124,89" fill="none" stroke="#0B0B0F" stroke-width="7" stroke-linecap="round"/>
+   <path d="M88,104 Q99,116 110,104" fill="none" stroke="#0B0B0F" stroke-width="7" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="g" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></symbol>
+ </defs>
+</svg>
+
+<div class="board">
+ <div class="col">
+  <div class="cap"><b>Bienvenue v8</b> · une seule page, sans défilement</div>
+  <button class="replay-all" onclick="replay()">Rejouer l'animation</button>
+  <div class="phone">
+   <div class="status"><span>03:21</span><span>●●● 38</span></div>
+   <div class="chrome"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8E8EA" stroke-width="2"><path d="M4 11 12 4l8 7v9H4z"/></svg><div class="url">bonsafar.com</div><div class="ic"></div></div>
+   <div class="page">
+    <div class="sky"></div>
+    <div class="wrap scene" id="scene">
+     <div class="head">
+      <div class="brand"><svg width="28" height="28"><use href="#safar"/></svg>BonSafar<em>trik slama</em></div>
+      <div class="lang"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B0B0F" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>FR<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0B0B0F" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+     </div>
+
+     <h1 class="h h1">Dis-le en <span class="mark">darija.</span></h1>
+
+     <div class="talk">
+      <div class="safar-box a" style="--k:pop;--e:var(--pop);--t:.2s">
+       <svg class="spark" width="16" height="16" viewBox="0 0 24 24"><path d="M12 1 14.2 9.8 23 12 14.2 14.2 12 23 9.8 14.2 1 12 9.8 9.8z" fill="#FFC800" stroke="#0B0B0F" stroke-width="1.6" stroke-linejoin="round"/></svg>
+       <svg class="safar" viewBox="0 0 200 200"><use href="#safar"/></svg>
+       <svg class="arcs" width="16" height="26" viewBox="0 0 18 30" fill="none" stroke="#0A6CFF" stroke-width="2.6" stroke-linecap="round"><path d="M3 9a8 8 0 0 1 0 12" opacity=".9"/><path d="M8 4a15 15 0 0 1 0 22" opacity=".45"/></svg>
+      </div>
+      <div class="voice a" style="--t:.3s;--e:var(--pop);--d:.55s">
+       <div class="vrow">
+        <div class="playbtn"><svg width="11" height="11" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="#fff"/></svg></div>
+        <div class="wave" id="wave"></div>
+        <div class="dur">0:07</div>
+       </div>
+       <div class="tr">« Bghit nsafer l'<span class="hl" style="--t:1.05s">Istanbul</span> m3a rajli f <span class="hl" style="--t:1.25s">nouss décembre</span>… »</div>
+      </div>
+     </div>
+
+     <h2 class="h h2 a" style="--t:1.45s">On s'occupe du <span class="under">voyage.</span></h2>
+     <p class="sub a" style="--t:1.55s">Vols, hôtel, visa et bagages vérifiés, au vrai prix.</p>
+
+     <div class="pass-wrap a" style="--t:1.7s;--d:.55s">
+      <div class="pass">
+       <div class="p-top">
+        <div class="p-row">
+         <span class="lbl"><i></i>BONSAFAR A COMPRIS</span>
+         <span class="gate a" style="--k:pop;--e:var(--pop);--t:1.95s">CMN <svg width="13" height="13" viewBox="0 0 256 256"><path d="M235.6 115.1 168 91.4V48a24 24 0 0 0-48 0v43.4L52.4 115.1A8 8 0 0 0 48 122v18a8 8 0 0 0 10.2 7.7l61.8-17.6v32.2l-14.3 14.3A8 8 0 0 0 104 182v18a8 8 0 0 0 10.9 7.4L144 196.2l29.1 11.2A8 8 0 0 0 184 200v-18a8 8 0 0 0-2.3-5.7L168 162.6v-32.5l61.8 17.6A8 8 0 0 0 240 140v-18a8 8 0 0 0-4.4-6.9z" fill="#0B0B0F" transform="rotate(90 128 128)"/></svg> IST</span>
+        </div>
+        <div class="dest">
+         <div>
+          <div class="city"><span class="a" style="--k:flip;--t:1.90s;--d:.38s">I</span><span class="a" style="--k:flip;--t:1.94s;--d:.38s">s</span><span class="a" style="--k:flip;--t:1.98s;--d:.38s">t</span><span class="a" style="--k:flip;--t:2.02s;--d:.38s">a</span><span class="a" style="--k:flip;--t:2.06s;--d:.38s">n</span><span class="a" style="--k:flip;--t:2.10s;--d:.38s">b</span><span class="a" style="--k:flip;--t:2.14s;--d:.38s">u</span><span class="a" style="--k:flip;--t:2.18s;--d:.38s">l</span></div>
+          <div class="country">Turquie · 7 nuits</div>
+         </div>
+         <div class="dates a" style="--t:2.1s"><b>15 → 22 déc.</b><span>mi-décembre</span></div>
+        </div>
+       </div>
+       <div class="perf"></div>
+       <div class="p-bot">
+        <div class="chips">
+         <span class="chip a" style="--k:drop;--e:var(--pop);--t:2.35s"><span class="ico" style="background:var(--bleu-doux)"><svg width="12" height="12" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" fill="#0A6CFF"/><circle cx="17" cy="9" r="3" fill="#0A6CFF"/><path d="M2 21a7 7 0 0 1 14 0zM14 21a5 5 0 0 1 9 0z" fill="#0A6CFF"/></svg></span>2 adultes</span>
+         <span class="chip a" style="--k:drop;--e:var(--pop);--t:2.43s"><span class="ico" style="background:var(--orange-doux)"><svg width="12" height="12" viewBox="0 0 24 24"><path d="M3 9h14v5a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6zM17 11h1.5a2.5 2.5 0 0 1 0 5H17" fill="#B45309"/></svg></span>Petit déj</span>
+         <span class="chip ok a" style="--k:drop;--e:var(--pop);--t:2.51s"><span class="ico" style="background:#fff"><svg width="12" height="12" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="#15803D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Sans visa</span>
+        </div>
+       </div>
+      </div>
+     </div>
+
+     <div class="try a" style="--t:2.75s;--e:var(--pop);--d:.55s">
+      <div class="dots"></div>
+      <div class="mic-zone"><div class="halo"></div><div class="mic"><svg width="22" height="22" viewBox="0 0 32 32"><rect x="11" y="3" width="10" height="17" rx="5" fill="#0A6CFF"/><path d="M7 15.5a9 9 0 0 0 18 0" fill="none" stroke="#0A6CFF" stroke-width="2.6" stroke-linecap="round"/><path d="M16 24.5V29" stroke="#0A6CFF" stroke-width="2.6" stroke-linecap="round"/></svg></div></div>
+      <div class="try-txt">
+       <div class="try-k">À TON TOUR, SANS COMPTE</div>
+       <div class="try-t">Dis-moi <span class="rot"><span>« Istanbul »</span><span>« Marrakech »</span><span>« Dubaï »</span><span>« Paris »</span><span>« Istanbul »</span></span></div>
+      </div>
+      <div class="try-h">Maintiens<br>et parle</div>
+     </div>
+
+     <div class="google a" style="--t:2.95s"><svg width="20" height="20"><use href="#g"/></svg>Continuer avec Google</div>
+     <div class="gsub a" style="--t:3.05s">Tes voyages sur tous tes appareils ·<a href="#">sans compte</a></div>
+    </div>
+    <div class="fold"><span>LIGNE DE FLOTTAISON · CHROME ANDROID</span></div>
+   </div>
+  </div>
+ </div>
+
+ <div class="col">
+  <div class="cap"><b>Notes pour Cursor</b></div>
+  <div class="notes">
+   <h4>Une seule page, dans cet ordre</h4>
+   <ul>
+    <li>« Dis-le en darija. » (surligneur jaune sous « darija »).</li>
+    <li>Safar qui écoute et la note vocale (onde qui joue, mots clés surlignés, petit saut de Safar).</li>
+    <li>« On s'occupe du voyage. » (trait bleu sous « voyage ») et une ligne de sous-titre.</li>
+    <li>La carte « BonSafar a compris » découpée en carte d'embarquement (« Istanbul » lettre par lettre, perforation qui se trace, chips qui tombent).</li>
+    <li>« À ton tour, sans compte » : bande bleue avec un micro blanc qui respire et la destination qui change. Un appui long lance l'écran 03 Vocal en invité.</li>
+    <li>« Continuer avec Google » (charte Google) et « sans compte ».</li>
+    <li>Tout tient au-dessus de la ligne rouge : 664 px utiles sous la barre de Chrome Android. Aucun défilement.</li>
+   </ul>
+   <h4>Animation (une seule fois, environ 3 s, puis seules les petites boucles continuent)</h4>
+   <ul>
+    <li>Rendu serveur = état final, tout visible. Le script ajoute .js sur html puis .seen sur la page au montage : toute la séquence se joue d'un coup, pilotée par les délais --t.</li>
+    <li>100 % CSS, uniquement transform et opacity (GPU), aucune librairie d'animation sur cet écran. Titres jamais masqués.</li>
+    <li>prefers-reduced-motion : même séquence en fondus de 250 ms, boucles arrêtées.</li>
+   </ul>
+  </div>
+ </div>
+</div>
+
+<script>
+(function(){
+  var hs=[.35,.7,1,.55,.85,.4,.95,.6,.3,.7,.45,.8,.35,.55,.75,.4];
+  var w=document.getElementById('wave');
+  hs.forEach(function(h,i){var s=document.createElement('span');s.style.setProperty('--h',h);s.style.setProperty('--i',i);if(i>8)s.style.opacity=.45;w.appendChild(s);});
+})();
+document.documentElement.classList.add('js');
+var sc=document.getElementById('scene');
+requestAnimationFrame(function(){sc.classList.add('seen');});
+function replay(){sc.classList.remove('seen');void sc.offsetWidth;sc.classList.add('seen');}
+</script>
+</body>
+</html>

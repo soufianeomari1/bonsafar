@@ -207,16 +207,13 @@ function applyEvent(draft: AgentRunSnapshot, event: AgentStreamEvent) {
       };
       break;
     case "step": {
-      let destination = event.destination ?? draft.legs.at(-1)?.destination ?? "";
-      const last = draft.legs.at(-1);
-      // Entry checks sometimes name the country (Turkey) while the search names the city.
-      if (
-        event.step === "entry_requirements" &&
-        last &&
-        last.steps.entry_requirements.phase !== "done" &&
-        last.destination.toLowerCase() !== destination.toLowerCase()
-      ) {
-        destination = last.destination;
+      const first = draft.legs[0];
+      let destination = event.destination ?? first?.destination ?? "";
+      if (first && destination && destination.toLowerCase() !== first.destination.toLowerCase()) {
+        const entryStillOpen =
+          event.step === "entry_requirements" && first.steps.entry_requirements.phase !== "done";
+        if (!entryStillOpen) break;
+        destination = first.destination;
       }
       const leg = ensureLeg(draft.legs, destination);
       const step = leg.steps[event.step];

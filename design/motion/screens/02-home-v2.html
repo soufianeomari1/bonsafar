@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accueil v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#F2F2F7; --carte:#FFFFFF; --encre:#0B0B0F; --gris:#6B6B76; --ligne:#E5E5EA;
+  --remplissage:#EFEFF4; --vert:#15803D; --vert-doux:#E8F7EE; --jaune:#FFC800;
+  --bleu:#0A6CFF; --bleu-profond:#0052D6; --bleu-doux:#EAF2FF; --orange:#B45309; --orange-doux:#FFF4E0;
+  --ombre:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);
+  --ease:cubic-bezier(0.23,1,0.32,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#E4E4EA;font-family:Geist,system-ui,sans-serif;color:var(--encre);padding:32px 24px 48px;-webkit-font-smoothing:antialiased}
+.board{display:flex;gap:40px;justify-content:center;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:12px;align-items:center}
+.cap{font:600 12px/1.3 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--gris)}
+.cap b{color:var(--encre)}
+
+/* Phone */
+.phone{position:relative;width:390px;height:844px;border-radius:44px;background:var(--fond);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.04)}
+.sky{position:absolute;inset:0 0 auto 0;height:520px;background:linear-gradient(180deg,#DCEBFF 0%,#EAF2FF 55%,var(--fond) 100%);pointer-events:none}
+.cloud{position:absolute;pointer-events:none;opacity:.9}
+.c1{top:178px;right:-40px;width:86px;animation:drift 46s linear infinite}
+.c2{top:300px;left:-30px;width:64px;animation:drift 56s linear infinite reverse;opacity:.7}
+@keyframes drift{0%{transform:translateX(0)}50%{transform:translateX(-26px)}100%{transform:translateX(0)}}
+
+.scroll{position:absolute;inset:0;overflow:hidden;padding:0 20px 140px}
+
+/* Header */
+.head{position:relative;display:flex;align-items:center;justify-content:space-between;height:56px;margin-top:20px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:19px;letter-spacing:-.01em}
+.brand small{font:500 13px 'Geist';color:var(--gris);margin-left:2px}
+.head-r{display:flex;gap:8px;align-items:center}
+.pill{height:36px;padding:0 14px;border-radius:999px;background:var(--carte);border:1px solid var(--ligne);display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--bleu)}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--carte);border:1px solid var(--ligne);display:grid;place-items:center;font-weight:700;font-size:15px}
+
+/* Title */
+.title{position:relative;margin-top:18px}
+.title h1{font-size:32px;line-height:1.08;font-weight:800;letter-spacing:-.025em}
+.title p{margin-top:10px;font-size:16px;color:var(--gris);max-width:260px}
+
+/* Voice zone */
+.voice{position:relative;height:250px;margin-top:8px}
+.safar-wrap{position:absolute;left:4px;top:28px;width:84px;height:84px}
+.bubble{position:absolute;left:96px;top:30px;background:var(--carte);border-radius:18px 18px 18px 6px;box-shadow:var(--ombre);padding:10px 14px;font-size:14px;line-height:1.3;white-space:nowrap}
+.bubble b{font-weight:700}
+.bubble span{display:block;color:var(--gris);font-size:13px}
+.mic-zone{position:absolute;left:50%;top:150px;transform:translate(-50%,-50%);width:88px;height:88px}
+.halo{position:absolute;inset:0;border-radius:50%;background:var(--bleu);opacity:.35;animation:breathe 2.6s var(--ease) infinite}
+@keyframes breathe{0%{transform:scale(1);opacity:.32}70%{transform:scale(1.55);opacity:0}100%{transform:scale(1.55);opacity:0}}
+.mic{position:relative;width:88px;height:88px;border-radius:50%;
+  background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.28) 0%,rgba(255,255,255,0) 45%),linear-gradient(180deg,var(--bleu) 0%,var(--bleu-profond) 100%);
+  box-shadow:0 10px 28px rgba(10,108,255,.35),0 2px 6px rgba(10,108,255,.25),inset 0 1px 0 rgba(255,255,255,.35);
+  display:grid;place-items:center}
+.mic.pressed{transform:scale(.96)}
+.hint{position:absolute;left:0;right:0;top:214px;text-align:center;font-size:13px;color:var(--gris)}
+.hint b{color:var(--encre);font-weight:600}
+/* radar while recording */
+.ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--bleu);opacity:0;animation:radar 1.8s var(--ease) infinite}
+.ring.r2{animation-delay:.6s}.ring.r3{animation-delay:1.2s}
+@keyframes radar{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.2);opacity:0}}
+.sweep{position:absolute;inset:-60px;border-radius:50%;background:conic-gradient(from 0deg,rgba(10,108,255,.18),rgba(10,108,255,0) 22%);animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Ideas */
+.sec{margin-top:6px;font:600 12px 'Geist Mono',monospace;letter-spacing:.1em;color:var(--gris)}
+.rail{display:flex;gap:12px;margin:12px -20px 0;padding:0 20px;overflow:hidden}
+.card{flex:0 0 156px;background:var(--carte);border-radius:22px;box-shadow:var(--ombre);overflow:hidden}
+.img{height:96px;position:relative}
+.i1{background:linear-gradient(160deg,#FFD58A 0%,#F59E62 55%,#C2603A 100%)}
+.i2{background:linear-gradient(160deg,#CFE2FF 0%,#7DA9F2 55%,#3B5FB8 100%)}
+.i3{background:linear-gradient(160deg,#FFE9B0 0%,#F3C46A 60%,#C9963A 100%)}
+.img svg{position:absolute;bottom:0;left:0;width:100%}
+.card .b{padding:12px 12px 14px}
+.card h3{font-size:15px;line-height:1.25;font-weight:700}
+.meta{margin-top:6px;font-size:12.5px;line-height:1.35;color:var(--gris)}
+.meta.ok{color:var(--vert)}
+
+/* Composer */
+.dock{position:absolute;left:0;right:0;bottom:0;padding:28px 16px calc(16px + 12px);background:linear-gradient(180deg,rgba(242,242,247,0) 0%,var(--fond) 34%)}
+.chips{display:flex;gap:8px;margin-bottom:10px;overflow:hidden}
+.chip{flex:0 0 auto;height:34px;padding:0 12px;border-radius:999px;background:var(--carte);border:1px solid var(--ligne);display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.chip i{font-style:normal;color:var(--bleu)}
+.composer{display:flex;align-items:center;gap:8px;height:56px;padding:0 6px 0 18px;background:var(--carte);border:1px solid var(--ligne);border-radius:18px;box-shadow:var(--ombre)}
+.composer.focus{border-color:var(--bleu);box-shadow:0 0 0 4px rgba(10,108,255,.12),var(--ombre)}
+.field{flex:1;min-width:0;height:22px;overflow:hidden;font-size:16px;position:relative}
+.ex{color:#9A9AA5;animation:roll 14s var(--ease) infinite}
+.ex div{height:22px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes roll{
+  0%,21%{transform:translateY(0);opacity:1}
+  24%{transform:translateY(-8px);opacity:0}
+  25%,46%{transform:translateY(-22px);opacity:1}
+  49%{transform:translateY(-30px);opacity:0}
+  50%,71%{transform:translateY(-44px);opacity:1}
+  74%{transform:translateY(-52px);opacity:0}
+  75%,96%{transform:translateY(-66px);opacity:1}
+  99%{transform:translateY(-74px);opacity:0}
+  100%{transform:translateY(0);opacity:0}
+}
+.typed{line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.typed:after{content:"";display:inline-block;width:2px;height:18px;background:var(--bleu);vertical-align:-3px;margin-left:1px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.send{flex:0 0 44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--remplissage)}
+.send.on{background:var(--encre);animation:pop .5s var(--ease)}
+@keyframes pop{0%{transform:scale(.9)}100%{transform:scale(1)}}
+.safe{height:8px}
+
+/* Safar */
+.safar{width:84px;height:84px;transform:rotate(-12deg);animation:float 3.2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-12deg)}50%{transform:translateY(-8px) rotate(-8deg)}}
+.wing{transform-box:fill-box;transform-origin:100% 50%;animation:flap .9s ease-in-out infinite}
+@keyframes flap{0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+.eyes{transform-box:fill-box;transform-origin:center;animation:blinkE 4.5s infinite}
+@keyframes blinkE{0%,92%,96%,100%{transform:scaleY(1)}94%{transform:scaleY(.15)}}
+
+/* Notes */
+.notes{width:390px;background:var(--carte);border-radius:22px;box-shadow:var(--ombre);padding:18px 20px;font-size:13px;line-height:1.5;color:#33333A}
+.notes h4{font-size:13px;margin-bottom:6px}
+.notes li{margin-left:16px;margin-top:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="safar" viewBox="0 0 200 200">
+      <g fill="#FFFFFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round">
+        <path class="wing" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z"/>
+        <g transform="translate(200,-10) scale(-1,1)"><path class="wing" d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z"/></g>
+      </g>
+      <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"/>
+      <g class="eyes" fill="none" stroke="#0B0B0F" stroke-width="7" stroke-linecap="round">
+        <path d="M74,89 Q82,78 90,89"/><path d="M108,89 Q116,78 124,89"/>
+      </g>
+      <path d="M88,104 Q99,116 110,104" fill="none" stroke="#0B0B0F" stroke-width="7" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="mic" viewBox="0 0 32 32">
+      <rect x="11" y="3" width="10" height="17" rx="5" fill="#fff"/>
+      <path d="M7 15.5a9 9 0 0 0 18 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M16 24.5V29" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="up" viewBox="0 0 24 24">
+      <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="cloud" viewBox="0 0 120 50">
+      <path d="M22 46h76a18 18 0 0 0 0-36 26 26 0 0 0-48-4 20 20 0 0 0-28 22A9 9 0 0 0 22 46z" fill="#fff"/>
+    </symbol>
+    <symbol id="skyline" viewBox="0 0 156 40">
+      <path d="M0 40V30h14v-6h6v6h12V18l8-8 8 8v12h10V8h3V2h2v6h3v22h14v-9a10 10 0 0 1 20 0v9h10v-12h4V12h2v6h4v12h16v10z" fill="rgba(255,255,255,.55)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="board">
+
+  <!-- STATE 1 -->
+  <div class="col">
+    <div class="cap"><b>1 · Au repos</b> · exemples qui défilent</div>
+    <div class="phone">
+      <div class="sky"></div>
+      <svg class="cloud c1" viewBox="0 0 120 50"><use href="#cloud"/></svg>
+      <div class="scroll">
+        <div class="head">
+          <div class="brand">
+            <svg width="28" height="28"><use href="#safar"/></svg>BonSafar<small>بون سفر</small>
+          </div>
+          <div class="head-r"><div class="pill"><i></i>Mode jury</div><div class="avatar">F</div></div>
+        </div>
+        <div class="title">
+          <h1>Salam Fatima !<br>Fin bghiti tsafer ?</h1>
+          <p>Dis-moi tout, comme sur WhatsApp.</p>
+        </div>
+        <div class="voice">
+          <div class="safar-wrap"><svg class="safar" viewBox="0 0 200 200"><use href="#safar"/></svg></div>
+          <div class="bubble"><b>Brek w hder</b><span>Appuie et parle</span></div>
+          <div class="mic-zone">
+            <div class="halo"></div>
+            <div class="mic"><svg width="34" height="34"><use href="#mic"/></svg></div>
+          </div>
+          <div class="hint"><b>Maintiens</b> pour parler · darija ou français</div>
+        </div>
+        <div class="sec">IDÉES POUR TOI</div>
+        <div class="rail">
+          <div class="card"><div class="img i1"><svg viewBox="0 0 156 40"><use href="#skyline"/></svg></div><div class="b"><h3>Istanbul en décembre</h3><div class="meta ok">Sans visa · 4 h 40 de vol</div></div></div>
+          <div class="card"><div class="img i2"><svg viewBox="0 0 156 40"><use href="#skyline"/></svg></div><div class="b"><h3>Paris un week-end</h3><div class="meta">3 h de vol · visa Schengen</div></div></div>
+          <div class="card"><div class="img i3"><svg viewBox="0 0 156 40"><use href="#skyline"/></svg></div><div class="b"><h3>Omra au printemps</h3><div class="meta">Formalités à prévoir</div></div></div>
+        </div>
+      </div>
+      <div class="dock">
+        <div class="composer">
+          <div class="field" aria-label="Écris ton voyage">
+            <div class="ex" aria-hidden="true">
+              <div>Istanbul m3a rajli f décembre, chi semaine</div>
+              <div>Weekend f Marrakech, otel b piscine</div>
+              <div>Fin nmchi bla visa had l'été ?</div>
+              <div>Bghit nsafer m3a l'wlad f les vacances</div>
+            </div>
+          </div>
+          <div class="send" style="color:#3A3A44"><svg width="22" height="22"><use href="#up"/></svg></div>
+        </div>
+        <div class="safe"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 2 -->
+  <div class="col">
+    <div class="cap"><b>2 · Champ actif</b> · chips d'exemples, envoi actif</div>
+    <div class="phone">
+      <div class="sky"></div>
+      <svg class="cloud c1" viewBox="0 0 120 50"><use href="#cloud"/></svg>
+      <div class="scroll">
+        <div class="head">
+          <div class="brand"><svg width="28" height="28"><use href="#safar"/></svg>BonSafar<small>بون سفر</small></div>
+          <div class="head-r"><div class="pill"><i></i>Mode jury</div><div class="avatar">F</div></div>
+        </div>
+        <div class="title">
+          <h1>Salam Fatima !<br>Fin bghiti tsafer ?</h1>
+          <p>Dis-moi tout, comme sur WhatsApp.</p>
+        </div>
+        <div class="voice">
+          <div class="safar-wrap"><svg class="safar" viewBox="0 0 200 200"><use href="#safar"/></svg></div>
+          <div class="bubble"><b>Ktebha liya</b><span>Ou écris-moi ton voyage</span></div>
+          <div class="mic-zone">
+            <div class="halo"></div>
+            <div class="mic"><svg width="34" height="34"><use href="#mic"/></svg></div>
+          </div>
+          <div class="hint"><b>Maintiens</b> pour parler · darija ou français</div>
+        </div>
+        <div class="sec">IDÉES POUR TOI</div>
+        <div class="rail">
+          <div class="card"><div class="img i1"><svg viewBox="0 0 156 40"><use href="#skyline"/></svg></div><div class="b"><h3>Istanbul en décembre</h3><div class="meta ok">Sans visa · 4 h 40 de vol</div></div></div>
+          <div class="card"><div class="img i2"><svg viewBox="0 0 156 40"><use href="#skyline"/></svg></div><div class="b"><h3>Paris un week-end</h3><div class="meta">3 h de vol · visa Schengen</div></div></div>
+          <div class="card"><div class="img i3"><svg viewBox="0 0 156 40"><use href="#skyline"/></svg></div><div class="b"><h3>Omra au printemps</h3><div class="meta">Formalités à prévoir</div></div></div>
+        </div>
+      </div>
+      <div class="dock">
+        <div class="chips">
+          <div class="chip"><i>✦</i>Istanbul en décembre</div>
+          <div class="chip"><i>✦</i>Sans visa cet été</div>
+          <div class="chip"><i>✦</i>Weekend à Marrakech</div>
+        </div>
+        <div class="composer focus">
+          <div class="field"><div class="typed">Istanbul m3a rajli f décembre</div></div>
+          <div class="send on" style="color:#fff"><svg width="22" height="22"><use href="#up"/></svg></div>
+        </div>
+        <div class="safe"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="col" style="align-self:flex-start">
+    <div class="cap"><b>Notes pour Cursor</b></div>
+    <div class="notes">
+      <h4>Ce qui change</h4>
+      <ul>
+        <li>Micro 88 px bleu Safar, dégradé vertical, reflet doux, ombre bleue. Au repos : un seul halo qui respire (2,6 s). Plus de secteur qui tourne ni d'anneau fin sur l'accueil.</li>
+        <li>Appui sur le micro : scale 0.96 et vibration start, puis ouverture immédiate de l'écran 03 Vocal tel qu'il est aujourd'hui (design/motion/screens/03-voice.html), sans aucun changement. Le radar reste sur l'écran 03, il n'apparaît pas sur l'accueil.</li>
+        <li>Safar idle à gauche du micro, bulle attachée à lui (coin de 6 px de son côté). Son texte suit l'état : « Brek w hder » au repos, « Ktebha liya » quand le champ a le focus.</li>
+        <li>Barre de saisie visible : carte blanche 56 px, bordure, ombre, fondu du fond au-dessus. Exemples qui défilent toutes les 3,5 s (glissement de 8 px avec fondu), arrêtés au focus.</li>
+        <li>Au focus : bordure bleue avec anneau doux, 3 chips d'exemples au-dessus du champ, bouton d'envoi noir avec flèche blanche dès qu'il y a du texte.</li>
+        <li>Champ vide : bouton d'envoi gris clair avec flèche gris foncé, visible mais calme.</li>
+        <li>Avatar en cercle blanc bordé, avec l'initiale. Une seule action principale à l'écran : le micro.</li>
+        <li>Nuages derrière tout, dans les zones sans texte, jamais sur un titre ni une bulle.</li>
+        <li>Les dégradés des cartes sont des emplacements : les vraies images Muse Image arrivent dans une autre tâche. Aucun prix sur cet écran.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

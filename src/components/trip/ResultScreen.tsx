@@ -6,7 +6,7 @@ import { useAgentRun } from "@/lib/agent-client/context";
 import { packageOptionId, selectPackage, withTripSearch } from "@/lib/agent-client/store";
 import type { PackageOption } from "@/lib/agent/schema";
 import { placeName } from "@/lib/airports";
-import { formatMad, formatWhen } from "@/lib/format";
+import { formatMad, formatMadNumber, formatWhen } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import { JURY_LANG, translate, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -14,6 +14,7 @@ import { legSentence, mapStops, nightsText } from "@/lib/trip/describe";
 import { asFlight, asHotel } from "@/lib/trip/selection";
 import { usePrefetchGoodToKnow } from "@/lib/trip/good-to-know-client";
 import { useProfile } from "@/lib/profile/useProfile";
+import { useTrip } from "@/lib/trip/useTrip";
 import { cn } from "@/lib/utils";
 import { PriceFact } from "./PriceFact";
 import { RouteMap } from "./RouteMap";
@@ -32,6 +33,7 @@ export function ResultScreen() {
   const run = useAgentRun();
   const { t, lang, jury } = useLanguage();
   const { profile } = useProfile();
+  const trip = useTrip();
   const router = useRouter();
   usePrefetchGoodToKnow(run, profile, lang);
   const result = run.result;
@@ -55,6 +57,7 @@ export function ResultScreen() {
     ...result.alternatives.map((alt) => ({ ...alt, label: alt.label })),
   ];
   const pack = result;
+  const budget = trip?.intent?.budget_mad ?? null;
   const city = placeName(pack.destination.iata, lang, pack.destination.city);
   const landedMs = run.end?.recorded?.total_ms ?? run.end?.total_ms ?? pack.total_ms;
   const seconds = Math.max(1, Math.round(landedMs / 1000));
@@ -92,6 +95,11 @@ export function ResultScreen() {
           <div>
             <h1 className="text-[27px] font-extrabold tracking-[-0.03em] rtl:tracking-normal">{t("result.title")}</h1>
             <p className="mt-0.5 text-sm text-muted">{t("result.subtitle", { count: rows.length })}</p>
+            {pack.entry?.visa_needed && (
+              <p className="mt-2 inline-flex h-7 items-center rounded-pill bg-orange-soft px-[11px] text-[12.5px] font-semibold text-orange">
+                {t("package.pillVisa")}
+              </p>
+            )}
           </div>
           {jury && run.run?.replay && (
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-orange">
@@ -103,7 +111,7 @@ export function ResultScreen() {
           )}
           <ul className="flex flex-col gap-3">
             {rows.map((row) => (
-              <OptionCard key={packageOptionId(row.flight_id, row.hotel_id)} row={row} />
+              <OptionCard key={packageOptionId(row.flight_id, row.hotel_id)} row={row} budget={budget} />
             ))}
           </ul>
           <p className="mt-1 flex items-center gap-2 text-sm text-muted">
@@ -122,7 +130,7 @@ export function ResultScreen() {
   );
 }
 
-function OptionCard({ row }: { row: Row }) {
+function OptionCard({ row, budget }: { row: Row; budget: number | null }) {
   const run = useAgentRun();
   const { t, lang } = useLanguage();
   const router = useRouter();
@@ -131,6 +139,8 @@ function OptionCard({ row }: { row: Row }) {
   const hotel = asHotel(run.offers[row.hotel_id]);
   const tag = TAG[row.label];
   const sentence = flight ? legSentence(flight.attrs.outbound, lang, t) : null;
+  const over =
+    budget != null && row.totals.total_display_mad > budget ? row.totals.total_display_mad - budget : 0;
 
   return (
     <li className="flex overflow-hidden rounded-card bg-card shadow-soft">
@@ -157,6 +167,11 @@ function OptionCard({ row }: { row: Row }) {
             </span>
           )}
           <span className="text-[12.5px] text-muted">{nightsText(row.totals.hotel.nights, t)}</span>
+          {over > 0 && (
+            <span className="text-[12.5px] font-semibold text-orange">
+              {t("result.overBudget", { delta: formatMadNumber(over) })}
+            </span>
+          )}
         </span>
       </button>
       <span className="flex shrink-0 items-end pb-2 pe-2">

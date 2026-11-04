@@ -36,7 +36,7 @@ export const WONDER_TOOLS: ChatCompletionTool[] = [
       parameters: {
         type: "object",
         properties: {
-          city: { type: "string", description: "Destination city in English, e.g. Istanbul." },
+          city: { type: "string", description: "The requested destination city, in English." },
           country: { type: "string", description: "Destination country in English." },
           iata: { type: "string", description: "Main airport or city IATA code." },
         },
@@ -392,6 +392,7 @@ export class AgentContext {
           visa_needed: entry.visa_needed,
           visa_kind: entry.visa_kind,
           code: entry.homecoming ? "homecoming" : entry.visa_needed ? "visa_needed" : "visa_free",
+          notes: entry.notes,
         });
         return entry;
       } catch (error) {
@@ -489,6 +490,29 @@ export class AgentContext {
     }));
   }
 
+  /**
+   * The request's city, airport and country. A tool call for anywhere else
+   * is refused before any search starts.
+   */
+  private destinationLock(name: string, city: string, country: string, iata: string): string | null {
+    const dest = this.intent.destination;
+    if (!dest) return JSON.stringify({ error: "destination_locked" });
+    const cityOk = !city || key(city) === key(dest.city);
+    const countryOk = !country || key(country) === key(dest.country);
+    const code = iata.toUpperCase();
+    const iataOk = !code || code === dest.iata.toUpperCase();
+    const named = Boolean(city || country);
+    if (named && cityOk && countryOk && iataOk) return null;
+    this.log.add({
+      step: "destination_locked",
+      model: "code",
+      latency_ms: 0,
+      status: "blocked",
+      note: `${name} refused for ${[city, country, code].filter(Boolean).join(", ") || "an empty destination"}; locked to ${dest.city} (${dest.iata})`,
+    });
+    return JSON.stringify({ error: "destination_locked", city: dest.city, iata: dest.iata });
+  }
+
   /** Runs one Wonder tool call and returns the JSON string for the tool message. */
   async execute(name: string, rawArgs: string): Promise<string> {
     const started = performance.now();
@@ -499,14 +523,36 @@ export class AgentContext {
       return JSON.stringify({ error: "invalid_arguments" });
     }
     const str = (value: unknown) => (typeof value === "string" ? value.trim() : "");
-    const num = (value: unknown) => (typeof value === "number" && Number.isFinite(value) ? value : null);
     const city = str(args.city);
     const country = str(args.country);
+    const askedIata = str(args.iata).toUpperCase();
+    const dest = this.intent.destination;
+    if (name === "search_flights" || name === "search_hotels" || name === "price_trends" || name === "check_entry_requirements") {
+      const locked = this.destinationLock(name, city, country, name === "search_flights" ? askedIata : "");
+      if (locked) return locked;
+      if (name === "check_entry_requirements" && dest) {
+        const code = str(args.country_code).toUpperCase();
+        const byCode = code ? findPlace({ iata: code }) : null;
+        if (byCode && key(byCode.country) !== key(dest.country) && key(byCode.city) !== key(dest.city)) {
+          this.log.add({
+            step: "destination_locked",
+            model: "code",
+            latency_ms: 0,
+            status: "blocked",
+            note: `check_entry_requirements refused for ${code}; locked to ${dest.city} (${dest.iata})`,
+          });
+          return JSON.stringify({ error: "destination_locked", city: dest.city, iata: dest.iata });
+        }
+      }
+    }
+    const lockedCity = dest?.city ?? city;
+    const lockedCountry = dest?.country ?? country;
+    const lockedIata = dest?.iata ?? askedIata;
     const prefetched =
-      (name === "search_flights" && this.flights.has(key(city))) ||
-      (name === "search_hotels" && this.hotels.has(key(city))) ||
-      (name === "price_trends" && this.trends.has(key(city))) ||
-      (name === "check_entry_requirements" && this.hasEntry(country, str(args.country_code) || null));
+      (name === "search_flights" && this.flights.has(key(lockedCity))) ||
+      (name === "search_hotels" && this.hotels.has(key(lockedCity))) ||
+      (name === "price_trends" && this.trends.has(key(lockedCity))) ||
+      (name === "check_entry_requirements" && this.hasEntry(lockedCountry, str(args.country_code) || null));
 
     const logCall = (status: "ok" | "error", note: string) =>
       this.log.add({
@@ -514,33 +560,27 @@ export class AgentContext {
         model: name,
         latency_ms: Math.round(performance.now() - started),
         status,
-        note: `${city || country} ${prefetched ? "(served from the search started with the intent)" : "(new search)"}${note ? `, ${note}` : ""}`,
+        note: `${lockedCity || lockedCountry} ${prefetched ? "(served from the search started with the intent)" : "(new search)"}${note ? `, ${note}` : ""}`,
       });
 
     try {
       let result: unknown;
       if (name === "search_flights") {
-        if (!city) return JSON.stringify({ error: "city_required" });
-        const offers = await this.flightsFor(city, country, str(args.iata));
+        if (!lockedCity) return JSON.stringify({ error: "city_required" });
+        const offers = await this.flightsFor(lockedCity, lockedCountry, lockedIata);
         const first = offers[0];
         result = {
-          city,
+          city: lockedCity,
           passengers: first?.attrs.passengers ?? null,
           count: offers.length,
           direct_count: offers.filter((o) => totalStops(o) === 0).length,
           offers: this.flightView(offers),
         };
       } else if (name === "search_hotels") {
-        if (!city) return JSON.stringify({ error: "city_required" });
-        const lat = num(args.latitude);
-        const lng = num(args.longitude);
-        const { offers, relaxed } = await this.hotelsFor(
-          city,
-          country,
-          lat != null && lng != null ? { lat, lng } : undefined,
-        );
+        if (!lockedCity) return JSON.stringify({ error: "city_required" });
+        const { offers, relaxed } = await this.hotelsFor(lockedCity, lockedCountry);
         result = {
-          city,
+          city: lockedCity,
           nights: offers[0]?.attrs.nights ?? this.intent.nights,
           style_stars: this.stars,
           breakfast_requested: this.wantsBreakfast,
@@ -549,12 +589,12 @@ export class AgentContext {
           offers: this.hotelView(offers),
         };
       } else if (name === "price_trends") {
-        if (!city) return JSON.stringify({ error: "city_required" });
-        const offers = await this.trendsFor(city);
+        if (!lockedCity) return JSON.stringify({ error: "city_required" });
+        const offers = await this.trendsFor(lockedCity);
         const ranks = priceRanks(offers);
         const travelMonth = this.intent.depart_date.slice(0, 7);
         result = {
-          city,
+          city: lockedCity,
           stars: this.stars,
           months: offers.map((o) => ({
             id: o.id,
@@ -564,9 +604,9 @@ export class AgentContext {
           })),
         };
       } else if (name === "check_entry_requirements") {
-        if (!country) return JSON.stringify({ error: "country_required" });
-        const code = str(args.country_code).toUpperCase() || null;
-        const entry = await this.entryFor(country, code, city || null);
+        if (!lockedCountry) return JSON.stringify({ error: "country_required" });
+        const place = findPlace({ iata: lockedIata, city: lockedCity });
+        const entry = await this.entryFor(lockedCountry, place?.country_code ?? null, lockedCity || null);
         result = {
           country: entry.country,
           passport: entry.passport,

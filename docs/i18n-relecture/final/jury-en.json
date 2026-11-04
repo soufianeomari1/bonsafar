@@ -1,0 +1,6 @@
+{
+  "plan.replay": "Replay",
+  "plan.captured": "Prices captured {time}",
+  "plan.replayLast": "View the last saved trip",
+  "plan.error.replay_unavailable": "No saved trip to replay."
+}

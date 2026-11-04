@@ -49,6 +49,7 @@ const SCHENGEN = new Set(["FR", "ES", "PT", "IT", "NL", "BE", "DE", "AT", "CH", 
 /** The destination's own official entry pages, searched first and ranked first. */
 const OFFICIAL_SITES: Record<string, { sites: string[]; topic: string }> = {
   FR: { sites: ["france-visas.gouv.fr", "service-public.gouv.fr"], topic: "short-stay Schengen visa (type C) for France" },
+  DE: { sites: ["auswaertiges-amt.de"], topic: "short-stay Schengen visa (type C) for Germany" },
   ES: { sites: ["exteriores.gob.es"], topic: "short-stay Schengen visa for Spain" },
   PT: { sites: ["vistos.mne.gov.pt"], topic: "short-stay Schengen visa for Portugal" },
   IT: { sites: ["vistoperitalia.esteri.it"], topic: "short-stay Schengen visa for Italy" },

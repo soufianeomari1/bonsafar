@@ -25,7 +25,7 @@ import { readCount, readFlightRows, readHotelRows, readSources, readVisaNeeded }
 import { AGENT_STEPS, type AgentStep } from "@/lib/agent/schema";
 import { formatTime, formatTripDate, formatWhen } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
-import { JURY_LANG, translate, type TranslationKey } from "@/lib/i18n";
+import { JURY_LANG, translate, type Lang, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { useProfile } from "@/lib/profile/useProfile";
 import { usePrefetchGoodToKnow } from "@/lib/trip/good-to-know-client";
@@ -51,6 +51,17 @@ const ERROR_KEY: Record<string, TranslationKey> = {
   replay_unavailable: "plan.error.replay_unavailable",
   interrupted: "plan.error.interrupted",
 };
+
+function prepareText(
+  notes: { darija?: string; fr?: string; en?: string; ar?: string } | undefined,
+  lang: Lang,
+): string {
+  if (!notes) return "";
+  if (lang === "en") return notes.en ?? "";
+  if (lang === "fr") return notes.fr ?? "";
+  if (lang === "ar") return notes.ar || notes.fr || "";
+  return notes.darija ?? "";
+}
 
 const VISA_KEY: Record<string, TranslationKey> = {
   none: "visaKind.none",
@@ -199,11 +210,6 @@ export function FlightPlanScreen() {
           const sources = readSources(item.steps.entry_requirements.progress);
           return (
             <div key={`${item.destination}-${index}`} className="relative mb-6" ref={current ? legRef : undefined}>
-              {index > 0 && (
-                <p className="mb-4 rounded-[18px] bg-green-soft px-3.5 py-3 text-[15px] font-bold">
-                  {t("plan.alt.title", { city: item.destination })}
-                </p>
-              )}
               {current && (
                 <>
                   <div
@@ -239,9 +245,13 @@ export function FlightPlanScreen() {
                       kind: t(VISA_KEY[visa.visa_kind ?? "unknown"] ?? "visaKind.unknown"),
                     })}
                   </p>
+                  {prepareText(visa.notes, jury ? JURY_LANG : lang) && (
+                    <p className="mt-1 text-sm leading-snug">{prepareText(visa.notes, jury ? JURY_LANG : lang)}</p>
+                  )}
                   {sources[0] && (
                     <a href={sources[0].url} className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-blue underline" target="_blank" rel="noreferrer">
                       {t("plan.visa.source")} · {sources[0].title}
+                      {sources[0].date ? ` · ${formatTripDate(sources[0].date, jury ? JURY_LANG : lang)}` : ""}
                     </a>
                   )}
                 </div>

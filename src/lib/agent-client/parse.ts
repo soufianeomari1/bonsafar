@@ -136,9 +136,17 @@ const HotelRows = z.object({
 
 const CountData = z.object({ count: z.number() });
 
+const EntryNotes = z.object({
+  darija: z.string().optional(),
+  fr: z.string().optional(),
+  en: z.string().optional(),
+  ar: z.string().optional(),
+});
+
 const EntryDone = z.object({
   visa_needed: z.boolean(),
   visa_kind: z.string().optional(),
+  notes: EntryNotes.optional(),
 });
 
 const EntryProgress = z.object({
@@ -163,7 +171,11 @@ export function readCount(data: unknown): number | null {
   return parsed.success ? parsed.data.count : null;
 }
 
-export function readVisaNeeded(data: unknown): { visa_needed: boolean; visa_kind?: string } | null {
+export function readVisaNeeded(data: unknown): {
+  visa_needed: boolean;
+  visa_kind?: string;
+  notes?: { darija?: string; fr?: string; en?: string; ar?: string };
+} | null {
   const parsed = EntryDone.safeParse(data);
   return parsed.success ? parsed.data : null;
 }

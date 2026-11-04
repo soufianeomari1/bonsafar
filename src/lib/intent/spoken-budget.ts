@@ -72,10 +72,22 @@ const ARABIC: { pattern: RegExp; value: number }[] = [
   { pattern: /خمستاش|خمسطاش|خمسة\s*عشر/, value: 15 },
   { pattern: /عشرين/, value: 20 },
   { pattern: /ثلاثين/, value: 30 },
+  { pattern: /ثمانية|تمانية|تمنية/, value: 8 },
+  { pattern: /تسعة|تسعه/, value: 9 },
+  { pattern: /سبعة/, value: 7 },
+  { pattern: /اربعة/, value: 4 },
+  { pattern: /ثلاثة|تلاتة/, value: 3 },
+  { pattern: /اثنين|اثنان/, value: 2 },
   { pattern: /مية|مئة|مائه/, value: 100 },
   { pattern: /عشرة/, value: 10 },
+  { pattern: /ستة/, value: 6 },
   { pattern: /خمسة/, value: 5 },
+  { pattern: /واحد/, value: 1 },
 ];
+
+/** Same phrases, longest first, for the "N thousand" scan. */
+const ARABIC_NUMBER =
+  "خمستاش|خمسطاش|خمسة\\s*عشر|عشرين|ثلاثين|ثمانية|تمانية|تمنية|تسعة|تسعه|سبعة|اربعة|ثلاثة|تلاتة|اثنين|اثنان|عشرة|ستة|خمسة|واحد";
 
 const THOUSAND_WORD = /(?:alf|alaf|mille|milles|thousand)(?![\p{L}])|الف|الاف/iu;
 const NUMBER_WORD = new RegExp(String.raw`(?:\d{1,4}|${WORD_PATTERN})`, "iu");
@@ -107,7 +119,7 @@ function wordValue(token: string): number | null {
 /** "15 alf", "quinze mille", "خمستاش الاف", "عشرين ألف". */
 function timesThousand(text: string): number | null {
   const re = new RegExp(
-    String.raw`(${NUMBER_WORD.source}|خمستاش|خمسطاش|خمسة\s*عشر|عشرين)\s*(${THOUSAND_WORD.source})`,
+    String.raw`(${NUMBER_WORD.source}|${ARABIC_NUMBER})\s*(${THOUSAND_WORD.source})`,
     "giu",
   );
   for (const match of text.matchAll(re)) {

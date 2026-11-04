@@ -55,7 +55,6 @@ import { Eyebrow, HotelPhoto, LegBlock, Pill, SectionTitle } from "./TripBits";
 
 const NOTICES: Record<AgentNotice, TranslationKey> = {
   visa_needed: "notice.visa_needed",
-  visa_free_alternative: "notice.visa_free_alternative",
   passport_validity_check: "notice.passport_validity_check",
   passengers_mismatch: "notice.passengers_mismatch",
   hotel_filters_relaxed: "notice.hotel_filters_relaxed",
@@ -169,10 +168,14 @@ export function PackageScreen() {
           </div>
 
           <div className="mt-3.5 flex flex-wrap gap-1.5">
-            {visaFree && (
-              <Pill tone="good" icon={<CheckCircle size={15} weight="light" />}>
-                {t(result.entry?.homecoming ? "ready.visaHome" : "package.pillNoVisa")}
-              </Pill>
+            {result.entry?.visa_needed ? (
+              <Pill tone="todo">{t("package.pillVisa")}</Pill>
+            ) : (
+              visaFree && (
+                <Pill tone="good" icon={<CheckCircle size={15} weight="light" />}>
+                  {t(result.entry?.homecoming ? "ready.visaHome" : "package.pillNoVisa")}
+                </Pill>
+              )
             )}
             {hotel?.attrs.breakfast && (
               <Pill icon={<Coffee size={15} weight="light" />}>{t("package.pillBreakfast")}</Pill>
@@ -188,11 +191,15 @@ export function PackageScreen() {
             )}
           </div>
 
-          {result.notices.map((notice) => (
-            <p key={notice} className="mt-3 rounded-button bg-orange-soft px-3.5 py-3 text-sm leading-snug">
-              {t(NOTICES[notice])}
-            </p>
-          ))}
+          {result.notices.map((notice) => {
+            const key = NOTICES[notice];
+            if (!key) return null;
+            return (
+              <p key={notice} className="mt-3 rounded-button bg-orange-soft px-3.5 py-3 text-sm leading-snug">
+                {t(key)}
+              </p>
+            );
+          })}
 
           {hotel && <HotelCard hotel={hotel} />}
 

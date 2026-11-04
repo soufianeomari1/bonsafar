@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bienvenue v12</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#F2F2F7;--carte:#FFFFFF;--encre:#0B0B0F;--gris:#6B6B76;--ligne:#E5E5EA;
+  --vert:#15803D;--vert-vif:#22C55E;--vert-doux:#E8F7EE;--jaune:#FFC800;--bleu:#0A6CFF;--bleu-doux:#EAF2FF;--orange-doux:#FFF4E0;
+  --ombre:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);
+  --out:cubic-bezier(0.23,1,0.32,1);--pop:cubic-bezier(0.34,1.56,0.64,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#E4E4EA;font-family:Geist,system-ui,sans-serif;color:var(--encre);padding:24px;-webkit-font-smoothing:antialiased}
+.board{display:flex;gap:36px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+.col{display:flex;flex-direction:column;gap:12px;align-items:center}
+.cap{font:600 12px/1.3 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--gris)}
+.cap b{color:var(--encre)}
+.tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.tools button{font:600 12px Geist;border:1px solid var(--ligne);background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer}
+.tools button.on{background:var(--encre);color:#fff;border-color:var(--encre)}
+
+.phone{position:relative;width:390px;height:844px;border-radius:44px;background:var(--fond);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.05)}
+.status{height:44px;background:#1C181B;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:600 14px Geist}
+.chrome{height:56px;background:#1C181B;display:flex;align-items:center;gap:12px;padding:0 14px}
+.url{flex:1;height:38px;border-radius:19px;background:#3A3438;color:#E8E8EA;display:flex;align-items:center;padding:0 16px;font-size:15px}
+.ic{width:22px;height:22px;border:2px solid #E8E8EA;border-radius:5px}
+.page{position:relative;height:744px;overflow:hidden}
+.page[dir=rtl]{font-family:'IBM Plex Sans Arabic',Geist,sans-serif}
+.sky{position:absolute;inset:0 0 auto 0;height:470px;background:linear-gradient(180deg,#DCEBFF 0%,#E8F1FE 60%,var(--fond) 100%)}
+.fold{position:absolute;left:0;right:0;top:664px;border-top:2px dashed #E0464C}
+.fold span{position:absolute;right:10px;top:6px;font:600 10px 'Geist Mono',monospace;color:#E0464C;letter-spacing:.06em}
+.wrap{position:relative;padding:0 20px 18px;height:664px;display:flex;flex-direction:column}
+.sp{flex:1 1 0;min-height:10px}
+.sp.s{flex-grow:.6}.sp.l{flex-grow:1.5}
+
+.head{position:relative;display:flex;align-items:center;justify-content:space-between;height:52px;margin-top:10px;padding:0 6px 0 12px;border-radius:18px;background:rgba(255,255,255,.78);border:1px solid rgba(11,11,15,.06);box-shadow:0 1px 1px rgba(11,11,15,.03),0 8px 22px rgba(10,108,255,.10)}
+.head::after{content:"";position:absolute;left:18px;right:18px;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(10,108,255,.35),rgba(255,200,0,.55),rgba(10,108,255,.35),transparent)}
+.brand{display:flex;align-items:center;gap:8px;font:800 19px Geist}
+.brand em{font:italic 500 14px Geist;color:var(--gris);margin-inline-start:2px}
+.lang{height:38px;padding:0 12px;border-radius:13px;background:var(--fond);border:1px solid transparent;display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
+
+/* ---- step titles with boarding-gate number ---- */
+.step{display:flex;align-items:center;gap:12px}
+.h{font-size:27px;line-height:1.08;font-weight:800;letter-spacing:-.03em;white-space:nowrap}
+[dir=rtl] .h{letter-spacing:0;font-weight:700;font-size:26px;line-height:1.3}
+.s1{margin-top:0}
+.gate-n{position:relative;flex:none;width:34px;height:34px;border-radius:9px;background:var(--jaune);display:grid;place-items:center;transform:rotate(-6deg);box-shadow:0 2px 0 #0B0B0F,0 6px 14px rgba(255,200,0,.35);overflow:hidden}
+[dir=rtl] .gate-n{transform:rotate(6deg)}
+.gate-n::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(11,11,15,.18)}
+.gate-n .digits{position:relative;display:block;height:34px;font:700 19px/34px 'Geist Mono',monospace;text-align:center;width:100%}
+.gate-n .digits span{display:block;height:34px}
+.mark{position:relative;z-index:0}
+.mark::after{content:"";position:absolute;inset-inline:-3px;bottom:2px;height:.32em;background:var(--jaune);border-radius:5px;z-index:-1;transform-origin:left center}
+[dir=rtl] .mark::after{transform-origin:right center;bottom:4px}
+.under{position:relative}
+.under::after{content:"";position:absolute;inset-inline:0;bottom:-3px;height:4px;background:var(--bleu);border-radius:3px;transform-origin:left center}
+[dir=rtl] .under::after{transform-origin:right center;bottom:0}
+
+/* voice */
+.talk{display:flex;align-items:flex-end;gap:4px;padding-inline-end:18px}
+.safar-box{position:relative;width:58px;height:58px;flex:none}
+.safar{width:58px;height:58px;transform:rotate(-12deg)}
+[dir=rtl] .safar-box{transform:scaleX(-1)}
+.arcs{position:absolute;right:-6px;top:14px;transform:scale(.8)}
+.spark{position:absolute;left:-4px;top:-8px;transform:scale(.8)}
+.voice{flex:1;background:linear-gradient(180deg,#1F7BFF 0%,var(--bleu) 100%);color:#fff;border-radius:18px;border-end-start-radius:5px;padding:8px 12px 9px;box-shadow:0 10px 24px rgba(10,108,255,.26),inset 0 1px 0 rgba(255,255,255,.25)}
+.vrow{display:flex;align-items:center;gap:8px}
+.playbtn{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+[dir=rtl] .playbtn svg{transform:scaleX(-1)}
+.wave{display:flex;align-items:center;gap:2.5px;height:16px;flex:1}
+.wave span{width:2.5px;height:16px;border-radius:2px;background:#fff;transform-origin:center;transform:scaleY(var(--h))}
+.dur{font:600 10px 'Geist Mono',monospace}
+.tr{margin-top:5px;font-size:12.5px;line-height:1.4;font-weight:500}
+[dir=rtl] .tr{font-size:13.5px;line-height:1.6}
+.hl{position:relative;z-index:0;color:var(--encre);font-weight:600;padding:0 3px;white-space:nowrap}
+.hl::before{content:"";position:absolute;inset:0;background:var(--jaune);border-radius:5px;z-index:-1;transform-origin:left center}
+[dir=rtl] .hl::before{transform-origin:right center}
+
+/* pass */
+.s2{margin-top:0}
+.sub{margin-top:6px;font-size:14px;color:var(--gris);padding-inline-start:46px}
+[dir=rtl] .sub{font-size:14.5px}
+.pass-wrap{margin:0 18px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.05)) drop-shadow(0 10px 22px rgba(11,11,15,.08))}
+.pass{--perf:88px;position:relative;background:var(--carte);border-radius:22px;overflow:hidden;
+  -webkit-mask:radial-gradient(circle 8px at 0 var(--perf),#0000 98%,#000 100%),radial-gradient(circle 8px at 100% var(--perf),#0000 98%,#000 100%);
+  -webkit-mask-composite:source-in;mask:radial-gradient(circle 8px at 0 var(--perf),#0000 98%,#000 100%),radial-gradient(circle 8px at 100% var(--perf),#0000 98%,#000 100%);mask-composite:intersect}
+.p-top{padding:12px 14px 0;height:88px}
+.p-row{display:flex;align-items:center;justify-content:space-between}
+.lbl{display:flex;align-items:center;gap:6px;font:600 9.5px 'Geist Mono',monospace;letter-spacing:.1em;color:var(--gris)}
+[dir=rtl] .lbl{font:600 11.5px 'IBM Plex Sans Arabic';letter-spacing:0}
+.lbl i{width:7px;height:7px;border-radius:50%;background:var(--vert-vif);box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.gate{height:21px;padding:0 7px;border-radius:6px;background:var(--jaune);display:flex;align-items:center;gap:4px;font:700 10.5px 'Geist Mono',monospace;direction:ltr}
+.dest{display:flex;align-items:flex-end;justify-content:space-between;margin-top:7px}
+.city{font-size:23px;line-height:1.1;font-weight:800;letter-spacing:-.03em;display:flex}
+[dir=rtl] .city{letter-spacing:0;font-weight:700}
+.city span{display:inline-block}
+.country{margin-top:3px;font-size:11.5px;color:var(--gris);font-weight:500}
+.dates{text-align:end}
+.dates b{display:block;font-size:14px;color:var(--vert);font-weight:700;font-variant-numeric:tabular-nums}
+.dates span{font-size:10.5px;color:var(--gris);font-weight:500}
+.perf{position:absolute;inset-inline:13px;top:var(--perf);border-top:2px dashed #DADAE2;transform-origin:left center}
+[dir=rtl] .perf{transform-origin:right center}
+.p-bot{padding:9px 12px 10px}
+.chips{display:flex;gap:5px}
+.chip{height:25px;padding-inline:3px 8px;border-radius:999px;background:var(--fond);display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;white-space:nowrap}
+[dir=rtl] .chip{font-size:12px}
+.chip .ico{width:18px;height:18px;flex:none;border-radius:50%;display:grid;place-items:center}
+.chip.ok{background:var(--vert-doux);color:var(--vert)}
+
+/* CTA */
+.pitch{margin-top:0;text-align:center;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.google{margin-top:12px;height:52px;border-radius:16px;background:#131314;color:#fff;display:flex;align-items:center;justify-content:center;gap:12px;font-weight:600;font-size:16px}
+.micro{margin-top:11px;display:flex;justify-content:center;flex-wrap:wrap;gap:4px;font-size:12.5px;color:var(--gris)}
+.micro b{color:var(--vert);font-weight:600}
+.micro a{color:var(--gris);text-decoration:underline;text-underline-offset:3px;text-decoration-color:#CFCFD6}
+
+/* ===== animation engine ===== */
+.js .scene:not(.seen) .a{opacity:0}
+.seen .a{animation:var(--k,rise) var(--d,.5s) var(--e,var(--out)) var(--t,0s) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:none}}
+@keyframes drop{0%{opacity:0;transform:translateY(-12px) scale(.96)}100%{opacity:1;transform:none}}
+@keyframes flip{0%{opacity:0;transform:perspective(300px) rotateX(-90deg)}100%{opacity:1;transform:none}}
+@keyframes gatein{0%{opacity:0;transform:rotate(-30deg) scale(.4)}100%{opacity:1;transform:rotate(-6deg)}}
+@keyframes gatein-rtl{0%{opacity:0;transform:rotate(30deg) scale(.4)}100%{opacity:1;transform:rotate(6deg)}}
+@keyframes flapdigit{0%{transform:translateY(0)}100%{transform:translateY(-200%)}}
+@keyframes sweep{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+@keyframes settle{to{transform:scaleY(var(--h))}}
+@keyframes bob{0%,100%{transform:rotate(-12deg) translateY(0)}50%{transform:rotate(-8deg) translateY(-5px)}}
+@keyframes jump{0%{transform:rotate(-12deg)}35%{transform:rotate(-6deg) translateY(-12px)}70%{transform:rotate(-12deg) scale(1.05,.95)}100%{transform:rotate(-12deg)}}
+.seen .gate-n{animation:gatein .5s var(--pop) var(--t) both}
+[dir=rtl] .seen .gate-n{animation-name:gatein-rtl}
+.gate-n .digits{transform:translateY(-200%)}
+.seen .gate-n .digits{animation:flapdigit .36s steps(2,end) calc(var(--t) + .3s) both}
+.js .scene:not(.seen) .gate-n{opacity:0}
+.js .scene:not(.seen) .mark::after,.js .scene:not(.seen) .under::after,.js .scene:not(.seen) .hl::before,.js .scene:not(.seen) .perf{transform:scaleX(0)}
+.seen .mark::after{animation:sweep .45s var(--out) .45s both}
+.seen .hl::before{animation:sweep .28s var(--out) var(--t) both}
+.seen .under::after{animation:sweep .45s var(--out) 1.85s both}
+.seen .perf{animation:sweep .4s var(--out) 2.35s both}
+.seen .wave span{animation:wave .3s ease-in-out calc(var(--i) * 35ms + .7s) 3,settle .2s ease-out calc(var(--i) * 35ms + 1.6s) forwards}
+.safar{animation:bob 3.2s ease-in-out infinite}
+.seen .safar{animation:jump .55s var(--out) 1.45s both,bob 3.2s ease-in-out 2s infinite}
+@media (prefers-reduced-motion:reduce){
+  .seen .a,.seen .gate-n{animation:fade .25s linear var(--t,0s) both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .gate-n .digits,.seen .gate-n .digits{animation:none;transform:translateY(-200%)}
+  .seen .mark::after,.seen .under::after,.seen .hl::before,.seen .perf{animation:fade .25s linear both}
+  .safar,.seen .safar,.seen .wave span{animation:none}
+}
+
+.notes{width:420px;background:var(--carte);border-radius:22px;box-shadow:var(--ombre);padding:18px 20px;font-size:13px;line-height:1.5;color:#33333A}
+.notes h4{font-size:13px;margin:12px 0 4px}
+.notes h4:first-child{margin-top:0}
+.notes li{margin-left:16px;margin-top:3px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <symbol id="safar" viewBox="0 0 200 200">
+   <g fill="#fff" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round">
+    <path d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z"/>
+    <g transform="translate(200,-10) scale(-1,1)"><path d="M54,84 C42,78 24,76 12,82 C9,88 12,94 18,95 C14,100 17,106 25,106 C23,111 28,115 35,114 C42,113 49,108 54,104 Z"/></g>
+   </g>
+   <path d="M80,45 H120 A30,30 0 0 1 150,75 V105 A30,30 0 0 1 130,131 L140,160 Q118,156 108,135 H80 A30,30 0 0 1 50,105 V75 A30,30 0 0 1 80,45 Z" fill="#0A6CFF" stroke="#0B0B0F" stroke-width="7" stroke-linejoin="round"/>
+   <path d="M74,89 Q82,78 90,89 M108,89 Q116,78 124,89" fill="none" stroke="#0B0B0F" stroke-width="7" stroke-linecap="round"/>
+   <path d="M88,104 Q99,116 110,104" fill="none" stroke="#0B0B0F" stroke-width="7" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="g" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></symbol>
+ </defs>
+</svg>
+
+<div class="board">
+ <div class="col">
+  <div class="cap"><b>Bienvenue v12</b> · une page, 5 langues</div>
+  <div class="tools" id="tools"></div>
+  <div class="phone">
+   <div class="status"><span>03:21</span><span>●●● 38</span></div>
+   <div class="chrome"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8E8EA" stroke-width="2"><path d="M4 11 12 4l8 7v9H4z"/></svg><div class="url">bonsafar.com</div><div class="ic"></div></div>
+   <div class="page" id="page">
+    <div class="sky"></div>
+    <div class="wrap scene" id="scene">
+     <div class="head">
+      <div class="brand"><svg width="28" height="28"><use href="#safar"/></svg>BonSafar<em>trik slama</em></div>
+      <div class="lang"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B0B0F" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span id="langcode">FR</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0B0B0F" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>
+     </div>
+
+     <div class="sp l"></div>
+     <div class="step s1">
+      <span class="gate-n" style="--t:.1s"><span class="digits"><span>3</span><span>7</span><span>1</span></span></span>
+      <h1 class="h" id="t1"></h1>
+     </div>
+
+     <div class="sp s"></div>
+     <div class="talk">
+      <div class="safar-box a" style="--k:pop;--e:var(--pop);--t:.35s">
+       <svg class="spark" width="16" height="16" viewBox="0 0 24 24"><path d="M12 1 14.2 9.8 23 12 14.2 14.2 12 23 9.8 14.2 1 12 9.8 9.8z" fill="#FFC800" stroke="#0B0B0F" stroke-width="1.6" stroke-linejoin="round"/></svg>
+       <svg class="safar" viewBox="0 0 200 200"><use href="#safar"/></svg>
+       <svg class="arcs" width="16" height="26" viewBox="0 0 18 30" fill="none" stroke="#0A6CFF" stroke-width="2.6" stroke-linecap="round"><path d="M3 9a8 8 0 0 1 0 12" opacity=".9"/><path d="M8 4a15 15 0 0 1 0 22" opacity=".45"/></svg>
+      </div>
+      <div class="voice a" style="--t:.45s;--e:var(--pop);--d:.55s">
+       <div class="vrow">
+        <div class="playbtn"><svg width="11" height="11" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="#fff"/></svg></div>
+        <div class="wave" id="wave"></div>
+        <div class="dur">0:07</div>
+       </div>
+       <div class="tr" id="tr"></div>
+      </div>
+     </div>
+
+     <div class="sp l"></div>
+     <div class="step s2">
+      <span class="gate-n" style="--t:1.6s"><span class="digits"><span>8</span><span>4</span><span>2</span></span></span>
+      <h2 class="h" id="t2"></h2>
+     </div>
+     <p class="sub a" style="--t:1.75s" id="sub"></p>
+
+     <div class="sp s"></div>
+     <div class="pass-wrap a" style="--t:1.95s;--d:.55s">
+      <div class="pass">
+       <div class="p-top">
+        <div class="p-row">
+         <span class="lbl"><i></i><span id="lbl"></span></span>
+         <span class="gate a" style="--k:pop;--e:var(--pop);--t:2.2s">CMN <svg width="13" height="13" viewBox="0 0 256 256"><path d="M235.6 115.1 168 91.4V48a24 24 0 0 0-48 0v43.4L52.4 115.1A8 8 0 0 0 48 122v18a8 8 0 0 0 10.2 7.7l61.8-17.6v32.2l-14.3 14.3A8 8 0 0 0 104 182v18a8 8 0 0 0 10.9 7.4L144 196.2l29.1 11.2A8 8 0 0 0 184 200v-18a8 8 0 0 0-2.3-5.7L168 162.6v-32.5l61.8 17.6A8 8 0 0 0 240 140v-18a8 8 0 0 0-4.4-6.9z" fill="#0B0B0F" transform="rotate(90 128 128)"/></svg> IST</span>
+        </div>
+        <div class="dest">
+         <div><div class="city" id="city"></div><div class="country" id="country"></div></div>
+         <div class="dates a" style="--t:2.35s"><b id="dates"></b><span id="mid"></span></div>
+        </div>
+       </div>
+       <div class="perf"></div>
+       <div class="p-bot">
+        <div class="chips">
+         <span class="chip a" style="--k:drop;--e:var(--pop);--t:2.6s"><span class="ico" style="background:var(--bleu-doux)"><svg width="12" height="12" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" fill="#0A6CFF"/><circle cx="17" cy="9" r="3" fill="#0A6CFF"/><path d="M2 21a7 7 0 0 1 14 0zM14 21a5 5 0 0 1 9 0z" fill="#0A6CFF"/></svg></span><span id="c1"></span></span>
+         <span class="chip a" style="--k:drop;--e:var(--pop);--t:2.68s"><span class="ico" style="background:var(--orange-doux)"><svg width="12" height="12" viewBox="0 0 24 24"><path d="M3 9h14v5a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6zM17 11h1.5a2.5 2.5 0 0 1 0 5H17" fill="#B45309"/></svg></span><span id="c2"></span></span>
+         <span class="chip ok a" style="--k:drop;--e:var(--pop);--t:2.76s"><span class="ico" style="background:#fff"><svg width="12" height="12" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="#15803D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="c3"></span></span>
+        </div>
+       </div>
+      </div>
+     </div>
+
+     <div class="sp l"></div>
+     <p class="pitch a" style="--t:2.95s" id="pitch"></p>
+     <div class="google a" style="--t:3.05s"><svg width="20" height="20"><use href="#g"/></svg><span id="gbtn"></span></div>
+     <div class="micro a" style="--t:3.15s" id="micro"></div>
+    </div>
+    <div class="fold"><span>LIGNE DE FLOTTAISON · CHROME ANDROID</span></div>
+   </div>
+  </div>
+ </div>
+
+ <div class="col">
+  <div class="cap"><b>Notes pour Cursor</b></div>
+  <div class="notes">
+   <h4>En-tête et respiration (v12)</h4>
+   <ul>
+    <li>En-tête en capsule flottante : blanc à 78 %, bord très fin, ombre bleutée douce, coins de 18 px, et un filet dégradé bleu, jaune, bleu qui s'estompe aux extrémités sous la capsule. Le sélecteur de langue devient une pastille grise intégrée. Pas de backdrop-filter (coûteux sur les petits Android).</li>
+    <li>La page occupe toute la hauteur visible (100svh) en colonne flex, et des espaceurs élastiques répartissent la place libre entre les blocs : plus d'air sur les grands téléphones, compact sur les petits, jamais de vide en bas ni de défilement. Poids : 1,5 avant chaque titre et avant le CTA, 0,6 entre un titre et son visuel, 10 px minimum.</li>
+   </ul>
+   <h4>Les chiffres d'étape : badge « porte d'embarquement »</h4>
+   <ul>
+    <li>Carré jaune de 34 px, coins de 9 px, incliné de -6° (+6° en RTL), ombre portée encre de 2 px vers le bas, fine ligne de pliure horizontale au milieu comme une palette de tableau des départs.</li>
+    <li>Animation : le badge arrive en tournant avec un rebond (0,5 s), puis le chiffre défile comme un tableau des départs (deux chiffres de passage puis le bon, en steps), uniquement en transform.</li>
+    <li>Titres réduits à 27 px (26 px en arabe, avec un interligne plus grand pour l'écriture arabe).</li>
+   </ul>
+   <h4>CTA</h4>
+   <ul>
+    <li>Au-dessus du bouton, en gras : « Ton prochain voyage, prêt en 1 minute. »</li>
+    <li>Bouton officiel Google. Darija latine : libellé officiel français. Darija arabe et arabe : libellé officiel arabe.</li>
+    <li>Dessous : « Gratuit, sans carte bancaire » (en vert) et le lien discret « continuer sans compte ».</li>
+   </ul>
+   <h4>Langues</h4>
+   <ul>
+    <li>Chaque langue est complète et pure. La note vocale reste un exemple en darija : en lettres latines pour FR, EN et darija latine, en lettres arabes pour l'arabe et la darija arabe.</li>
+    <li>En écriture arabe, « إسطنبول » s'anime en un seul mot (découper des lettres arabes casse leurs liaisons). L'effet lettre par lettre reste réservé aux écritures latines.</li>
+    <li>Codes CMN et IST, dates, 0:07 et chiffres toujours en sens gauche-droite.</li>
+    <li>Les textes en darija sont à faire relire par Soufiane avant la démo.</li>
+   </ul>
+  </div>
+ </div>
+</div>
+
+<script>
+var L={
+ fr:{code:'FR',dir:'ltr',t1:'Dis-le en <span class="mark">darija.</span>',t2:'On s\'occupe du <span class="under">voyage.</span>',
+  tr:'« Bghit nsafer l\'<span class="hl" style="--t:1.2s">Istanbul</span> m3a rajli f <span class="hl" style="--t:1.4s">nouss décembre</span>… »',
+  sub:'Vols, hôtel, visa et bagages vérifiés, au vrai prix.',lbl:'BONSAFAR A COMPRIS',city:'Istanbul',latin:true,country:'Turquie · 7 nuits',dates:'15 → 22 déc.',mid:'mi-décembre',
+  c1:'2 adultes',c2:'Petit déj',c3:'Sans visa',pitch:'Ton prochain voyage, prêt en 1 minute.',g:'Continuer avec Google',micro:'<b>Gratuit, sans carte bancaire</b><span>·</span><a href="#">continuer sans compte</a>'},
+ en:{code:'EN',dir:'ltr',t1:'Say it in <span class="mark">darija.</span>',t2:'We handle the <span class="under">trip.</span>',
+  tr:'« Bghit nsafer l\'<span class="hl" style="--t:1.2s">Istanbul</span> m3a rajli f <span class="hl" style="--t:1.4s">nouss décembre</span>… »',
+  sub:'Flights, hotel, visa and bags checked, at the real price.',lbl:'BONSAFAR UNDERSTOOD',city:'Istanbul',latin:true,country:'Turkey · 7 nights',dates:'Dec 15 → 22',mid:'mid-December',
+  c1:'2 adults',c2:'Breakfast',c3:'No visa',pitch:'Your next trip, ready in 1 minute.',g:'Continue with Google',micro:'<b>Free, no card needed</b><span>·</span><a href="#">continue without an account</a>'},
+ ar:{code:'ع',dir:'rtl',t1:'قُلها <span class="mark">بالدارجة.</span>',t2:'ونحن نتكفّل <span class="under">بالرحلة.</span>',
+  tr:'« بغيت نسافر لـ<span class="hl" style="--t:1.2s">إسطنبول</span> مع راجلي ف<span class="hl" style="--t:1.4s">نص دجنبر</span>… »',
+  sub:'الطيران والفندق والتأشيرة والأمتعة، بالسعر الحقيقي.',lbl:'فهم بون سفر طلبك',city:'إسطنبول',latin:false,country:'تركيا · 7 ليالٍ',dates:'من 15 إلى 22 ديسمبر',mid:'منتصف ديسمبر',
+  c1:'شخصان بالغان',c2:'فطور',c3:'بدون تأشيرة',pitch:'رحلتك القادمة جاهزة في دقيقة واحدة.',g:'المتابعة باستخدام Google',micro:'<b>مجاني ودون بطاقة بنكية</b><span>·</span><a href="#">المتابعة دون حساب</a>'},
+ dl:{code:'DARIJA',dir:'ltr',t1:'Golha b <span class="mark">darija.</span>',t2:'<span class="under">Safar</span> 3lina.',
+  tr:'« Bghit nsafer l\'<span class="hl" style="--t:1.2s">Istanbul</span> m3a rajli f <span class="hl" style="--t:1.4s">nouss décembre</span>… »',
+  sub:'Tiyara, otel, visa w bagages, kolchi mt7a99e9, b taman l7a9i9i.',lbl:'BONSAFAR FHEM',city:'Istanbul',latin:true,country:'Turkia · 7 lyali',dates:'15 → 22 déc.',mid:'nouss décembre',
+  c1:'2 kbar',c2:'Ftour',c3:'Bla visa',pitch:'Safrek jay wajed f d9i9a.',g:'Continuer avec Google',micro:'<b>Fabor, bla carte bancaire</b><span>·</span><a href="#">kmmel bla compte</a>'},
+ da:{code:'دارجة',dir:'rtl',t1:'قولها <span class="mark">بالدارجة.</span>',t2:'<span class="under">السفر</span> علينا.',
+  tr:'« بغيت نسافر لـ<span class="hl" style="--t:1.2s">إسطنبول</span> مع راجلي ف<span class="hl" style="--t:1.4s">نص دجنبر</span>… »',
+  sub:'الطيارة، الأوطيل، الفيزا والباگاج، كلشي متحقق، بالثمن الحقيقي.',lbl:'بون سفر فهم',city:'إسطنبول',latin:false,country:'تركيا · 7 ليالي',dates:'من 15 حتى 22 دجنبر',mid:'نص دجنبر',
+  c1:'جوج كبار',c2:'فطور',c3:'بلا فيزا',pitch:'سفرك الجاي واجد فدقيقة.',g:'المتابعة باستخدام Google',micro:'<b>فابور، بلا كارط بنكية</b><span>·</span><a href="#">كمّل بلا كونط</a>'}
+};
+var names={fr:'Français',en:'English',ar:'العربية',dl:'Darija',da:'الدارجة'};
+(function(){
+  var hs=[.35,.7,1,.55,.85,.4,.95,.6,.3,.7,.45,.8,.35,.55,.75,.4];
+  var w=document.getElementById('wave');
+  hs.forEach(function(h,i){var s=document.createElement('span');s.style.setProperty('--h',h);s.style.setProperty('--i',i);if(i>8)s.style.opacity=.45;w.appendChild(s);});
+})();
+function $(i){return document.getElementById(i)}
+function setLang(k){
+  var d=L[k];var pg=$('page');pg.setAttribute('dir',d.dir);pg.setAttribute('lang',k==='en'?'en':(k==='fr'||k==='dl')?'fr':'ar');
+  $('langcode').textContent=d.code;$('t1').innerHTML=d.t1;$('t2').innerHTML=d.t2;$('tr').innerHTML=d.tr;$('sub').innerHTML=d.sub;$('lbl').textContent=d.lbl;
+  $('country').textContent=d.country;$('dates').innerHTML=d.dates;$('mid').textContent=d.mid;$('c1').textContent=d.c1;$('c2').textContent=d.c2;$('c3').textContent=d.c3;
+  $('pitch').textContent=d.pitch;$('gbtn').textContent=d.g;$('micro').innerHTML=d.micro;
+  var c=$('city');
+  if(d.latin){c.innerHTML=d.city.split('').map(function(ch,i){return '<span class="a" style="--k:flip;--t:'+(2.15+i*.04).toFixed(2)+'s;--d:.38s">'+ch+'</span>'}).join('')}
+  else{c.innerHTML='<span class="a" style="--t:2.15s">'+d.city+'</span>'}
+  document.querySelectorAll('#tools button').forEach(function(b){b.classList.toggle('on',b.dataset.k===k)});
+  replay();
+}
+var tools=$('tools');
+Object.keys(L).forEach(function(k){var b=document.createElement('button');b.textContent=names[k];b.dataset.k=k;b.onclick=function(){setLang(k)};tools.appendChild(b)});
+var rb=document.createElement('button');rb.textContent='Rejouer';rb.onclick=function(){replay()};tools.appendChild(rb);
+document.documentElement.classList.add('js');
+var sc=$('scene');
+function replay(){sc.classList.remove('seen');void sc.offsetWidth;requestAnimationFrame(function(){sc.classList.add('seen')});}
+var q=new URLSearchParams(location.search).get('lang');setLang(q&&L[q]?q:'fr');
+</script>
+</body>
+</html>

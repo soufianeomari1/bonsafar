@@ -134,7 +134,6 @@ export const WonderOutputSchemaAr = WonderOutputSchema.extend({ why: z.array(Tri
 export type AgentStatus = "ok" | "visa_alternative" | "visa_needed_no_alternative";
 export type AgentNotice =
   | "visa_needed"
-  | "visa_free_alternative"
   | "passport_validity_check"
   | "passengers_mismatch"
   | "hotel_filters_relaxed"
@@ -152,9 +151,9 @@ export type AgentPackage = {
   run_id: string;
   status: AgentStatus;
   notices: AgentNotice[];
-  /** What the traveller asked for, with its entry check (shown first when a visa is needed). */
+  /** What the traveller asked for, with its entry check. */
   requested: { destination: Destination; entry: EntryRequirements | null };
-  /** Where the package goes: the requested city or a visa-free alternative. */
+  /** Where the package goes: always the requested city. */
   destination: Destination;
   entry: EntryRequirements | null;
   recommended: PackageOption;
@@ -189,7 +188,7 @@ export type AgentStreamEvent =
       type: "step";
       step: AgentStep;
       phase: StepPhase;
-      /** City this step works on: changes when the agent looks at an alternative. */
+      /** City this step works on. A search has one city. */
       destination?: string;
       data?: unknown;
     }

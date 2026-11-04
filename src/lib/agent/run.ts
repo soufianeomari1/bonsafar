@@ -4,7 +4,6 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 import { serverEnv } from "@/lib/env";
 import { callChat, type CallChatResult } from "@/lib/ai/call";
 import type { RunLog } from "@/lib/ai/events";
-import { findPlace } from "@/lib/mcp/places";
 import { applyFlightRule } from "@/lib/prices/flight-rule";
 import { guardModelText, scrubMoney } from "@/lib/prices/guardrail";
 import { eurMadRate } from "@/lib/prices/money";
@@ -73,7 +72,6 @@ const cityKey = (text: string) =>
 type Review = { issues: string[]; output: WonderOutput };
 
 const MONEY_ISSUE = "Remove every price, amount of money and currency";
-const VISA_ISSUE = "needs a visa this traveller does not have";
 
 /**
  * Code-side checks Wonder cannot be trusted with: ids exist and belong
@@ -113,19 +111,11 @@ function review(raw: WonderOutput, ctx: AgentContext, store: PriceStore, log: Ru
     }
   }
 
-  if (flight) {
-    const entry = ctx.entryForCity(flight.destination);
-    if (entry?.visa_needed) {
-      const visaFree = [...ctx.destinations.values()].some((d) => {
-        const other = ctx.entryForCity(d.city);
-        return other && !other.visa_needed && cityKey(d.city) !== cityKey(flight.destination);
-      });
-      issues.push(
-        visaFree
-          ? `${flight.destination} ${VISA_ISSUE}: build the package in the visa-free city you searched.`
-          : `${flight.destination} ${VISA_ISSUE}: search a visa-free alternative city (flights, hotels, entry requirements) and build the package there.`,
-      );
-    }
+  const wanted = ctx.intent.destination;
+  if (flight && wanted && cityKey(flight.destination) !== cityKey(wanted.city)) {
+    issues.push(
+      `The package must stay in ${wanted.city}. Do not search or recommend another city.`,
+    );
   }
 
   const recTotal =
@@ -347,9 +337,8 @@ export async function runAgent({
     }
 
     if (repairs >= 1 || mustAnswer) {
-      // Last chance: a package for a visa city is still shown (status says so),
-      // amounts are scrubbed; anything else is a failed run.
-      const usable = candidate && issues.every((i) => i.startsWith(MONEY_ISSUE) || i.includes(VISA_ISSUE));
+      // Last chance: amounts are scrubbed. A package for another city is a failed run.
+      const usable = candidate && issues.every((i) => i.startsWith(MONEY_ISSUE));
       if (candidate && usable) {
         final = issues.some((i) => i.startsWith(MONEY_ISSUE)) ? scrubWhy(candidate) : candidate;
         scrubbed = final !== candidate;
@@ -375,29 +364,17 @@ export async function runAgent({
 
   const recFlight = store.flight(final.recommended.flight_id);
   if (!recFlight) throw new AgentError("agent_invalid_output");
-  const packageCity = recFlight.destination;
+  if (cityKey(recFlight.destination) !== cityKey(destination.city)) {
+    throw new AgentError("agent_invalid_output", "The package left the requested city.");
+  }
   const requestedEntry = ctx.entryForCity(destination.city);
-  const packageEntry: EntryRequirements | null = ctx.entryForCity(packageCity);
-  const searched = ctx.destinations.get(cityKey(packageCity));
-  const packagePlace = findPlace({ city: packageCity });
-  const packageDestination: Destination =
-    cityKey(packageCity) === cityKey(destination.city)
-      ? destination
-      : {
-          city: packageCity,
-          country: searched?.country ?? packagePlace?.country ?? "",
-          iata: searched?.iata || packagePlace?.codes[0] || "",
-        };
+  const packageEntry: EntryRequirements | null = requestedEntry;
+  const packageDestination: Destination = destination;
 
-  const status: AgentStatus = requestedEntry?.visa_needed
-    ? packageEntry?.visa_needed
-      ? "visa_needed_no_alternative"
-      : "visa_alternative"
-    : "ok";
+  const status: AgentStatus = "ok";
 
   const notices: AgentNotice[] = [];
   if (requestedEntry?.visa_needed) notices.push("visa_needed");
-  if (status === "visa_alternative") notices.push("visa_free_alternative");
   if (
     packageEntry?.passport_validity_days != null &&
     (!profile.passport_6m || packageEntry.passport_validity_days > 180)

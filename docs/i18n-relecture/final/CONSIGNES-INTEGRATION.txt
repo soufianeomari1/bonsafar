@@ -1,0 +1,41 @@
+BonSafar — relecture linguistique du 4 novembre 2026
+
+418 clés relues. Les 21 erreurs initiales A · Sens sont corrigées.
+414 lignes validées, 4 clés réservées au jury en anglais.
+284 clés et 569 textes ont une correction.
+
+DÉCISIONS
+1. 9elleb et Kan9elleb, y compris dans les textes issus des maquettes.
+2. قول / قولها en lettres arabes, Goul / Goulha en lettres latines.
+3. Wakha, yallah / واخا، يالله pour le bouton de validation.
+4. Safar kaywejjed lik\nkolchi / سافار كيوجد ليك\nكلشي. Le nom de la mascotte est conservé, la répétition du mot voyage est supprimée.
+5. Replays : jury uniquement, anglais.
+
+FICHIERS
+corrections/darija-latn.json : 240 modifications
+corrections/darija-arab.json : 216 modifications
+corrections/ar.json : 113 modifications
+avant-modification/ : valeurs attendues avant intégration pour les mêmes clés.
+jury-en.json : libellés anglais des quatre clés de replay.
+relecture.json : décisions, texte actuel et texte retenu pour les 418 clés.
+
+INTÉGRATION
+Lire les consignes du dépôt et comparer chaque valeur actuelle avec avant-modification/ avant de fusionner les corrections dans les dictionnaires existants. Ne pas remplacer un dictionnaire complet par ces fichiers partiels. En cas de valeur divergente, comparer avec la version courante avant d’appliquer.
+Conserver exactement les variables entre accolades, les marqueurs [[...]], les passages en gras et les retours à la ligne des titres.
+Ne modifier ni les textes français ni les autres pages jury/Under the hood dans cette opération. La transcription de Fatima garde sa formulation enregistrée en darija.
+
+REPLAYS EN MODE JURY
+Les clés plan.replay, plan.captured, plan.replayLast et plan.error.replay_unavailable sont exclues des corrections grand public. Utiliser les libellés de jury-en.json dans la branche jury anglaise, sans dépendre de la langue choisie pour le parcours public.
+Vérifier les conditions de visibilité de tous les chemins replay : badge, heure de capture, bouton de dernier voyage et état vide. Aucun accès au replay ne doit apparaître en mode utilisateur. Le badge Replay et l’heure de capture restent visibles dans le mode jury.
+Ne pas exclure price.captured : l’heure de capture du prix sert aussi aux prix du parcours utilisateur.
+
+VÉRIFICATION DANS L’APPLICATION
+Contrôler les trois écritures, les écrans RTL, les boutons et les titres. Tester les compteurs avec 1, 2, 3, 10, 11 et 15. Vérifier le maintien du micro et les libellés de bagage. Vérifier aussi la visibilité des replays, en accès direct et via les boutons.
+
+PORTÉE
+Le classeur et les dictionnaires ont été relus et vérifiés. Le code et l’application n’ont pas été modifiés pendant cette intervention.
+
+AJUSTEMENTS VALIDÉS PAR SOUFIANE
+Les formulations demandées sont prioritaires, y compris leur mélange de darija et de français, leurs accents et leur ponctuation. Ne pas normaliser à nouveau dialk, li, enregistré, téléfone, N déconnecta ou l’écran.
+Employer tefl et l2atfal pour les enfants, lilat pour les nuits en darija, chouraka2 pour les partenaires, dirham pour la monnaie et Luxe. Les équivalents en lettres arabes ont été adaptés. L’arabe classique conserve ses formes habituelles pour les nuits.
+Les clés jury restent à part en anglais.

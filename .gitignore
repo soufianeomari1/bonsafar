@@ -161,5 +161,8 @@ next-env.d.ts
 .DS_Store
 *.pem
 
+# Local demo film captures (video, stills, zip)
+/exports/
+
 # Yarn / pnpm plug'n'play
 /.pnp

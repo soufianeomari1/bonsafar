@@ -283,7 +283,6 @@ export const en = {
   "plan.stops.other": "{count} stops",
   "plan.visa.title": "{city} needs a {kind} visa",
   "plan.visa.source": "Source",
-  "plan.alt.title": "Visa-free destination: {city}",
   "plan.landed": "Landed: your package is ready",
   "plan.seePackage": "See the package",
   "plan.replayLast": "View the last saved trip",
@@ -306,6 +305,7 @@ export const en = {
   "result.share": "Share",
   "result.landed": "Landed in {time} · 5 steps",
   "result.how": "See how",
+  "result.overBudget": "Over your budget by {delta} DH",
   "result.missing": "The package is not ready yet.",
   "result.backToPlan": "Back to the flight plan",
 
@@ -347,7 +347,6 @@ export const en = {
   "package.perNight": "per night",
 
   "notice.visa_needed": "A visa is required for the city you asked for.",
-  "notice.visa_free_alternative": "This package goes to a visa-free destination instead.",
   "notice.passport_validity_check": "Check that the passport stays valid long enough after arrival.",
   "notice.passengers_mismatch": "The flight price does not cover the same number of travellers.",
   "notice.hotel_filters_relaxed": "Hotel filters were relaxed to find a room.",
@@ -533,6 +532,7 @@ export const en = {
   "package.departTodayShort": "Leaves today",
   "package.datesPast": "These dates have passed",
   "package.pillNoVisa": "No visa",
+  "package.pillVisa": "Visa required",
   "package.pillBreakfast": "Breakfast included",
   "package.pillDirect": "Direct",
   "package.pillStopsOne": "1 stop",

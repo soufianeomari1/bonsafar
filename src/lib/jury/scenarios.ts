@@ -40,7 +40,7 @@ export const JURY_SCENARIOS: JuryScenario[] = [
     number: 2,
     label: "jury-paris",
     title: "Paris for a weekend",
-    status: { label: "Schengen visa needed", tone: "warn" },
+    status: { label: "Visa required", tone: "warn" },
     audio: "/jury/scenario-2-paris.wav",
     darija: "Bghit nemshi l Paris ghir week-end m3a benti f janvier.",
     english: "I want to go to Paris for just a weekend with my daughter in January.",

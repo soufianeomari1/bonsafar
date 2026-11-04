@@ -105,8 +105,8 @@ Rules:
 1. destination: the city to visit, its country in English and its main airport IATA code. If no precise city is named (only a wish like "somewhere with the sea"), use null.
 2. origin_iata: the profile home airport, unless the traveller names another departure city.
 3. Dates are always in the future, relative to today. "nouss"/"mi-"/"mid" a month = the 15th. "bdyat"/"début"/"early" = the 1st. "lekher"/"fin"/"late" = the 24th. A month alone = the 15th. "chi semaine"/"une semaine"/"1 semaine"/"a week"/"one week" = 7 nights; "weekend" = Friday to Sunday. With a start and a length, return_date = depart_date + nights. A season alone ("f l'été", "summer") or nothing at all is too vague: dates and nights null.
-4. adults and children: from the words ("m3a rajli" = with my husband = 2 adults), otherwise from the profile; 2 adults if still unknown.
-5. Money, only if the traveller says an amount in dirhams (dh, dirham, "alf" = thousand). Never guess. The amount goes only in budget_mad or budget_per_night_mad, never in a sentence: it is the traveller's own figure, not a price. Spoken amounts count, in darija, Arabic or French. "خمستاش الاف درهم" = 15000, "عشرين ألف درهم" = 20000, "khamstach alf" = 15000, "15 alf dh" = 15000, "quinze mille dirhams" = 15000. A cap per night ("la nuit", "par nuit", "l lila", "per night", "لليلة") goes in budget_per_night_mad and budget_mad stays null. A total for the trip goes in budget_mad and budget_per_night_mad stays null. If they say neither, both are null.
+4. adults and children: only from the words ("m3a rajli" = with my husband = 2 adults, "m3a benti" = with my daughter = 1 adult and 1 child). If the transcript does not say who is travelling, copy the profile. If the profile does not say either, 1 adult and 0 children. Never assume 2.
+5. Money, only if the traveller says an amount in dirhams (dh, dirham, "alf" = thousand). Never guess. The amount goes only in budget_mad or budget_per_night_mad, never in a sentence: it is the traveller's own figure, not a price. Spoken amounts count, in darija, Arabic or French. "خمستاش الاف درهم" = 15000, "عشرين ألف درهم" = 20000, "تسعة الاف درهم" = 9000, "البودجي ديالي ماكسيمال هو تسعة الاف درهم" = 9000, "khamstach alf" = 15000, "15 alf dh" = 15000, "quinze mille dirhams" = 15000. A cap per night ("la nuit", "par nuit", "l lila", "per night", "لليلة") goes in budget_per_night_mad and budget_mad stays null. A total for the trip goes in budget_mad and budget_per_night_mad stays null. If they say neither, both are null.
 6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). label: 1 to 3 words in the label language.
 7. keywords: EXACT substrings copied from the transcript (same spelling, accents and case) that carry each extracted fact, with the slot they fill. At most 2 per slot, most telling first.
 8. Do not translate the transcript and do not write an English gloss of it. Another call does that.
@@ -144,7 +144,15 @@ function daysBetween(from: string, to: string): number {
   );
 }
 
-const SPOKEN_NUMBER = /\d|mille|alf|alaf|ألف|آلاف|million|mlyoun|thousand/i;
+const SPOKEN_NUMBER = /\d|mille|alf|alaf|ألف|آلاف|الف|الاف|million|mlyoun|thousand/i;
+
+/** The transcript names who is travelling. A silent note does not mean two adults. */
+const PARTY_MENTION =
+  /(?:\bm3a\b|\brajli\b|\brajel\b|\bmrati\b|\bmerati\b|\bmerti\b|\bbenti\b|\bbnti\b|\bweldi\b|\bwldi\b|\bhusband\b|\bwife\b|\bdaughter\b|\bson\b|\bkids?\b|\bchildren\b|\bchild\b|\badults?\b|\bcouple\b|\bfamily\b|\bfriends\b|\bmari\b|\bfemme\b|\bfille\b|\bfils\b|\benfants?\b|\badultes?\b|\bpersonnes\b|راجلي|مراتي|بنتي|ولدي|زوجي|أطفال|اطفال|بالغ|صحاب)/iu;
+
+function partyMentioned(text: string): boolean {
+  return PARTY_MENTION.test(text);
+}
 const PER_NIGHT =
   /(?:par nuit|la nuit|\/\s*nuit|per night|a night|each night|l[\s-]*lila|لليلة|للّيلة|ل ليلة|فالليلة)/i;
 
@@ -244,6 +252,18 @@ function enforce(
   } else {
     intent.budget_per_night_mad = null;
     if (said != null) intent.budget_mad = said;
+  }
+
+  // Who travels: the words win, then the profile. Two adults is never the fallback.
+  if (!partyMentioned(spoken)) {
+    const fromProfile = profileTravellers(profile);
+    if (fromProfile.adults != null) {
+      intent.adults = fromProfile.adults;
+      intent.children = fromProfile.children;
+    } else {
+      intent.adults = 1;
+      intent.children = 0;
+    }
   }
 
   // One question, then stop: once an answer has filled the city and the dates, do not ask again.
