@@ -12,7 +12,7 @@ import {
 } from "@/lib/intent/edits";
 import type { Intent, QuestionField } from "@/lib/intent/schema";
 import { readProfileState } from "@/lib/profile/store";
-import { fetchIntent, transcribeWav, VoiceApiError } from "@/lib/voice/client";
+import { fetchIntent, fetchTranslate, transcribeWav, VoiceApiError } from "@/lib/voice/client";
 import type { TranscribeFinal } from "@/lib/voice/protocol";
 import { toWav24k } from "@/lib/voice/wav";
 
@@ -55,6 +55,8 @@ export type TripJob = {
 let job: TripJob | null = null;
 let controller: AbortController | null = null;
 let nextId = 1;
+/** Translation that arrived before the intent. Applied when the intent lands. */
+let heldTranslation: { id: number; text: string } | null = null;
 const listeners = new Set<() => void>();
 
 function set(patch: Partial<TripJob>, id: number) {
@@ -97,12 +99,42 @@ function begin(fields: Pick<TripJob, "source" | "audioUrl" | "durationMs" | "lev
   return job;
 }
 
+function applyTranslation(id: number, text: string, events: RunEvent[]) {
+  const latest = job;
+  if (!latest || latest.id !== id || !text) return;
+  if (!latest.intent) {
+    heldTranslation = { id, text };
+    if (events.length) set({ events: [...latest.events, ...events] }, id);
+    return;
+  }
+  set(
+    {
+      intent: { ...latest.intent, translation_en: text },
+      events: events.length ? [...latest.events, ...events] : latest.events,
+    },
+    id,
+  );
+}
+
 async function understandJob(id: number, unlock?: QuestionField) {
   const current = job;
   if (!current || current.id !== id || !controller) return;
   set({ phase: "understanding", error: null }, id);
   const { profile } = readProfileState();
   const requested = unlock ? current.userEdited.filter((field) => field !== unlock) : current.userEdited;
+  const signal = controller.signal;
+  // The chips wait only for the intent. The English gloss fills in when it arrives.
+  const translate =
+    current.intent?.translation_en
+      ? null
+      : fetchTranslate(current.transcript, current.runId, signal)
+          .then((response) => applyTranslation(id, response.translation_en, response.events))
+          .catch((error: unknown) => {
+            if (signal.aborted) return;
+            const events = error instanceof VoiceApiError ? error.events : [];
+            if (events.length && job?.id === id) set({ events: [...job.events, ...events] }, id);
+          });
+
   try {
     const response = await fetchIntent(
       {
@@ -114,12 +146,16 @@ async function understandJob(id: number, unlock?: QuestionField) {
         locked: current.intent ? locksFor(current.intent, requested) : undefined,
       },
       current.runId,
-      controller.signal
+      signal,
     );
     const latest = job;
     if (!latest || latest.id !== id) return;
     const edited = unlock ? latest.userEdited.filter((field) => field !== unlock) : latest.userEdited;
-    const intent = latest.intent ? mergeIntent(response.intent, latest.intent, edited) : response.intent;
+    let intent = latest.intent ? mergeIntent(response.intent, latest.intent, edited) : response.intent;
+    const carried =
+      latest.intent?.translation_en || (heldTranslation?.id === id ? heldTranslation.text : "");
+    if (carried) intent = { ...intent, translation_en: carried };
+    if (heldTranslation?.id === id) heldTranslation = null;
     const userEdited =
       unlock && (unlock !== "destination" || intent.destination)
         ? [...new Set<UserEdit>([...latest.userEdited, unlock])]
@@ -135,10 +171,11 @@ async function understandJob(id: number, unlock?: QuestionField) {
       id,
     );
   } catch (error) {
-    if (controller?.signal.aborted) return;
+    if (signal.aborted) return;
     const events = error instanceof VoiceApiError ? error.events : [];
     set({ phase: "error", error: "understand", events: [...(job?.events ?? []), ...events] }, id);
   }
+  await translate;
 }
 
 async function transcribeJob(id: number) {

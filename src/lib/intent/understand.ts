@@ -37,8 +37,11 @@ const LANG_NAMES: Record<Lang, string> = {
   "darija-arab": "Moroccan darija in Arabic letters",
 };
 
+/** Translation is a separate, parallel call. The model must not spend tokens on it. */
+const ModelIntentSchema = IntentSchema.omit({ translation_en: true });
+
 const JSON_SCHEMA = (() => {
-  const schema = z.toJSONSchema(IntentSchema) as Record<string, unknown>;
+  const schema = z.toJSONSchema(ModelIntentSchema) as Record<string, unknown>;
   delete schema.$schema;
   return schema;
 })();
@@ -96,7 +99,7 @@ Rules:
 5. budget_mad: only if the traveller says a budget in dirhams (dh, dirham, "alf" = thousand). Otherwise null. Never guess.
 6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). label: 1 to 3 words in the label language.
 7. keywords: EXACT substrings copied from the transcript (same spelling, accents and case) that carry each extracted fact, with the slot they fill. At most 2 per slot, most telling first.
-8. translation_en: a faithful, natural English translation of the whole transcript. Never write an amount of money: put the token {budget} where the budget is said.
+8. Do not translate the transcript and do not write an English gloss of it. Another call does that.
 9. question: null unless something indispensable is missing: the destination, or dates too vague to search. Then ask ONE short, friendly question about the most important gap, never about the departure city, travellers or papers. Set field to the gap you ask about: destination, dates, nights, travelers or budget. darija in the given script, plus French and English. Give 2 to 4 short answer options, each in darija, French and English. No amounts of money anywhere.`;
 
 function contextBlock(profile: Profile, lang: Lang, jury: boolean): string {
@@ -308,8 +311,17 @@ export async function understand({
 
     let issue: string;
     try {
-      const parsed = IntentSchema.safeParse(JSON.parse(content));
-      if (parsed.success) return enforce(parsed.data, transcript, answers, profile, locked, log);
+      const parsed = ModelIntentSchema.safeParse(JSON.parse(content));
+      if (parsed.success) {
+        return enforce(
+          { ...parsed.data, translation_en: "" },
+          transcript,
+          answers,
+          profile,
+          locked,
+          log,
+        );
+      }
       issue = z.prettifyError(parsed.error);
     } catch {
       issue = "The output was not valid JSON.";

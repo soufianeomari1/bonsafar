@@ -7,7 +7,7 @@ import { formatUsd } from "@/lib/format";
 import { useLanguage } from "@/lib/i18n/provider";
 import { REASONING_EFFORTS, type Intent, type IntentEffort } from "@/lib/intent/schema";
 import { useProfile } from "@/lib/profile/useProfile";
-import { fetchIntent, transcribeWav } from "@/lib/voice/client";
+import { fetchIntent, fetchTranslate, transcribeWav, VoiceApiError } from "@/lib/voice/client";
 import type { TranscribeFinal } from "@/lib/voice/protocol";
 import { RecorderError, VoiceRecorder } from "@/lib/voice/recorder";
 import { micHoldStyle, useVoiceCapture, type PointerTrace } from "@/components/voice/useVoiceCapture";
@@ -110,16 +110,30 @@ export default function VoiceBenchPage() {
   async function understand(transcript: string, runId: string) {
     setPhase("understanding");
     const started = performance.now();
+    let glossText = "";
+    const gloss = fetchTranslate(transcript, runId)
+      .then((response) => {
+        glossText = response.translation_en;
+        setIntent((current) =>
+          current ? { ...current, translation_en: response.translation_en } : current,
+        );
+        setEvents((current) => [...current, ...response.events]);
+      })
+      .catch((caught: unknown) => {
+        const events = caught instanceof VoiceApiError ? caught.events : [];
+        if (events.length) setEvents((current) => [...current, ...events]);
+      });
     try {
       const response = await fetchIntent({ transcript, profile, lang, jury, effort }, runId);
-      setIntent(response.intent);
+      setClientMs((current) => ({ ...current, intent: Math.round(performance.now() - started) }));
+      setIntent({ ...response.intent, translation_en: glossText || response.intent.translation_en });
       setEvents((current) => [...current, ...response.events]);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Intent failed.");
     } finally {
-      setClientMs((current) => ({ ...current, intent: Math.round(performance.now() - started) }));
       setPhase("idle");
     }
+    await gloss;
   }
 
   function reset() {

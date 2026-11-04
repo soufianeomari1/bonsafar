@@ -1,7 +1,7 @@
 "use client";
 
 import type { RunEvent } from "@/lib/ai/events";
-import type { IntentRequest, IntentResponse } from "@/lib/intent/schema";
+import type { IntentRequest, IntentResponse, TranslateResponse } from "@/lib/intent/schema";
 import {
   RUN_ID_HEADER,
   readSse,
@@ -65,6 +65,27 @@ export async function fetchIntent(
     | null;
   if (!response.ok || !body?.intent) {
     throw new VoiceApiError(body?.error ?? `Understanding failed (${response.status}).`, body?.events ?? []);
+  }
+  return body;
+}
+
+/** English gloss of the transcript. Runs beside the intent call and never blocks the chips. */
+export async function fetchTranslate(
+  transcript: string,
+  runId: string,
+  signal?: AbortSignal,
+): Promise<TranslateResponse> {
+  const response = await fetch("/api/translate", {
+    method: "POST",
+    headers: { "content-type": "application/json", [RUN_ID_HEADER]: runId },
+    body: JSON.stringify({ transcript }),
+    signal,
+  });
+  const body = (await response.json().catch(() => null)) as
+    | (TranslateResponse & { error?: string })
+    | null;
+  if (!response.ok || body?.translation_en == null) {
+    throw new VoiceApiError(body?.error ?? `Translation failed (${response.status}).`, body?.events ?? []);
   }
   return body;
 }

@@ -126,3 +126,16 @@ export type IntentResponse = {
   run_id: string;
   events: RunEvent[];
 };
+
+/** English gloss of the transcript. Separate from the intent so the chips do not wait for it. */
+export const TranslateRequestSchema = z.object({
+  transcript: z.string().trim().min(1).max(2000),
+});
+
+export type TranslateRequest = z.input<typeof TranslateRequestSchema>;
+
+export type TranslateResponse = {
+  translation_en: string;
+  run_id: string;
+  events: RunEvent[];
+};
