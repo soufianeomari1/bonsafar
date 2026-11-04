@@ -59,9 +59,20 @@ export type TripJob = {
 let job: TripJob | null = null;
 let controller: AbortController | null = null;
 let nextId = 1;
+/**
+ * Bumped on every new departure. An in-flight transcribe, intent or
+ * translation from the previous scenario must not land on the next one.
+ */
+let epoch = 0;
 /** Translation that arrived before the intent. Applied when the intent lands. */
 let heldTranslation: { id: number; text: string } | null = null;
 const listeners = new Set<() => void>();
+/** Agent run and any other client cache that must die with the trip. Profile is not one of them. */
+let onReset: (() => void) | null = null;
+
+export function registerTripReset(hook: () => void) {
+  onReset = hook;
+}
 
 function set(patch: Partial<TripJob>, id: number) {
   if (!job || job.id !== id) return;
@@ -82,10 +93,28 @@ export function readServerTrip(): TripJob | null {
   return null;
 }
 
-function begin(fields: Pick<TripJob, "source" | "audioUrl" | "durationMs" | "levels" | "transcript" | "phase" | "wav">): TripJob {
+function notify() {
+  for (const listener of listeners) listener();
+}
+
+/**
+ * Drops the trip in memory: intent, wishes, visa choice, quick replies,
+ * transcript and the in-flight request. The profile is left as it is.
+ */
+function dropSession() {
+  epoch += 1;
   controller?.abort();
-  controller = new AbortController();
+  controller = null;
+  heldTranslation = null;
   if (job?.audioUrl) URL.revokeObjectURL(job.audioUrl);
+  job = null;
+  notify();
+  onReset?.();
+}
+
+function begin(fields: Pick<TripJob, "source" | "audioUrl" | "durationMs" | "levels" | "transcript" | "phase" | "wav">): TripJob {
+  dropSession();
+  controller = new AbortController();
   job = {
     id: nextId++,
     runId: newRunId(),
@@ -100,13 +129,17 @@ function begin(fields: Pick<TripJob, "source" | "audioUrl" | "durationMs" | "lev
     error: null,
     ...fields,
   };
-  for (const listener of listeners) listener();
+  notify();
   return job;
 }
 
-function applyTranslation(id: number, text: string, events: RunEvent[]) {
+function currentEpoch(): number {
+  return epoch;
+}
+
+function applyTranslation(id: number, started: number, text: string, events: RunEvent[]) {
   const latest = job;
-  if (!latest || latest.id !== id || !text) return;
+  if (started !== currentEpoch() || !latest || latest.id !== id || !text) return;
   if (!latest.intent) {
     heldTranslation = { id, text };
     if (events.length) set({ events: [...latest.events, ...events] }, id);
@@ -122,10 +155,13 @@ function applyTranslation(id: number, text: string, events: RunEvent[]) {
 }
 
 async function understandJob(id: number, unlock?: QuestionField) {
+  const started = currentEpoch();
   const current = job;
-  if (!current || current.id !== id || !controller) return;
+  if (started !== currentEpoch() || !current || current.id !== id || !controller) return;
   set({ phase: "understanding", error: null }, id);
   const { profile } = readProfileState();
+  // A follow-up may lock chips. A new departure never sends the previous scenario.
+  const followUp = current.answers.length > 0 || current.userEdited.length > 0;
   const requested = unlock ? current.userEdited.filter((field) => field !== unlock) : current.userEdited;
   const signal = controller.signal;
   // The chips wait only for the intent. The English gloss fills in when it arrives.
@@ -133,9 +169,9 @@ async function understandJob(id: number, unlock?: QuestionField) {
     current.intent?.translation_en
       ? null
       : fetchTranslate(current.transcript, current.runId, signal)
-          .then((response) => applyTranslation(id, response.translation, response.events))
+          .then((response) => applyTranslation(id, started, response.translation, response.events))
           .catch((error: unknown) => {
-            if (signal.aborted) return;
+            if (signal.aborted || started !== currentEpoch()) return;
             const events = error instanceof VoiceApiError ? error.events : [];
             if (events.length && job?.id === id) set({ events: [...job.events, ...events] }, id);
           });
@@ -148,18 +184,23 @@ async function understandJob(id: number, unlock?: QuestionField) {
         profile: profileForLang(profile, lang),
         lang,
         jury: readJury(),
-        answers: current.answers,
-        locked: current.intent ? locksFor(current.intent, requested) : undefined,
+        answers: followUp ? current.answers : [],
+        locked: followUp && current.intent ? locksFor(current.intent, requested) : undefined,
       },
       current.runId,
       signal,
     );
     const latest = job;
-    if (!latest || latest.id !== id) return;
+    if (started !== currentEpoch() || !latest || latest.id !== id) return;
     const edited = unlock ? latest.userEdited.filter((field) => field !== unlock) : latest.userEdited;
-    let intent = latest.intent ? mergeIntent(response.intent, latest.intent, edited) : response.intent;
-    const carried =
-      latest.intent?.translation_en || (heldTranslation?.id === id ? heldTranslation.text : "");
+    const carryEdits = followUp || latest.userEdited.length > 0;
+    let intent = response.intent;
+    if (carryEdits && latest.intent) intent = mergeIntent(response.intent, latest.intent, edited);
+    const carried = carryEdits
+      ? latest.intent?.translation_en || (heldTranslation?.id === id ? heldTranslation.text : "")
+      : heldTranslation?.id === id
+        ? heldTranslation.text
+        : "";
     if (carried) intent = { ...intent, translation_en: fillBudgetMarker(carried, intent.budget_mad) };
     if (heldTranslation?.id === id) heldTranslation = null;
     const userEdited =
@@ -177,7 +218,7 @@ async function understandJob(id: number, unlock?: QuestionField) {
       id,
     );
   } catch (error) {
-    if (signal.aborted) return;
+    if (signal.aborted || started !== currentEpoch()) return;
     const events = error instanceof VoiceApiError ? error.events : [];
     set({ phase: "error", error: "understand", events: [...(job?.events ?? []), ...events] }, id);
   }
@@ -185,8 +226,9 @@ async function understandJob(id: number, unlock?: QuestionField) {
 }
 
 async function transcribeJob(id: number) {
+  const started = currentEpoch();
   const current = job;
-  if (!current?.wav || current.id !== id || !controller) return;
+  if (started !== currentEpoch() || !current?.wav || current.id !== id || !controller) return;
   set({ phase: "transcribing", error: null, partial: "" }, id);
   try {
     const final = await transcribeWav(
@@ -198,6 +240,7 @@ async function transcribeJob(id: number) {
       },
       controller.signal
     );
+    if (started !== currentEpoch()) return;
     const text = final.text.trim();
     if (!text) {
       set({ phase: "error", error: "empty", transcription: final }, id);
@@ -206,7 +249,7 @@ async function transcribeJob(id: number) {
     set({ transcription: final, transcript: text, partial: text, wav: null }, id);
     await understandJob(id);
   } catch (error) {
-    if (controller?.signal.aborted) return;
+    if (controller?.signal.aborted || started !== currentEpoch()) return;
     const short = error instanceof VoiceApiError && /too short/i.test(error.message);
     set({ phase: "error", error: short ? "short" : "transcribe" }, id);
   }
@@ -223,10 +266,13 @@ export async function startVoiceTrip(take: Blob, durationMs: number, levels: num
     phase: "transcribing",
     wav: null,
   });
+  const started = currentEpoch();
   try {
     const { wav } = await toWav24k(take);
+    if (started !== currentEpoch()) return;
     set({ wav }, created.id);
   } catch {
+    if (started !== currentEpoch()) return;
     set({ phase: "error", error: "transcribe" }, created.id);
     return;
   }
@@ -272,9 +318,12 @@ export async function answerTrip(
   unlock?: QuestionField,
 ): Promise<void> {
   if (!job) return;
+  const id = job.id;
+  const started = currentEpoch();
   const answers = [...job.answers, { question, answer }].slice(-3);
-  set({ answers }, job.id);
-  await understandJob(job.id, unlock);
+  set({ answers }, id);
+  if (started !== currentEpoch()) return;
+  await understandJob(id, unlock);
 }
 
 export async function retryTrip(): Promise<void> {
@@ -302,8 +351,5 @@ export function patchIntent(patch: Partial<Intent>): void {
 }
 
 export function clearTrip(): void {
-  controller?.abort();
-  if (job?.audioUrl) URL.revokeObjectURL(job.audioUrl);
-  job = null;
-  for (const listener of listeners) listener();
+  dropSession();
 }

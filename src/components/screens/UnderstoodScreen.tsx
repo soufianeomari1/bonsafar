@@ -49,7 +49,7 @@ export function UnderstoodScreen() {
   const { profile } = useProfile();
   const [english, setEnglish] = useState<boolean | null>(null);
   const [landedRev, setLandedRev] = useState(0);
-  const [editing, setEditing] = useState<IntentChipModel | null>(null);
+  const [editing, setEditing] = useState<{ jobId: number; chip: IntentChipModel } | null>(null);
 
   const showEnglish = english ?? jury;
   const intent = job?.intent ?? null;
@@ -226,7 +226,7 @@ export function UnderstoodScreen() {
                         whileTap={reduced ? undefined : { scale: PRESS_SCALE, transition: PRESS_TRANSITION }}
                         onClick={() => {
                           haptic("select");
-                          setEditing(chip);
+                          setEditing({ jobId: job.id, chip });
                         }}
                         className="flex min-h-11 items-center gap-2 rounded-pill border border-line bg-card pe-3.5 ps-2 text-[15px] font-bold text-ink"
                       >
@@ -258,7 +258,7 @@ export function UnderstoodScreen() {
               <AnimatePresence mode="wait" initial={false}>
                 {showVisaFollowUp && visa?.ideaIds && (
                   <motion.div
-                    key="visa-ideas"
+                    key={`visa-ideas-${job.id}`}
                     initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
@@ -278,7 +278,7 @@ export function UnderstoodScreen() {
                 )}
                 {showVisaFollowUp && visa?.conflictOpen && shownIntent?.destination && (
                   <motion.div
-                    key="visa-conflict"
+                    key={`visa-conflict-${job.id}`}
                     initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
@@ -308,7 +308,7 @@ export function UnderstoodScreen() {
                 )}
                 {asking && intent.question && (
                   <motion.div
-                    key={`question-${intent.question.field}`}
+                    key={`question-${job.id}-${intent.question.field}`}
                     initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
@@ -353,7 +353,11 @@ export function UnderstoodScreen() {
         </Button>
       </div>
 
-      <ChipEditor chip={editing} intent={intent} onClose={() => setEditing(null)} />
+      <ChipEditor
+        chip={editing?.jobId === job.id ? editing.chip : null}
+        intent={intent}
+        onClose={() => setEditing(null)}
+      />
     </div>
   );
 }

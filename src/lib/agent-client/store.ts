@@ -8,7 +8,7 @@ import type { FxRate } from "@/lib/prices/money";
 import type { Offer } from "@/lib/prices/store";
 import { profileForLang } from "@/lib/profile/schema";
 import { readProfileState } from "@/lib/profile/store";
-import { readTrip } from "@/lib/trip/store";
+import { readTrip, registerTripReset } from "@/lib/trip/store";
 import { playRecordedRun, type ReplayableRun } from "@/lib/agent/replay-frames";
 import type { GuardCode } from "@/lib/jury/copy";
 import { parseStreamEvent } from "./parse";
@@ -208,13 +208,11 @@ function applyEvent(draft: AgentRunSnapshot, event: AgentStreamEvent) {
       break;
     case "step": {
       const first = draft.legs[0];
-      let destination = event.destination ?? first?.destination ?? "";
-      if (first && destination && destination.toLowerCase() !== first.destination.toLowerCase()) {
-        const entryStillOpen =
-          event.step === "entry_requirements" && first.steps.entry_requirements.phase !== "done";
-        if (!entryStillOpen) break;
-        destination = first.destination;
-      }
+      const destination = event.destination ?? first?.destination ?? "";
+      // A step for another city belongs to another scenario. Never paint it
+      // onto the leg already on screen (that is how a Schengen visa result
+      // showed up on Istanbul).
+      if (first && destination && destination.toLowerCase() !== first.destination.toLowerCase()) break;
       const leg = ensureLeg(draft.legs, destination);
       const step = leg.steps[event.step];
       step.phase = event.phase;
@@ -316,7 +314,9 @@ export async function fetchRecordedRun(scenario: string, signal?: AbortSignal): 
 function applyAndCommit(mine: number, event: AgentStreamEvent) {
   if (mine !== token) return;
   const next = structuredClone(snapshot);
+  if (mine !== token) return;
   applyEvent(next, event);
+  if (mine !== token) return;
   commit(next);
 }
 
@@ -569,3 +569,7 @@ export function activeStep(leg: Leg | undefined): AgentStep {
 export function packageOptionId(flightId: string, hotelId: string): string {
   return `${flightId}:${hotelId}`;
 }
+
+registerTripReset(() => {
+  resetAgentRun();
+});
