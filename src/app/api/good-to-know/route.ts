@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { RunLog } from "@/lib/ai/events";
 import { fetchGoodToKnow } from "@/lib/ai/good-to-know";
+import { wantsArabic } from "@/lib/agent/schema";
+import { LANGUAGES } from "@/lib/i18n";
 
 export const maxDuration = 30;
 
@@ -11,6 +13,7 @@ const Body = z.object({
   origin: z.string().trim().min(1).max(80),
   month: z.string().trim().min(1).max(40),
   script: z.enum(["latn", "arab"]).default("latn"),
+  lang: z.enum(LANGUAGES).default("fr"),
 });
 
 /** Four practical notes from Muse Spark. Amounts of money are rejected. */
@@ -33,6 +36,7 @@ export async function POST(request: Request) {
         origin: body.data.origin,
         month: body.data.month,
         script: body.data.script,
+        arabic: wantsArabic(body.data.lang),
       },
       log,
     );

@@ -1,7 +1,12 @@
 "use client";
 
 import type { RunEvent } from "@/lib/ai/events";
-import type { IntentRequest, IntentResponse, TranslateResponse } from "@/lib/intent/schema";
+import type {
+  IntentRequest,
+  IntentResponse,
+  TranslateResponse,
+  TranslateTarget,
+} from "@/lib/intent/schema";
 import {
   RUN_ID_HEADER,
   readSse,
@@ -69,22 +74,26 @@ export async function fetchIntent(
   return body;
 }
 
-/** English gloss of the transcript. Runs beside the intent call and never blocks the chips. */
+/**
+ * English gloss of the transcript by default: runs beside the intent call and never blocks the chips.
+ * target "ar" returns a Modern Standard Arabic version of a model line instead.
+ */
 export async function fetchTranslate(
   transcript: string,
   runId: string,
   signal?: AbortSignal,
+  target: TranslateTarget = "en",
 ): Promise<TranslateResponse> {
   const response = await fetch("/api/translate", {
     method: "POST",
     headers: { "content-type": "application/json", [RUN_ID_HEADER]: runId },
-    body: JSON.stringify({ transcript }),
+    body: JSON.stringify({ transcript, target }),
     signal,
   });
   const body = (await response.json().catch(() => null)) as
     | (TranslateResponse & { error?: string })
     | null;
-  if (!response.ok || body?.translation_en == null) {
+  if (!response.ok || body?.translation == null) {
     throw new VoiceApiError(body?.error ?? `Translation failed (${response.status}).`, body?.events ?? []);
   }
   return body;

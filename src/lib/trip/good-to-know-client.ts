@@ -2,8 +2,9 @@
 
 import { appendRunEvents } from "@/lib/agent-client/store";
 import type { RunEvent } from "@/lib/ai/events";
+import type { Lang } from "@/lib/i18n";
 
-export type GoodToKnowLine = { darija: string; fr: string; en: string };
+export type GoodToKnowLine = { darija: string; fr: string; en: string; ar?: string };
 export type GoodToKnowNotes = {
   timezone: GoodToKnowLine;
   plugs: GoodToKnowLine;
@@ -17,15 +18,16 @@ type Payload = { ok: true; notes: GoodToKnowNotes; events: RunEvent[] } | { ok: 
 
 const inflight = new Map<string, Promise<GoodToKnowNotes | null>>();
 
-function cacheKey(runId: string): string {
-  return `${CACHE}.${runId}`;
+/** Arabic notes are a separate call: the other languages share one. */
+function cacheKey(runId: string, lang: Lang): string {
+  return lang === "ar" ? `${CACHE}.${runId}.ar` : `${CACHE}.${runId}`;
 }
 
 type CachedNotes = { notes: GoodToKnowNotes; events?: RunEvent[] };
 
-function readCache(runId: string): CachedNotes | null {
+function readCache(key: string): CachedNotes | null {
   try {
-    const raw = sessionStorage.getItem(cacheKey(runId));
+    const raw = sessionStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as {
       timezone?: GoodToKnowLine;
@@ -54,16 +56,18 @@ export type GoodToKnowInput = {
   origin: string;
   month: string;
   script: "latn" | "arab";
+  lang: Lang;
 };
 
 /** One Spark call per run. A refresh reads the note back and does not pay again. */
 export function loadGoodToKnow(input: GoodToKnowInput): Promise<GoodToKnowNotes | null> {
-  const cached = readCache(input.runId);
+  const key = cacheKey(input.runId, input.lang);
+  const cached = readCache(key);
   if (cached) {
     if (cached.events?.length) appendRunEvents(cached.events);
     return Promise.resolve(cached.notes);
   }
-  const pending = inflight.get(input.runId);
+  const pending = inflight.get(key);
   if (pending) return pending;
 
   const job = (async () => {
@@ -78,16 +82,14 @@ export function loadGoodToKnow(input: GoodToKnowInput): Promise<GoodToKnowNotes 
           origin: input.origin,
           month: input.month,
           script: input.script,
+          lang: input.lang,
         }),
       });
       const payload = (await response.json()) as Payload;
       if (payload.events?.length) appendRunEvents(payload.events);
       if (!response.ok || !payload.ok) return null;
       try {
-        sessionStorage.setItem(
-          cacheKey(input.runId),
-          JSON.stringify({ notes: payload.notes, events: payload.events ?? [] }),
-        );
+        sessionStorage.setItem(key, JSON.stringify({ notes: payload.notes, events: payload.events ?? [] }));
       } catch {
         // The note still shows for this view.
       }
@@ -95,10 +97,10 @@ export function loadGoodToKnow(input: GoodToKnowInput): Promise<GoodToKnowNotes 
     } catch {
       return null;
     } finally {
-      inflight.delete(input.runId);
+      inflight.delete(key);
     }
   })();
 
-  inflight.set(input.runId, job);
+  inflight.set(key, job);
   return job;
 }

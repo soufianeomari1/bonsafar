@@ -11,6 +11,8 @@ import { flightDelta, packageTotals, passengerCount, totalStops } from "@/lib/pr
 import { wonderContext, WONDER_SYSTEM_PROMPT } from "./prompt";
 import {
   WonderOutputSchema,
+  WonderOutputSchemaAr,
+  wantsArabic,
   type AgentErrorCode,
   type AgentNotice,
   type AgentPackage,
@@ -33,11 +35,14 @@ export class AgentError extends Error {
   }
 }
 
-const WONDER_JSON_SCHEMA = (() => {
-  const schema = z.toJSONSchema(WonderOutputSchema) as Record<string, unknown>;
-  delete schema.$schema;
-  return schema;
-})();
+function jsonSchema(schema: z.ZodType): Record<string, unknown> {
+  const json = z.toJSONSchema(schema) as Record<string, unknown>;
+  delete json.$schema;
+  return json;
+}
+
+const WONDER_JSON_SCHEMA = jsonSchema(WonderOutputSchema);
+const WONDER_JSON_SCHEMA_AR = jsonSchema(WonderOutputSchemaAr);
 
 const WONDER_EFFORT = "minimal";
 
@@ -137,6 +142,7 @@ function scrubWhy(output: WonderOutput): WonderOutput {
       darija: scrubMoney(w.darija, "…"),
       fr: scrubMoney(w.fr, "…"),
       en: scrubMoney(w.en, "…"),
+      ...(w.ar ? { ar: scrubMoney(w.ar, "…") } : {}),
     })),
   };
 }
@@ -176,9 +182,11 @@ export async function runAgent({
 
   emit({ type: "step", step: "package", phase: "start", destination: destination.city });
 
+  const arabic = wantsArabic(lang);
+  const outputSchema: z.ZodType<WonderOutput> = arabic ? WonderOutputSchemaAr : WonderOutputSchema;
   const messages: ChatCompletionMessageParam[] = [
     { role: "system", content: WONDER_SYSTEM_PROMPT },
-    { role: "user", content: wonderContext(dated, profile, origin) },
+    { role: "user", content: wonderContext(dated, profile, origin, arabic) },
   ];
 
   let final: WonderOutput | null = null;
@@ -204,7 +212,7 @@ export async function runAgent({
         tool_choice: mustAnswer ? "none" : "auto",
         response_format: {
           type: "json_schema",
-          json_schema: { name: "BonSafarPackage", schema: WONDER_JSON_SCHEMA },
+          json_schema: { name: "BonSafarPackage", schema: arabic ? WONDER_JSON_SCHEMA_AR : WONDER_JSON_SCHEMA },
         },
         max_completion_tokens: 4000,
         prompt_cache_key: "bonsafar-agent",
@@ -237,7 +245,7 @@ export async function runAgent({
     let issues: string[];
     let candidate: WonderOutput | null = null;
     try {
-      const parsed = WonderOutputSchema.safeParse(JSON.parse(content));
+      const parsed = outputSchema.safeParse(JSON.parse(content));
       if (parsed.success) {
         const checked = review(parsed.data, ctx, store, log);
         candidate = checked.output;

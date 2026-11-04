@@ -1,11 +1,15 @@
 import { RunLog } from "@/lib/ai/events";
 import { TranslateRequestSchema, type TranslateResponse } from "@/lib/intent/schema";
-import { translateTranscript } from "@/lib/intent/translate";
+import { translateToArabic, translateToDarijaArab, translateTranscript } from "@/lib/intent/translate";
 import { RUN_ID_HEADER } from "@/lib/voice/protocol";
 
 export const maxDuration = 30;
 
-/** Transcript in, a short English gloss out (Muse Spark, minimal reasoning). */
+/**
+ * Text in, a short translation out (Muse Spark, minimal reasoning).
+ * target "en" (default): English gloss of a transcript. target "ar": Modern Standard Arabic.
+ * target "darija-arab": darija in Arabic letters.
+ */
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -19,10 +23,22 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
 
+  const { transcript, target } = parsed.data;
   const log = new RunLog(request.headers.get(RUN_ID_HEADER) ?? undefined);
   try {
-    const translation_en = await translateTranscript(parsed.data.transcript, log);
-    const response: TranslateResponse = { translation_en, run_id: log.runId, events: log.list() };
+    const translation =
+      target === "ar"
+        ? await translateToArabic(transcript, log)
+        : target === "darija-arab"
+          ? await translateToDarijaArab(transcript, log)
+          : await translateTranscript(transcript, log);
+    const response: TranslateResponse = {
+      target,
+      translation,
+      ...(target === "en" ? { translation_en: translation } : {}),
+      run_id: log.runId,
+      events: log.list(),
+    };
     return Response.json(response);
   } catch {
     return Response.json(

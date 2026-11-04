@@ -77,6 +77,19 @@ export function isDarija(lang: Lang): boolean {
   return lang === "darija-latn" || lang === "darija-arab";
 }
 
+/** A darija interface fixes the script the models write darija in. */
+export function scriptForLang(lang: Lang, fallback: DarijaScript): DarijaScript {
+  if (lang === "darija-arab") return "arab";
+  if (lang === "darija-latn") return "latn";
+  return fallback;
+}
+
+/** The profile as the servers should see it for this interface language. */
+export function profileForLang(profile: Profile, lang: Lang): Profile {
+  const darija_script = scriptForLang(lang, profile.darija_script);
+  return darija_script === profile.darija_script ? profile : { ...profile, darija_script };
+}
+
 /** Travellers implied by the profile; friends leave the count to the request. */
 export function profileTravellers(profile: Profile): {
   adults: number | null;

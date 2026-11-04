@@ -8,6 +8,7 @@ import { profileTravellers, type Profile } from "@/lib/profile/schema";
 import { applyLocks } from "./edits";
 import {
   IntentSchema,
+  QuestionSchemaAr,
   type Intent,
   type IntentEffort,
   type IntentLocks,
@@ -39,12 +40,18 @@ const LANG_NAMES: Record<Lang, string> = {
 
 /** Translation is a separate, parallel call. The model must not spend tokens on it. */
 const ModelIntentSchema = IntentSchema.omit({ translation_en: true });
+/** An Arabic interface also needs the question and its options in Modern Standard Arabic. */
+const ModelIntentSchemaAr = ModelIntentSchema.extend({ question: QuestionSchemaAr.nullable() });
+type ModelIntent = z.infer<typeof ModelIntentSchema>;
 
-const JSON_SCHEMA = (() => {
-  const schema = z.toJSONSchema(ModelIntentSchema) as Record<string, unknown>;
-  delete schema.$schema;
-  return schema;
-})();
+function jsonSchema(schema: z.ZodType): Record<string, unknown> {
+  const json = z.toJSONSchema(schema) as Record<string, unknown>;
+  delete json.$schema;
+  return json;
+}
+
+const JSON_SCHEMA = jsonSchema(ModelIntentSchema);
+const JSON_SCHEMA_AR = jsonSchema(ModelIntentSchemaAr);
 
 function today(): { iso: string; weekday: string } {
   const now = new Date();
@@ -100,7 +107,11 @@ Rules:
 6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). label: 1 to 3 words in the label language.
 7. keywords: EXACT substrings copied from the transcript (same spelling, accents and case) that carry each extracted fact, with the slot they fill. At most 2 per slot, most telling first.
 8. Do not translate the transcript and do not write an English gloss of it. Another call does that.
-9. question: null unless something indispensable is missing: the destination, or dates too vague to search. Then ask ONE short, friendly question about the most important gap, never about the departure city, travellers or papers. Set field to the gap you ask about: destination, dates, nights, travelers or budget. darija in the given script, plus French and English. Give 2 to 4 short answer options, each in darija, French and English. No amounts of money anywhere.`;
+9. question: null unless something indispensable is missing: the destination, or dates too vague to search. Then ask ONE short, friendly question about the most important gap, never about the departure city, travellers or papers. Set field to the gap you ask about: destination, dates, nights, travelers or budget. darija in the given script, plus French and English, and Modern Standard Arabic in "ar" (fusha, never darija) when the user message asks for it. Give 2 to 4 short answer options, each in the same languages. Each language is complete on its own, with no word of another language inside it. Latin digits only. No amounts of money anywhere.`;
+
+function arabicQuestion(lang: Lang, jury: boolean): boolean {
+  return lang === "ar" && !jury;
+}
 
 function contextBlock(profile: Profile, lang: Lang, jury: boolean): string {
   const { iso, weekday } = today();
@@ -110,6 +121,9 @@ function contextBlock(profile: Profile, lang: Lang, jury: boolean): string {
     `Today: ${weekday} ${iso} (Morocco time).`,
     `Traveller profile:\n${describeProfile(profile)}`,
     `Darija script: ${script}. Label language: ${jury ? "English" : LANG_NAMES[lang]}.`,
+    arabicQuestion(lang, jury)
+      ? `If you ask a question, also write it and its options in Modern Standard Arabic ("ar").`
+      : `If you ask a question, leave "ar" out.`,
   ].join("\n");
 }
 
@@ -231,6 +245,7 @@ function enforce(
         darija: scrubMoney(q.darija, "…"),
         fr: scrubMoney(q.fr, "…"),
         en: scrubMoney(q.en, "…"),
+        ...(q.ar ? { ar: scrubMoney(q.ar, "…") } : {}),
         options: q.options.filter(
           (option) => !collectStrings(option).some(containsMoney)
         ),
@@ -270,6 +285,8 @@ export async function understand({
   log: RunLog;
 }): Promise<Intent> {
   const env = serverEnv();
+  const arabic = arabicQuestion(lang, jury);
+  const modelSchema: z.ZodType<ModelIntent> = arabic ? ModelIntentSchemaAr : ModelIntentSchema;
   const userContent = [
     contextBlock(profile, lang, jury),
     `Transcript:\n${transcript}`,
@@ -304,14 +321,14 @@ export async function understand({
         messages,
         response_format: {
           type: "json_schema",
-          json_schema: { name: "TripIntent", schema: JSON_SCHEMA },
+          json_schema: { name: "TripIntent", schema: arabic ? JSON_SCHEMA_AR : JSON_SCHEMA },
         },
       },
     });
 
     let issue: string;
     try {
-      const parsed = ModelIntentSchema.safeParse(JSON.parse(content));
+      const parsed = modelSchema.safeParse(JSON.parse(content));
       if (parsed.success) {
         return enforce(
           { ...parsed.data, translation_en: "" },

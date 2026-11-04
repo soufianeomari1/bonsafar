@@ -16,7 +16,7 @@ import {
 } from "@/lib/prices/store";
 import { totalStops } from "@/lib/prices/totals";
 import { checkEntryRequirements } from "./entry";
-import type { AgentStep, AgentStreamEvent, EntryRequirements, StepPhase } from "./schema";
+import { wantsArabic, type AgentStep, type AgentStreamEvent, type EntryRequirements, type StepPhase } from "./schema";
 
 /**
  * Data tools for Muse Wonder. Searches for the requested city start as soon
@@ -362,6 +362,7 @@ export class AgentContext {
           departDate: this.intent.depart_date,
           nights: this.intent.nights,
           profile: this.profile,
+          arabic: wantsArabic(this.lang),
           log: this.log,
         });
         for (const k of keys) this.entryResults.set(k, entry);

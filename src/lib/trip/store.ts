@@ -11,6 +11,7 @@ import {
   type UserEdit,
 } from "@/lib/intent/edits";
 import type { Intent, QuestionField } from "@/lib/intent/schema";
+import { profileForLang } from "@/lib/profile/schema";
 import { readProfileState } from "@/lib/profile/store";
 import { fetchIntent, fetchTranslate, transcribeWav, VoiceApiError } from "@/lib/voice/client";
 import type { TranscribeFinal } from "@/lib/voice/protocol";
@@ -128,19 +129,20 @@ async function understandJob(id: number, unlock?: QuestionField) {
     current.intent?.translation_en
       ? null
       : fetchTranslate(current.transcript, current.runId, signal)
-          .then((response) => applyTranslation(id, response.translation_en, response.events))
+          .then((response) => applyTranslation(id, response.translation, response.events))
           .catch((error: unknown) => {
             if (signal.aborted) return;
             const events = error instanceof VoiceApiError ? error.events : [];
             if (events.length && job?.id === id) set({ events: [...job.events, ...events] }, id);
           });
 
+  const lang = readLang();
   try {
     const response = await fetchIntent(
       {
         transcript: current.transcript,
-        profile,
-        lang: readLang(),
+        profile: profileForLang(profile, lang),
+        lang,
         jury: readJury(),
         answers: current.answers,
         locked: current.intent ? locksFor(current.intent, requested) : undefined,

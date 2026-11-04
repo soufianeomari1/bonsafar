@@ -8,6 +8,7 @@ import {
   DEFAULT_PROFILE,
   PROFILE_COLUMNS,
   parseProfile,
+  profileForLang,
   type Prefs,
   type Profile,
 } from "./schema";
@@ -163,11 +164,12 @@ export function readServerProfileState(): ProfileState {
 
 export async function updateProfile(patch: ProfilePatch): Promise<void> {
   const current = state.profile;
-  const next = parseProfile({
+  const merged = parseProfile({
     ...current,
     ...patch,
     prefs: { ...current.prefs, ...patch.prefs },
   });
+  const next = patch.ui_lang ? profileForLang(merged, patch.ui_lang) : merged;
   setState({ ...state, profile: next });
 
   if (patch.ui_lang && !readJury()) writeLang(next.ui_lang);

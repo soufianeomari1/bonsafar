@@ -33,9 +33,27 @@ const Trilingual = z.object({
   darija: z.string().min(1).max(200),
   fr: z.string().min(1).max(200),
   en: z.string().min(1).max(200),
+  /** Modern Standard Arabic. Only asked for when the request has lang = "ar". */
+  ar: z.string().min(1).max(200).optional(),
 });
+const TrilingualAr = Trilingual.extend({ ar: z.string().min(1).max(200) });
 
 const IsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+/** The one follow-up question, with its quick answers. */
+export const QuestionSchema = z.object({
+  topic: z.enum(QUESTION_TOPICS),
+  /** The fact this question asks for. A hand edit of it dismisses the card. */
+  field: z.enum(QUESTION_FIELDS),
+  ...Trilingual.shape,
+  options: z.array(Trilingual).max(4),
+});
+
+/** What the model must return when the interface is in Arabic. */
+export const QuestionSchemaAr = QuestionSchema.extend({
+  ar: z.string().min(1).max(200),
+  options: z.array(TrilingualAr).max(4),
+});
 
 /** What Muse Spark must return. Mirrored as a JSON schema in response_format. */
 export const IntentSchema = z.object({
@@ -60,17 +78,7 @@ export const IntentSchema = z.object({
     .array(z.object({ text: z.string().min(1).max(60), slot: z.enum(KEYWORD_SLOTS) }))
     .max(10),
   translation_en: z.string().max(600),
-  question: z
-    .object({
-      topic: z.enum(QUESTION_TOPICS),
-      /** The fact this question asks for. A hand edit of it dismisses the card. */
-      field: z.enum(QUESTION_FIELDS),
-      darija: z.string().min(1).max(200),
-      fr: z.string().min(1).max(200),
-      en: z.string().min(1).max(200),
-      options: z.array(Trilingual).max(4),
-    })
-    .nullable(),
+  question: QuestionSchema.nullable(),
 });
 
 export type Intent = z.infer<typeof IntentSchema>;
@@ -127,15 +135,26 @@ export type IntentResponse = {
   events: RunEvent[];
 };
 
-/** English gloss of the transcript. Separate from the intent so the chips do not wait for it. */
+export const TRANSLATE_TARGETS = ["en", "ar", "darija-arab"] as const;
+export type TranslateTarget = (typeof TRANSLATE_TARGETS)[number];
+
+/**
+ * en: English gloss of the transcript, separate from the intent so the chips do not wait for it.
+ * ar: Modern Standard Arabic version of a model line, for replays recorded without one.
+ * darija-arab: darija in Arabic letters, for replays recorded with darija in Latin letters.
+ */
 export const TranslateRequestSchema = z.object({
   transcript: z.string().trim().min(1).max(2000),
+  target: z.enum(TRANSLATE_TARGETS).default("en"),
 });
 
 export type TranslateRequest = z.input<typeof TranslateRequestSchema>;
 
 export type TranslateResponse = {
-  translation_en: string;
+  target: TranslateTarget;
+  translation: string;
+  /** Kept for the English gloss: same value as translation. */
+  translation_en?: string;
   run_id: string;
   events: RunEvent[];
 };

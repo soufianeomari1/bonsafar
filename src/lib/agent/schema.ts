@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { RunEvent } from "@/lib/ai/events";
-import { LANGUAGES } from "@/lib/i18n";
+import { LANGUAGES, type Lang } from "@/lib/i18n";
 import { IntentSchema } from "@/lib/intent/schema";
 import { ProfileSchema } from "@/lib/profile/schema";
 import type { FxRate } from "@/lib/prices/money";
@@ -51,8 +51,18 @@ const Trilingual = z.object({
   darija: z.string().min(1).max(280),
   fr: z.string().min(1).max(280),
   en: z.string().min(1).max(280),
+  /** Modern Standard Arabic. Only asked for when the request has lang = "ar". */
+  ar: z.string().min(1).max(280).optional(),
 });
 export type TrilingualText = z.infer<typeof Trilingual>;
+
+/** The same text with the Arabic line required: the schema sent when lang = "ar". */
+const TrilingualAr = Trilingual.extend({ ar: z.string().min(1).max(280) });
+
+/** Arabic model text costs tokens: only an Arabic interface asks for it. */
+export function wantsArabic(lang: Lang): boolean {
+  return lang === "ar";
+}
 
 export const VISA_KINDS = ["none", "schengen", "evisa", "on_arrival", "consular", "unknown"] as const;
 
@@ -65,6 +75,7 @@ export const EntryModelSchema = z.object({
   passport_validity_days: z.number().int().min(0).max(3650).nullable(),
   notes: Trilingual,
 });
+export const EntryModelSchemaAr = EntryModelSchema.extend({ notes: TrilingualAr });
 
 export type EntryRequirements = z.infer<typeof EntryModelSchema> & {
   country: string;
@@ -115,6 +126,7 @@ export const WonderOutputSchema = z.object({
     .max(6),
 });
 export type WonderOutput = z.infer<typeof WonderOutputSchema>;
+export const WonderOutputSchemaAr = WonderOutputSchema.extend({ why: z.array(TrilingualAr).length(3) });
 
 /** Codes the interface translates; the engine never ships display text. */
 export type AgentStatus = "ok" | "visa_alternative" | "visa_needed_no_alternative";

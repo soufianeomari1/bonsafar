@@ -6,6 +6,7 @@ import { readJury, readLang } from "@/lib/i18n/store";
 import type { Intent } from "@/lib/intent/schema";
 import type { FxRate } from "@/lib/prices/money";
 import type { Offer } from "@/lib/prices/store";
+import { profileForLang } from "@/lib/profile/schema";
 import { readProfileState } from "@/lib/profile/store";
 import { readTrip } from "@/lib/trip/store";
 import { parseStreamEvent } from "./parse";
@@ -376,9 +377,10 @@ export function ensureAgentRun() {
   const trip = readTrip();
   if (!trip?.intent || trip.phase !== "ready") return;
   const { profile } = readProfileState();
+  const lang = readLang();
   const scenario = scenarioFor(trip.intent);
   startAgentRun(
-    { intent: trip.intent, profile, lang: readLang(), jury: readJury(), scenario },
+    { intent: trip.intent, profile: profileForLang(profile, lang), lang, jury: readJury(), scenario },
     scenario,
   );
 }

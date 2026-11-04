@@ -2,7 +2,11 @@
 // server and prints total time, total measured cost and the recommended
 // package. With --replay, streams the latest saved run instead and checks it
 // is the same event sequence as the live run, every event marked replay.
-// Usage: npm run agent:check -- [http://localhost:3001] [istanbul] [--replay paris]
+// By default it also runs one live Arabic run (lang "ar", not saved as a demo
+// scenario) and checks every "ar" line is filled: why, entry notes, plus
+// /api/good-to-know, /api/translate (targets ar and darija-arab) and the
+// /api/intent question.
+// Usage: npm run agent:check -- [http://localhost:3001] [istanbul] [--replay paris] [--ar istanbul] [--no-ar]
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -10,15 +14,23 @@ import { FATIMA, SCENARIOS } from "../src/lib/agent/scenarios.ts";
 
 const args = process.argv.slice(2);
 const urlArg = args.find((a) => /^https?:\/\//.test(a));
-const replays = args.flatMap((a, i) => (args[i - 1] === "--replay" && a in SCENARIOS ? [a] : []));
-const live = args.filter((a, i) => a in SCENARIOS && args[i - 1] !== "--replay");
+const flagged = (flag) => args.flatMap((a, i) => (args[i - 1] === flag && a in SCENARIOS ? [a] : []));
+const replays = flagged("--replay");
+const arabicRuns = flagged("--ar");
+const live = args.filter((a, i) => a in SCENARIOS && args[i - 1] !== "--replay" && args[i - 1] !== "--ar");
+const onlyFlagged = !live.length && (replays.length || arabicRuns.length);
 const jobs = [
-  ...(live.length || !replays.length ? (live.length ? live : Object.keys(SCENARIOS)) : []).map((name) => ({
+  ...(onlyFlagged ? [] : live.length ? live : Object.keys(SCENARIOS)).map((name) => ({
     name,
     replay: false,
+    arabic: false,
   })),
-  ...replays.map((name) => ({ name, replay: true })),
+  ...replays.map((name) => ({ name, replay: true, arabic: false })),
+  ...(arabicRuns.length ? arabicRuns : args.includes("--no-ar") || replays.length ? [] : ["istanbul"]).map(
+    (name) => ({ name, replay: false, arabic: true }),
+  ),
 ];
+const FATIMA_AR = { ...FATIMA, ui_lang: "ar" };
 
 const REQUIRED_TYPES = ["run", "step", "log", "offers", "result", "saved", "end"];
 const REPLAY_MAX_S = 12;
@@ -46,7 +58,81 @@ const mad = (n) => `${new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).
 const dh = (n) => `${new Intl.NumberFormat("en").format(n)} DH`;
 const usd = (n) => `$${n.toFixed(4)}`;
 
-async function run(base, name, replay) {
+const filled = (value) => typeof value === "string" && value.trim().length > 0;
+const ARABIC_LETTERS = /[\u0600-\u06FF]/;
+const arabicProblem = (label, value) =>
+  !filled(value) ? `${label}: ar is empty` : !ARABIC_LETTERS.test(value) ? `${label}: ar has no Arabic letters` : null;
+
+/** Checks the "ar" lines of an Arabic run and of the Arabic side calls. */
+async function checkArabic(base, result) {
+  const problems = [];
+  result.why.forEach((w, i) => problems.push(arabicProblem(`why[${i}]`, w.ar)));
+  for (const [label, entry] of [
+    ["requested entry notes", result.requested.entry],
+    ["entry notes", result.entry],
+  ]) {
+    if (entry) problems.push(arabicProblem(label, entry.notes.ar));
+  }
+  console.log(`  why (ar): ${result.why.map((w) => w.ar ?? "∅").join(" | ")}`);
+  if (result.entry?.notes.ar) console.log(`  entry notes (ar): ${result.entry.notes.ar}`);
+
+  const post = async (path, body) => {
+    const response = await fetch(`${base}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return { status: response.status, body: await response.json().catch(() => null) };
+  };
+
+  const good = await post("/api/good-to-know", {
+    city: result.destination.city,
+    country: result.destination.country,
+    origin: "Casablanca",
+    month: "December 2026",
+    script: "latn",
+    lang: "ar",
+  });
+  if (good.status !== 200 || !good.body?.notes) problems.push(`good-to-know: HTTP ${good.status}`);
+  else {
+    for (const [key, line] of Object.entries(good.body.notes)) problems.push(arabicProblem(`good-to-know ${key}`, line.ar));
+    console.log(`  good to know (ar): ${Object.values(good.body.notes).map((l) => l.ar ?? "∅").join(" | ")}`);
+  }
+
+  const source = result.why[0]?.en ?? "Direct flight, and breakfast is included.";
+  const translated = await post("/api/translate", { transcript: source, target: "ar" });
+  if (translated.status !== 200) problems.push(`translate ar: HTTP ${translated.status}`);
+  else {
+    problems.push(arabicProblem("translate ar", translated.body?.translation));
+    if (translated.body?.target !== "ar") problems.push("translate ar: target is not ar");
+    console.log(`  translate (ar): ${translated.body?.translation}`);
+  }
+  const darija = await post("/api/translate", { transcript: source, target: "darija-arab" });
+  if (darija.status !== 200) problems.push(`translate darija-arab: HTTP ${darija.status}`);
+  else {
+    problems.push(arabicProblem("translate darija-arab", darija.body?.translation));
+    console.log(`  translate (darija-arab): ${darija.body?.translation}`);
+  }
+
+  const intent = await post("/api/intent", {
+    transcript: "Bghit nsafer f sif m3a rajli",
+    profile: FATIMA_AR,
+    lang: "ar",
+    jury: false,
+  });
+  const question = intent.body?.intent?.question;
+  if (intent.status !== 200) problems.push(`intent ar: HTTP ${intent.status}`);
+  else if (!question) console.log("  intent (ar): no question asked, nothing to check");
+  else {
+    problems.push(arabicProblem("intent question", question.ar));
+    question.options.forEach((o, i) => problems.push(arabicProblem(`intent option[${i}]`, o.ar)));
+    console.log(`  intent question (ar): ${question.ar} [${question.options.map((o) => o.ar).join(" / ")}]`);
+  }
+
+  return problems.filter(Boolean);
+}
+
+async function run(base, name, replay, arabic) {
   const started = performance.now();
   const response = await fetch(`${base}/api/agent`, {
     method: "POST",
@@ -54,7 +140,9 @@ async function run(base, name, replay) {
     body: JSON.stringify(
       replay
         ? { replay: true, scenario: name }
-        : { intent: SCENARIOS[name], profile: FATIMA, lang: "en", jury: true, scenario: name },
+        : arabic
+          ? { intent: SCENARIOS[name], profile: FATIMA_AR, lang: "ar", jury: false, scenario: null }
+          : { intent: SCENARIOS[name], profile: FATIMA, lang: "en", jury: true, scenario: name },
     ),
   });
   if (!response.ok || !response.body) throw new Error(`${name}: HTTP ${response.status}`);
@@ -97,7 +185,7 @@ async function run(base, name, replay) {
 
   const wallSeconds = (performance.now() - started) / 1000;
   const seconds = ((end?.total_ms ?? performance.now() - started) / 1000).toFixed(1);
-  const label = `${name.toUpperCase()}${replay ? " (REPLAY)" : ""}`;
+  const label = `${name.toUpperCase()}${replay ? " (REPLAY)" : ""}${arabic ? " (AR)" : ""}`;
   console.log(`\n${label}: ${seconds} s, cost ${usd(end?.cost_usd ?? 0)}, saved: ${saved}`);
   if (replay && end?.recorded) {
     console.log(`  recorded live run: ${(end.recorded.total_ms / 1000).toFixed(1)} s, ${usd(end.recorded.cost_usd)}`);
@@ -125,7 +213,7 @@ async function run(base, name, replay) {
       if (liveTypes !== [...types].sort().join(",")) replayProblems.push("event types differ from the last live run");
       else console.log(`  replay check: same event types as the last live run (a different run, ${recorded.run_id})`);
     }
-  } else if (result && saved) {
+  } else if (result && saved && !arabic) {
     mkdirSync(sequenceDir, { recursive: true });
     writeFileSync(sequenceFile(name), JSON.stringify({ run_id: runEvent?.run_id, sequence }));
   }
@@ -198,6 +286,14 @@ async function run(base, name, replay) {
     return { ok: false, ms: end?.total_ms ?? 0, cost: end?.cost_usd ?? 0 };
   }
   console.log(`  rounding check: ${options.length}/3 options, total_display_mad = sum of displayed lines`);
+  if (arabic) {
+    const problems = await checkArabic(base, result);
+    if (problems.length) {
+      console.log(`  ARABIC CHECK FAILED:\n    ${problems.join("\n    ")}`);
+      return { ok: false, ms: end?.total_ms ?? 0, cost: end?.cost_usd ?? 0 };
+    }
+    console.log("  arabic check: every ar line is filled with Arabic text");
+  }
   return { ok: true, ms: end?.total_ms ?? 0, cost: end?.cost_usd ?? 0 };
 }
 
@@ -205,8 +301,8 @@ const base = await pickBase();
 console.log(`Agent check against ${base}\n`);
 const results = [];
 for (const job of jobs) {
-  console.log(`> ${job.name}${job.replay ? " (replay)" : ""}`);
-  results.push(await run(base, job.name, job.replay));
+  console.log(`> ${job.name}${job.replay ? " (replay)" : ""}${job.arabic ? " (lang ar)" : ""}`);
+  results.push(await run(base, job.name, job.replay, job.arabic));
   console.log("");
 }
 const totalMs = results.reduce((s, r) => s + r.ms, 0);

@@ -8,7 +8,10 @@ const Line = z.object({
   darija: z.string().trim().min(1).max(180),
   fr: z.string().trim().min(1).max(180),
   en: z.string().trim().min(1).max(180),
+  /** Modern Standard Arabic, only asked for when the interface is in Arabic. */
+  ar: z.string().trim().min(1).max(180).optional(),
 });
+const LineAr = Line.extend({ ar: z.string().trim().min(1).max(180) });
 
 /** Four short notes. No amount of money is valid here. */
 export const GoodToKnowSchema = z.object({
@@ -17,16 +20,20 @@ export const GoodToKnowSchema = z.object({
   currency: Line,
   weather: Line,
 });
+const GoodToKnowSchemaAr = z.object({ timezone: LineAr, plugs: LineAr, currency: LineAr, weather: LineAr });
 
 export type GoodToKnow = z.infer<typeof GoodToKnowSchema>;
 
-const JSON_SCHEMA = (() => {
-  const schema = z.toJSONSchema(GoodToKnowSchema) as Record<string, unknown>;
-  delete schema.$schema;
-  return schema;
-})();
+function jsonSchema(schema: z.ZodType): Record<string, unknown> {
+  const json = z.toJSONSchema(schema) as Record<string, unknown>;
+  delete json.$schema;
+  return json;
+}
 
-const SYSTEM = `You write four short practical notes for a Moroccan traveller about to fly. Each note is one sentence, in Moroccan darija, French and English.
+const JSON_SCHEMA = jsonSchema(GoodToKnowSchema);
+const JSON_SCHEMA_AR = jsonSchema(GoodToKnowSchemaAr);
+
+const SYSTEM = `You write four short practical notes for a Moroccan traveller about to fly. Each note is one sentence, in Moroccan darija, French and English. When the request asks for Arabic, also fill "ar" in Modern Standard Arabic (fusha, never darija). Each language is complete on its own, with no word of another language inside it. Write numbers with Latin digits.
 
 Fields, in order of usefulness:
 - timezone: the time difference between Morocco and the destination.
@@ -43,6 +50,8 @@ export type GoodToKnowRequest = {
   /** "December 2026", already formatted by code. */
   month: string;
   script: "latn" | "arab";
+  /** Adds the Modern Standard Arabic line. */
+  arabic: boolean;
   runId?: string;
 };
 
@@ -52,6 +61,7 @@ function cleaned(value: GoodToKnow): GoodToKnow {
     darija: scrub(item.darija),
     fr: scrub(item.fr),
     en: scrub(item.en),
+    ...(item.ar ? { ar: scrub(item.ar) } : {}),
   });
   return GoodToKnowSchema.parse({
     timezone: line(value.timezone),
@@ -74,7 +84,9 @@ export async function fetchGoodToKnow(request: GoodToKnowRequest, log: RunLog): 
     `Traveller leaves from: ${request.origin}, Morocco.`,
     `Travel month: ${request.month}.`,
     `Darija script: ${script}.`,
+    request.arabic ? `Also write every note in Modern Standard Arabic ("ar").` : `Leave "ar" out.`,
   ].join("\n");
+  const schema: z.ZodType<GoodToKnow> = request.arabic ? GoodToKnowSchemaAr : GoodToKnowSchema;
 
   const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
     { role: "system", content: SYSTEM },
@@ -96,14 +108,14 @@ export async function fetchGoodToKnow(request: GoodToKnowRequest, log: RunLog): 
         messages,
         response_format: {
           type: "json_schema",
-          json_schema: { name: "GoodToKnow", schema: JSON_SCHEMA },
+          json_schema: { name: "GoodToKnow", schema: request.arabic ? JSON_SCHEMA_AR : JSON_SCHEMA },
         },
       },
     });
     last = content;
     let parsed: GoodToKnow | null = null;
     try {
-      const json = GoodToKnowSchema.safeParse(JSON.parse(content));
+      const json = schema.safeParse(JSON.parse(content));
       if (json.success) parsed = json.data;
     } catch {
       parsed = null;

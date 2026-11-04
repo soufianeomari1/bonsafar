@@ -113,9 +113,9 @@ export default function VoiceBenchPage() {
     let glossText = "";
     const gloss = fetchTranslate(transcript, runId)
       .then((response) => {
-        glossText = response.translation_en;
+        glossText = response.translation;
         setIntent((current) =>
-          current ? { ...current, translation_en: response.translation_en } : current,
+          current ? { ...current, translation_en: response.translation } : current,
         );
         setEvents((current) => [...current, ...response.events]);
       })

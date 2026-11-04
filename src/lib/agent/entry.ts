@@ -5,13 +5,16 @@ import type { RunLog } from "@/lib/ai/events";
 import { callResponses } from "@/lib/ai/responses";
 import { guardModelText, scrubMoney } from "@/lib/prices/guardrail";
 import type { Profile } from "@/lib/profile/schema";
-import { EntryModelSchema, type EntryRequirements } from "./schema";
+import { EntryModelSchema, EntryModelSchemaAr, type EntryRequirements } from "./schema";
 
-const JSON_SCHEMA = (() => {
-  const schema = z.toJSONSchema(EntryModelSchema) as Record<string, unknown>;
-  delete schema.$schema;
-  return schema;
-})();
+function jsonSchema(schema: z.ZodType): Record<string, unknown> {
+  const json = z.toJSONSchema(schema) as Record<string, unknown>;
+  delete json.$schema;
+  return json;
+}
+
+const JSON_SCHEMA = jsonSchema(EntryModelSchema);
+const JSON_SCHEMA_AR = jsonSchema(EntryModelSchemaAr);
 
 const PASSPORTS: Record<NonNullable<Profile["passport_country"]>, string> = {
   ma: "Moroccan ordinary passport",
@@ -28,7 +31,7 @@ Rules:
 - visa_kind: none, schengen, evisa, on_arrival, consular or unknown.
 - max_stay_days: the visa-free (or visa) tourist stay limit in days, null if unclear.
 - passport_validity_days: how many days the passport must remain valid counted from the arrival date (e.g. 150 when it must be valid 60 days beyond a 90-day stay; 90 for "3 months after the planned departure" from a short trip, rounded to the rule), null if unclear.
-- notes: one or two short sentences on what to prepare, in Moroccan darija (in the given script), French and English. Never write a fee, a price or any amount of money: no digits next to a currency.`;
+- notes: one or two short sentences on what to prepare, in Moroccan darija (in the given script), French and English. When the request asks for Arabic, also fill "ar" in Modern Standard Arabic (fusha, never darija), with Latin digits. Each language is complete on its own, with no word of another language inside it. Never write a fee, a price or any amount of money: no digits next to a currency.`;
 
 function sourceDate(iso: string): string {
   return iso.slice(0, 10);
@@ -248,6 +251,7 @@ export async function checkEntryRequirements({
   departDate,
   nights,
   profile,
+  arabic,
   log,
 }: {
   country: string;
@@ -256,6 +260,8 @@ export async function checkEntryRequirements({
   departDate: string | null;
   nights: number | null;
   profile: Profile;
+  /** Adds the Modern Standard Arabic line to the notes. */
+  arabic: boolean;
   log: RunLog;
 }): Promise<EntryRequirements> {
   const env = serverEnv();
@@ -272,6 +278,7 @@ export async function checkEntryRequirements({
       ? `Official sites to search first: ${official.sites.join(", ")}. Look for the page on: ${official.topic}, for a ${passport}.`
       : `Search the official government site of ${country} about its visa rules for a ${passport}.`,
     `Darija script: ${script}.`,
+    arabic ? `Also write the notes in Modern Standard Arabic ("ar").` : `Leave "ar" out of the notes.`,
   ].join("\n");
 
   const { response, finalText } = await callResponses({
@@ -286,21 +293,26 @@ export async function checkEntryRequirements({
       input,
       tools: [{ type: "web_search", search_context_size: "low" }],
       include: ["web_search_call.results"],
-      text: { format: { type: "json_schema", name: "EntryRequirements", schema: JSON_SCHEMA } },
+      text: {
+        format: { type: "json_schema", name: "EntryRequirements", schema: arabic ? JSON_SCHEMA_AR : JSON_SCHEMA },
+      },
       max_output_tokens: 3000,
     },
   });
 
-  const parsed = EntryModelSchema.safeParse(parseJson(finalText));
+  const schema: z.ZodType<z.infer<typeof EntryModelSchema>> = arabic ? EntryModelSchemaAr : EntryModelSchema;
+  const parsed = schema.safeParse(parseJson(finalText));
   if (!parsed.success) throw new Error("Entry requirements did not match the schema.");
 
   const result = parsed.data;
   const verdict = guardModelText(result.notes, log, "entry notes");
   if (!verdict.passed) {
+    const { ar } = result.notes;
     result.notes = {
       darija: scrubMoney(result.notes.darija, "…"),
       fr: scrubMoney(result.notes.fr, "…"),
       en: scrubMoney(result.notes.en, "…"),
+      ...(ar ? { ar: scrubMoney(ar, "…") } : {}),
     };
   }
 
