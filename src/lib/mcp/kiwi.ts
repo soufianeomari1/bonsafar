@@ -207,6 +207,7 @@ export async function searchFlights(params: FlightSearchParams, log: RunLog): Pr
     currency: "EUR",
     locale: params.locale,
     sort: "price",
+    max_sector_stopovers: 1,
   };
   if (params.return_date) args.returnDate = kiwiDate(params.return_date);
 

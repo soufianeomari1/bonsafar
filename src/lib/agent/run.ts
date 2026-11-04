@@ -4,9 +4,10 @@ import { serverEnv } from "@/lib/env";
 import { callChat } from "@/lib/ai/call";
 import type { RunLog } from "@/lib/ai/events";
 import { findPlace } from "@/lib/mcp/places";
+import { applyFlightRule } from "@/lib/prices/flight-rule";
 import { guardModelText, scrubMoney } from "@/lib/prices/guardrail";
 import { eurMadRate } from "@/lib/prices/money";
-import { PriceStore, type Offer } from "@/lib/prices/store";
+import { PriceStore, type FlightOffer, type Offer } from "@/lib/prices/store";
 import { flightDelta, packageTotals, passengerCount, totalStops } from "@/lib/prices/totals";
 import { wonderContext, WONDER_SYSTEM_PROMPT } from "./prompt";
 import {
@@ -72,13 +73,33 @@ const VISA_ISSUE = "needs a visa this traveller does not have";
 function review(raw: WonderOutput, ctx: AgentContext, store: PriceStore, log: RunLog): Review {
   const issues: string[] = [];
   const output: WonderOutput = structuredClone(raw);
-  const flight = store.flight(output.recommended.flight_id);
+  let flight = store.flight(output.recommended.flight_id);
   const hotel = store.hotel(output.recommended.hotel_id);
 
   if (!flight) issues.push(`recommended.flight_id ${output.recommended.flight_id} is not a flight offer id.`);
   if (!hotel) issues.push(`recommended.hotel_id ${output.recommended.hotel_id} is not a hotel offer id.`);
   if (flight && hotel && cityKey(flight.destination) !== cityKey(hotel.destination)) {
     issues.push("The recommended flight and hotel are not in the same city.");
+  }
+
+  if (flight) {
+    const chosen = flight;
+    const sameCity = store.list().filter(
+      (offer): offer is FlightOffer =>
+        offer.kind === "flight" && cityKey(offer.destination) === cityKey(chosen.destination),
+    );
+    const decision = applyFlightRule(chosen.id, sameCity);
+    if (decision.changed) {
+      output.recommended.flight_id = decision.flightId;
+      flight = store.flight(decision.flightId) ?? flight;
+      log.add({
+        step: "flight_rule",
+        model: "code",
+        latency_ms: 0,
+        status: "ok",
+        note: decision.note,
+      });
+    }
   }
 
   if (flight) {
