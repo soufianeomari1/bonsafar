@@ -169,6 +169,59 @@ export function formatWhen(iso: string, lang: Lang): string {
   }).format(date);
 }
 
+/**
+ * IATA designator taken from a flight number already stored on the offer.
+ * Two letters or digits, then the numeric part: "AT972" → "AT", "W45018" → "W4", "3O457" → "3O".
+ */
+const FLIGHT_NUMBER = /^([A-Z0-9]{2})\d+$/;
+
+export function airlineCodeFromFlight(flightNumber: string): string | null {
+  const compact = flightNumber.trim().toUpperCase().replace(/[\s-]+/g, "");
+  return FLIGHT_NUMBER.exec(compact)?.[1] ?? null;
+}
+
+export type AirlineMark = {
+  /** Null when the flight number does not yield a code: show `name` as text. */
+  code: string | null;
+  /** Carrier name when it lines up with the code; otherwise null. */
+  name: string | null;
+};
+
+/**
+ * One mark per airline, in flight order. Names from `carriers` are attached
+ * only when each unique code has exactly one name, so a replay never invents
+ * initials from "Royal Air Maroc".
+ */
+export function airlineMarks(flights: string[], carriers: string[]): AirlineMark[] {
+  const names = carriers.map((name) => name.trim()).filter(Boolean);
+  const codes: string[] = [];
+  const seen = new Set<string>();
+  let failed = 0;
+  for (const flight of flights) {
+    if (!flight.trim()) continue;
+    const code = airlineCodeFromFlight(flight);
+    if (!code) {
+      failed += 1;
+      continue;
+    }
+    if (seen.has(code)) continue;
+    seen.add(code);
+    codes.push(code);
+  }
+  if (codes.length === 0) return names.map((name) => ({ code: null, name }));
+  if (failed === 0 && codes.length === names.length) {
+    return codes.map((code, index) => ({ code, name: names[index] ?? null }));
+  }
+  const marks: AirlineMark[] = codes.map((code) => ({ code, name: null }));
+  if (failed > 0) marks.push(...names.map((name) => ({ code: null, name })));
+  return marks;
+}
+
+/** "AT972 + PC1102", the flight numbers as Kiwi.com returned them. */
+export function formatFlightNumbers(flights: string[]): string {
+  return flights.map((flight) => flight.trim()).filter(Boolean).join(" + ");
+}
+
 /** Whole days from today in Morocco until an ISO departure date. */
 export function daysUntil(iso: string): number {
   const today = new Intl.DateTimeFormat("en-CA", {

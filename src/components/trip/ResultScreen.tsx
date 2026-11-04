@@ -12,6 +12,7 @@ import type { TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import type { FlightOffer } from "@/lib/prices/store";
 import { cn } from "@/lib/utils";
+import { AirlineMarks } from "./AirlineMark";
 import { PriceFact } from "./PriceFact";
 import { RouteMap } from "./RouteMap";
 
@@ -126,7 +127,6 @@ function OfferRow({ row, first, reduced }: { row: Row; first: boolean; reduced: 
   const tag = TAG[row.label ?? "recommended"];
   const nights = row.totals.hotel.nights;
   const out = flight?.attrs.outbound;
-  const carriers = out?.carriers.join(" + ") ?? "";
   const hotelName = hotel?.kind === "hotel" ? hotel.attrs.name : "";
 
   return (
@@ -153,7 +153,7 @@ function OfferRow({ row, first, reduced }: { row: Row; first: boolean; reduced: 
             <span className={cn("whitespace-nowrap rounded-[5px] px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-[0.04em]", tag.className)}>
               {t(tag.key)}
             </span>
-            <span className="truncate text-xs text-muted">{carriers}</span>
+            {out && <AirlineMarks flights={out.flights} carriers={out.carriers} />}
           </span>
           <span className="truncate text-base font-bold">{hotelName}</span>
           {out && (

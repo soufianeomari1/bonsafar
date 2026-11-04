@@ -29,6 +29,7 @@ import type { TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { useTrip } from "@/lib/trip/useTrip";
 import { cn } from "@/lib/utils";
+import { AirlineMarks } from "./AirlineMark";
 import { PriceFact } from "./PriceFact";
 
 const COPY: Record<AgentStep, { dj: TranslationKey; fr: TranslationKey; en: TranslationKey }> = {
@@ -63,14 +64,6 @@ const VISA_KEY: Record<string, TranslationKey> = {
 };
 
 let sentRunId: string | null = null;
-
-function initials(carriers: string[]): string {
-  const name = carriers[0] ?? "";
-  const parts = name.split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-  const letters = name.replace(/[^A-Za-z]/g, "");
-  return (letters.slice(0, 2) || "—").toUpperCase();
-}
 
 function doneSignature(legs: Leg[]): string {
   return legs.map((leg) => AGENT_STEPS.map((step) => leg.steps[step].phase).join("")).join("|");
@@ -333,24 +326,29 @@ function FlightRows({ data, lang }: { data: unknown; lang: Parameters<typeof Pri
     <ul className="mt-2.5 flex flex-col gap-1.5">
       {rows.map((row, index) => {
         const offer = run.offers[row.id];
+        const outbound = offer?.kind === "flight" ? offer.attrs.outbound : null;
         return (
           <motion.li
             key={row.id}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.12, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-bg px-2.5 py-1"
+            className="flex items-center gap-2 rounded-xl bg-bg px-2.5 py-1"
           >
-            <span className="rounded-[5px] bg-yellow px-1.5 py-0.5 font-mono text-[11px] font-semibold" title={row.carriers.join(" + ")}>
-              <bdi>{initials(row.carriers)}</bdi>
-            </span>
-            <span className="whitespace-nowrap text-sm font-bold tabular-nums text-green">
-              <bdi>
-                {formatTime(row.departure)} → {formatTime(row.arrival)}
-              </bdi>
-            </span>
-            <span className="whitespace-nowrap text-end text-xs text-muted">
-              {row.stops <= 0 ? t("plan.direct") : row.stops === 1 ? t("plan.stops.one") : t("plan.stops.other", { count: row.stops })}
+            <AirlineMarks
+              flights={outbound?.flights ?? []}
+              carriers={outbound?.carriers ?? row.carriers}
+              className="shrink-0 flex-col items-start"
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-bold tabular-nums text-green">
+                <bdi>
+                  {formatTime(row.departure)} → {formatTime(row.arrival)}
+                </bdi>
+              </span>
+              <span className="block truncate text-xs text-muted">
+                {row.stops <= 0 ? t("plan.direct") : row.stops === 1 ? t("plan.stops.one") : t("plan.stops.other", { count: row.stops })}
+              </span>
             </span>
             <PriceFact
               amount={offer?.price_mad_display ?? row.price_mad_display}

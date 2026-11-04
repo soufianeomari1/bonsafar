@@ -10,7 +10,7 @@ import { useAgentRun } from "@/lib/agent-client/context";
 import { packageOptionId, withTripSearch } from "@/lib/agent-client/store";
 import type { AgentNotice, PackageOption, TrilingualText } from "@/lib/agent/schema";
 import { airportCity } from "@/lib/airports";
-import { daysUntil, formatDuration, formatEur, formatMad, formatMadNumber, formatMonth, formatTime, formatTripDate, formatWhen } from "@/lib/format";
+import { daysUntil, formatDuration, formatEur, formatFlightNumbers, formatMad, formatMadNumber, formatMonth, formatTime, formatTripDate, formatWhen } from "@/lib/format";
 import type { TranslationKey } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -18,6 +18,7 @@ import { useProfile } from "@/lib/profile/useProfile";
 import type { FlightDelta } from "@/lib/prices/totals";
 import type { FlightOffer, HotelOffer, Offer, TrendOffer } from "@/lib/prices/store";
 import { cn } from "@/lib/utils";
+import { AirlineMarks } from "./AirlineMark";
 import { PriceFact } from "./PriceFact";
 import { RouteMap } from "./RouteMap";
 
@@ -116,7 +117,9 @@ export function PackageScreen({ dotationMad }: { dotationMad: number }) {
           <motion.div layoutId={reduced ? undefined : id}>
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">
               <bdi>
-                {out ? `${out.flights.join(" + ")} · ${depart ? formatTripDate(depart, lang) : ""}` : result.destination.city}
+                {out
+                  ? [formatFlightNumbers(out.flights), depart ? formatTripDate(depart, lang) : ""].filter(Boolean).join(" · ")
+                  : result.destination.city}
               </bdi>
             </p>
             <h1 className="mt-1 text-[26px] font-extrabold tracking-[-0.02em]">
@@ -139,6 +142,7 @@ export function PackageScreen({ dotationMad }: { dotationMad: number }) {
 
           {out && (
             <div className="rounded-card bg-card px-4 py-3.5 shadow-soft">
+              <AirlineMarks flights={out.flights} carriers={out.carriers} className="mb-2" />
               <div className="flex items-end justify-between">
                 <TimeBlock time={formatTime(out.departure)} code={out.from} />
                 <div className="flex flex-col items-center gap-1 pb-1.5">
@@ -157,8 +161,9 @@ export function PackageScreen({ dotationMad }: { dotationMad: number }) {
           )}
 
           {back && (
-            <p className="text-sm text-muted">
-              <span className="font-semibold text-ink">{t("package.return")}</span>{" "}
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+              <span className="font-semibold text-ink">{t("package.return")}</span>
+              <AirlineMarks flights={back.flights} carriers={back.carriers} />
               <bdi>
                 {formatTripDate(back.departure.slice(0, 10), lang)} · {formatTime(back.departure)} → {formatTime(back.arrival)} ·{" "}
                 {back.stops <= 0 ? t("plan.direct") : t("plan.stops.other", { count: back.stops })} · {formatDuration(back.duration_min)}
