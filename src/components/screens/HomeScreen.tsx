@@ -9,6 +9,7 @@ import { JuryPill, Wordmark } from "@/components/bs/Brand";
 import { Composer, ComposerDock } from "@/components/bs/Composer";
 import { Clouds } from "@/components/bs/Clouds";
 import { Safar, type SafarState } from "@/components/bs/Safar";
+import { Avatar } from "@/components/profile/GoogleAvatar";
 import { TrustSheet } from "@/components/screens/TrustSheet";
 import { VocalScreen } from "@/components/screens/VocalScreen";
 import { micHoldStyle, useVoiceCapture, type CaptureError } from "@/components/voice/useVoiceCapture";
@@ -33,7 +34,7 @@ const ERROR_KEYS: Record<CaptureError, TranslationKey> = {
 export function HomeScreen() {
   const { t, lang, jury } = useLanguage();
   const router = useRouter();
-  const { ready, profile } = useProfile();
+  const { ready, profile, user } = useProfile();
   const juryArabic = profile.darija_script === "arab";
   const [trustSeen, setTrustSeen] = useLocalFlag(TRUST_KEY);
   const [text, setText] = useState("");
@@ -87,11 +88,15 @@ export function HomeScreen() {
           <div className="flex shrink-0 items-center gap-2">
             <JuryPill dot label={t("common.juryMode")} className="h-9 border border-line px-3.5 text-[13px]" />
             <Link
-              href="/profile"
-              aria-label={t("profile.open")}
-              className="flex size-10 items-center justify-center rounded-pill border border-line bg-card text-[15px] font-bold text-ink"
+              href="/account"
+              aria-label={t("account.open")}
+              className="flex size-10 items-center justify-center overflow-hidden rounded-pill border border-line bg-card text-[15px] font-bold text-ink"
             >
-              {initial || <UserCircle size={22} weight="light" aria-hidden />}
+              {user?.avatar ? (
+                <Avatar size={40} />
+              ) : (
+                initial || <UserCircle size={22} weight="light" aria-hidden />
+              )}
             </Link>
           </div>
         </header>
