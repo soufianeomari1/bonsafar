@@ -23,7 +23,7 @@ export const JURY_COPY = {
   impact: [
     { value: "619,827", label: "Schengen visa applications filed in Morocco in 2025" },
     { value: "19.2%", label: "of them refused" },
-    { value: "5th", label: "country in the world for applications" },
+    { value: "114,320", label: "applications refused in 2025" },
   ],
   impactSource: "Source: European Commission visa statistics, released May 28, 2026.",
 

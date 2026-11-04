@@ -9,7 +9,7 @@ Meta Global AI Developer Hackathon · Indie track · Theme: Build for Your World
 
 ## The problem
 
-In 2025, Moroccans filed 619,827 Schengen visa applications and 19.2% were refused (European Commission data, released May 28, 2026). Visas, payment cards, baggage rules: one mistake costs money and months. So many people who can afford to travel still go through an agency. And they don't talk to it in English: they talk in darija, a language most voice and travel tools don't officially support.
+In 2025, Moroccans filed 619,827 Schengen visa applications and 19.2% were refused: 114,320 applications refused in 2025 (European Commission visa statistics, released May 28, 2026). Visas, payment cards, baggage rules: one mistake costs money and months. So many people who can afford to travel still go through an agency. And they don't talk to it in English: they talk in darija, a language most voice and travel tools don't officially support.
 
 ## What BonSafar does
 
