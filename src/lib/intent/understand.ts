@@ -105,7 +105,7 @@ Rules:
 2. origin_iata: the profile home airport, unless the traveller names another departure city.
 3. Dates are always in the future, relative to today. "nouss"/"mi-"/"mid" a month = the 15th. "bdyat"/"début"/"early" = the 1st. "lekher"/"fin"/"late" = the 24th. A month alone = the 15th. "chi semaine"/"une semaine"/"a week" = 7 nights; "weekend" = Friday to Sunday. With a start and a length, return_date = depart_date + nights. A season alone ("f l'été", "summer") or nothing at all is too vague: dates and nights null.
 4. adults and children: from the words ("m3a rajli" = with my husband = 2 adults), otherwise from the profile; 2 adults if still unknown.
-5. budget_mad: only if the traveller says a budget in dirhams (dh, dirham, "alf" = thousand). Otherwise null. Never guess.
+5. Money, only if the traveller says an amount in dirhams (dh, dirham, "alf" = thousand). Never guess, and never write an amount in a sentence. A cap per night ("la nuit", "par nuit", "l lila", "per night", "لليلة") goes in budget_per_night_mad and budget_mad stays null. A total for the trip goes in budget_mad and budget_per_night_mad stays null. If they say neither, both are null.
 6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). label: 1 to 3 words in the label language.
 7. keywords: EXACT substrings copied from the transcript (same spelling, accents and case) that carry each extracted fact, with the slot they fill. At most 2 per slot, most telling first.
 8. Do not translate the transcript and do not write an English gloss of it. Another call does that.
@@ -144,6 +144,8 @@ function daysBetween(from: string, to: string): number {
 }
 
 const SPOKEN_NUMBER = /\d|mille|alf|alaf|ألف|آلاف|million|mlyoun|thousand/i;
+const PER_NIGHT =
+  /(?:par nuit|la nuit|\/\s*nuit|per night|a night|each night|l[\s-]*lila|لليلة|للّيلة|ل ليلة|فالليلة)/i;
 
 /**
  * Code-side checks the model cannot be trusted with: exact keywords for A2,
@@ -176,6 +178,11 @@ function locksBlock(locks: IntentLocks | undefined): string | null {
       locks.budget_mad == null
         ? "- budget_mad: null"
         : `- budget_mad: ${locks.budget_mad} (copy this number, never write it in a sentence)`,
+    );
+    lines.push(
+      locks.budget_per_night_mad == null
+        ? "- budget_per_night_mad: null"
+        : `- budget_per_night_mad: ${locks.budget_per_night_mad} (copy this number, never write it in a sentence)`,
     );
   }
   return lines.join("\n");
@@ -217,8 +224,15 @@ function enforce(
   }
 
   const spoken = [transcript, ...answers.map((answer) => answer.answer)].join("\n");
-  if (intent.budget_mad !== null && !SPOKEN_NUMBER.test(spoken)) {
+  if (!SPOKEN_NUMBER.test(spoken)) {
     intent.budget_mad = null;
+    intent.budget_per_night_mad = null;
+  } else if (PER_NIGHT.test(spoken)) {
+    const nightly = intent.budget_per_night_mad ?? intent.budget_mad;
+    intent.budget_per_night_mad = nightly;
+    if (intent.budget_mad != null && intent.budget_mad === nightly) intent.budget_mad = null;
+  } else {
+    intent.budget_per_night_mad = null;
   }
 
   const travellersKnown = profile.companions !== null && profile.companions !== "friends";

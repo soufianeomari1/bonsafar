@@ -107,6 +107,8 @@ export type HotelSearchParams = {
   lang: Lang;
   stars: HotelStars | null;
   breakfast: boolean;
+  /** Dirhams per night. Omitted from the request when null. */
+  maxPerNightMad?: number | null;
 };
 
 function toNumber(value: string | number | null | undefined): number | null {
@@ -193,6 +195,9 @@ export async function searchHotels(params: HotelSearchParams, log: RunLog): Prom
     language: trivagoLanguage(params.lang),
   };
   if (params.children > 0) base.children = params.children;
+  if (params.maxPerNightMad != null && params.maxPerNightMad > 0) {
+    base.price_range = { budgetType: "PRICE_PER_NIGHT", maxPrice: Math.round(params.maxPerNightMad) };
+  }
 
   const filtered: Record<string, unknown> = { ...base };
   if (params.stars) filtered.hotel_rating = { [`${params.stars}star`]: true };

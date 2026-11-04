@@ -15,7 +15,7 @@ export function fieldIsFilled(intent: Intent, field: QuestionField): boolean {
     case "travelers":
       return intent.adults >= 1;
     case "budget":
-      return intent.budget_mad !== null;
+      return intent.budget_mad !== null || intent.budget_per_night_mad !== null;
   }
 }
 
@@ -30,7 +30,7 @@ export function fieldsTouched(patch: Partial<Intent>): UserEdit[] {
   if ("depart_date" in patch || "return_date" in patch) fields.push("dates", "nights");
   if ("nights" in patch && !fields.includes("nights")) fields.push("nights");
   if ("adults" in patch || "children" in patch) fields.push("travelers");
-  if ("budget_mad" in patch) fields.push("budget");
+  if ("budget_mad" in patch || "budget_per_night_mad" in patch) fields.push("budget");
   if ("wishes" in patch) fields.push("wishes");
   return fields;
 }
@@ -51,7 +51,10 @@ export function locksFor(intent: Intent, edited: readonly UserEdit[]): IntentLoc
     locks.adults = intent.adults;
     locks.children = intent.children;
   }
-  if (fields.includes("budget")) locks.budget_mad = intent.budget_mad;
+  if (fields.includes("budget")) {
+    locks.budget_mad = intent.budget_mad;
+    locks.budget_per_night_mad = intent.budget_per_night_mad;
+  }
   return locks;
 }
 
@@ -70,6 +73,9 @@ export function applyLocks(intent: Intent, locks: IntentLocks): Intent {
     if (locks.children !== undefined) next.children = locks.children;
   }
   if (fields.has("budget") && locks.budget_mad !== undefined) next.budget_mad = locks.budget_mad;
+  if (fields.has("budget") && locks.budget_per_night_mad !== undefined) {
+    next.budget_per_night_mad = locks.budget_per_night_mad;
+  }
   if (next.question && fields.has(next.question.field) && fieldIsFilled(next, next.question.field)) {
     next.question = null;
   }

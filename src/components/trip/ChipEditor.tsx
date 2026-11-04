@@ -37,6 +37,7 @@ export function ChipEditor({
     dates: t("edit.dates"),
     travellers: t("edit.travellers"),
     budget: t("edit.budget"),
+    budgetNight: t("edit.budgetNight"),
     wish: t("edit.wish"),
   } as const;
 
@@ -64,7 +65,15 @@ function EditorBody({
   const [ret, setRet] = useState(intent.return_date ?? "");
   const [adults, setAdults] = useState(intent.adults);
   const [children, setChildren] = useState(intent.children);
-  const [budget, setBudget] = useState(intent.budget_mad ? String(intent.budget_mad) : "");
+  const [budget, setBudget] = useState(
+    chip.kind === "budgetNight"
+      ? intent.budget_per_night_mad
+        ? String(intent.budget_per_night_mad)
+        : ""
+      : intent.budget_mad
+        ? String(intent.budget_mad)
+        : "",
+  );
 
   function save() {
     switch (chip.kind) {
@@ -87,9 +96,14 @@ function EditorBody({
       case "travellers":
         patchIntent({ adults, children });
         break;
-      case "budget": {
+      case "budget":
+      case "budgetNight": {
         const amount = Number(budget.replace(/[^\d]/g, ""));
-        patchIntent({ budget_mad: amount > 0 ? amount : null });
+        patchIntent(
+          chip.kind === "budgetNight"
+            ? { budget_per_night_mad: amount > 0 ? amount : null }
+            : { budget_mad: amount > 0 ? amount : null },
+        );
         break;
       }
       case "wish":
@@ -186,9 +200,9 @@ function EditorBody({
         </div>
       )}
 
-      {chip.kind === "budget" && (
+      {(chip.kind === "budget" || chip.kind === "budgetNight") && (
         <input
-          aria-label={t("edit.budget")}
+          aria-label={t(chip.kind === "budgetNight" ? "edit.budgetNight" : "edit.budget")}
           inputMode="numeric"
           autoFocus
           value={budget}

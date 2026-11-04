@@ -71,6 +71,8 @@ export const IntentSchema = z.object({
   adults: z.number().int().min(1).max(9),
   children: z.number().int().min(0).max(9),
   budget_mad: z.number().positive().max(10_000_000).nullable(),
+  /** Cap per hotel night, in dirhams. Null when the traveller gave a total, or no budget. */
+  budget_per_night_mad: z.number().positive().max(10_000_000).nullable().default(null),
   wishes: z
     .array(z.object({ kind: z.enum(WISH_KINDS), label: z.string().min(1).max(40) }))
     .max(6),
@@ -105,6 +107,7 @@ export const LockedSchema = z.object({
   adults: z.number().int().min(1).max(9).optional(),
   children: z.number().int().min(0).max(9).optional(),
   budget_mad: z.number().positive().max(10_000_000).nullable().optional(),
+  budget_per_night_mad: z.number().positive().max(10_000_000).nullable().optional(),
 });
 
 export type IntentLocks = z.infer<typeof LockedSchema>;

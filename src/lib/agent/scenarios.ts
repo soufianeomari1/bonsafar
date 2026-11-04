@@ -38,6 +38,7 @@ const BASE = {
   adults: 2,
   children: 0,
   budget_mad: null,
+  budget_per_night_mad: null,
   wishes: [{ kind: "breakfast", label: "Breakfast" }],
   keywords: [],
   question: null,

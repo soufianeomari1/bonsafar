@@ -22,7 +22,7 @@ import type { Intent, KeywordSlot, WishKind } from "@/lib/intent/schema";
 
 type Translate = (key: TranslationKey, values?: TranslateValues) => string;
 
-export type ChipKind = "origin" | "destination" | "dates" | "travellers" | "budget" | "wish";
+export type ChipKind = "origin" | "destination" | "dates" | "travellers" | "budget" | "budgetNight" | "wish";
 
 export type IntentChipModel = {
   id: string;
@@ -110,6 +110,17 @@ export function chipsFor(
     icon: Users,
     tone: "bg-blue-soft text-blue",
   });
+
+  if (intent.budget_per_night_mad) {
+    chips.push({
+      id: "budget-night",
+      kind: "budgetNight",
+      slot: "budget",
+      label: t("chip.budgetNight", { amount: formatAmount(intent.budget_per_night_mad, lang) }),
+      icon: Wallet,
+      tone: "bg-orange-soft text-orange",
+    });
+  }
 
   if (intent.budget_mad) {
     chips.push({

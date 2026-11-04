@@ -257,6 +257,7 @@ export class AgentContext {
             lang: this.jury ? "en" : this.lang,
             stars: this.stars,
             breakfast,
+            maxPerNightMad: this.intent.budget_per_night_mad,
           },
           this.log,
         );
