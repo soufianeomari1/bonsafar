@@ -253,7 +253,7 @@ export const en = {
   // 5 · Flight plan
   "plan.skip": "Skip",
   "plan.title": "Safar is preparing\nyour trip",
-  "plan.replay": "replay",
+  "plan.replay": "Replay",
   "plan.captured": "Prices captured {time}",
   "plan.pricesNote": "Prices come live from **Kiwi.com** and **trivago**. Safar never invents them.",
   "plan.step.flights": "Searching flights",
@@ -280,14 +280,14 @@ export const en = {
   "plan.alt.title": "Visa-free destination: {city}",
   "plan.landed": "Landed: your package is ready",
   "plan.seePackage": "See the package",
-  "plan.replayLast": "See the last saved trip",
+  "plan.replayLast": "View the last saved trip",
   "plan.empty": "Tell BonSafar where you want to go first.",
   "plan.error.intent_incomplete": "A destination and both dates are still missing.",
   "plan.error.origin_missing": "I don't know which airport you leave from.",
   "plan.error.timeout": "This search took too long. Try again.",
   "plan.error.agent_invalid_output": "The package came back incomplete. Try again.",
   "plan.error.agent_failed": "The search stopped. Try again.",
-  "plan.error.replay_unavailable": "No saved trip to replay yet.",
+  "plan.error.replay_unavailable": "No saved trip to replay.",
   "plan.error.interrupted": "The search was interrupted. Try again.",
 
   // 6 · Result
@@ -710,6 +710,14 @@ export const en = {
   "issue.site_error": "The site had an error",
   "issue.other": "Something else",
   "file.booking": "Booking",
+
+  "guard.rateLimited":
+    "You have reached 10 live searches this hour. This limit keeps BonSafar free for everyone. Try again a little later.",
+  "guard.spendLimit":
+    "Live searches are paused for now: the free demo credits are used up. Please come back later.",
+  "privacy.live.title": "Live searches and fair use",
+  "privacy.live.body":
+    "Live searches run on Meta Model API credits. To keep BonSafar free for everyone, each person can run a limited number of live searches per hour. Your IP address is never stored: only a salted fingerprint of it is used for the count.",
 } as const;
 
 export type TranslationKey = keyof typeof en;

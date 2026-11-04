@@ -8,7 +8,7 @@ import type { PackageOption } from "@/lib/agent/schema";
 import { placeName } from "@/lib/airports";
 import { formatMad, formatWhen } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
-import type { TranslationKey } from "@/lib/i18n";
+import { JURY_LANG, translate, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { legSentence, mapStops, nightsText } from "@/lib/trip/describe";
 import { asFlight, asHotel } from "@/lib/trip/selection";
@@ -30,7 +30,7 @@ const TAG: Record<Row["label"], { key: TranslationKey; className: string }> = {
 /** Screen 06. The real route, then the options. Opening one shows the package. */
 export function ResultScreen() {
   const run = useAgentRun();
-  const { t, lang } = useLanguage();
+  const { t, lang, jury } = useLanguage();
   const { profile } = useProfile();
   const router = useRouter();
   usePrefetchGoodToKnow(run, profile, lang);
@@ -93,10 +93,12 @@ export function ResultScreen() {
             <h1 className="text-[27px] font-extrabold tracking-[-0.03em] rtl:tracking-normal">{t("result.title")}</h1>
             <p className="mt-0.5 text-sm text-muted">{t("result.subtitle", { count: rows.length })}</p>
           </div>
-          {run.run?.replay && (
+          {jury && run.run?.replay && (
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-orange">
-              {t("plan.replay")}
-              {run.run.captured_at ? ` · ${t("plan.captured", { time: formatWhen(run.run.captured_at, lang) })}` : ""}
+              {translate(JURY_LANG, "plan.replay")}
+              {run.run.captured_at
+                ? ` · ${translate(JURY_LANG, "plan.captured", { time: formatWhen(run.run.captured_at, JURY_LANG) })}`
+                : ""}
             </p>
           )}
           <ul className="flex flex-col gap-3">

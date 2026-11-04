@@ -640,4 +640,12 @@ export const fr: Dictionary = {
   "issue.site_error": "Le site a eu une erreur",
   "issue.other": "Autre chose",
   "file.booking": "Réservation",
+
+  "guard.rateLimited":
+    "Tu as atteint 10 recherches en direct cette heure-ci. Cette limite garde BonSafar gratuit pour tout le monde. Réessaie un peu plus tard.",
+  "guard.spendLimit":
+    "Les recherches en direct sont en pause : les crédits gratuits de la démo sont épuisés. Reviens plus tard.",
+  "privacy.live.title": "Recherches en direct et usage équitable",
+  "privacy.live.body":
+    "Les recherches en direct utilisent les crédits de la Meta Model API. Pour garder BonSafar gratuit pour tout le monde, chaque personne a droit à un nombre limité de recherches en direct par heure. Ton adresse IP n'est jamais stockée : seule une empreinte salée sert à compter.",
 };

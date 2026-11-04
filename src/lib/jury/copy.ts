@@ -1,9 +1,7 @@
-import type { Lang } from "@/lib/i18n";
-
 /**
  * Judges' board copy. The board is English only, so it lives here and not in
- * the five dictionaries. GUARD_COPY is the exception: travellers read it, in
- * their own language (to move into the dictionaries later).
+ * the five dictionaries. Traveller-facing guard and privacy lines live in
+ * the dictionaries (`guard.*`, `privacy.live.*`).
  */
 
 export const JURY_LINKS = {
@@ -98,31 +96,3 @@ export const JURY_COPY = {
 } as const;
 
 export type GuardCode = "rate_limited" | "spend_limit";
-
-/** What a traveller reads when a live search is refused. */
-export const GUARD_COPY: Record<GuardCode, Record<Lang, string>> = {
-  rate_limited: {
-    en: "You have reached 10 live searches this hour. This limit keeps BonSafar free for everyone. Try again a little later.",
-    fr: "Tu as atteint 10 recherches en direct cette heure-ci. Cette limite garde BonSafar gratuit pour tout le monde. Réessaie un peu plus tard.",
-    "darija-latn":
-      "Wselti l 10 dyal l'recherches f direct f had sa3a. Had l'limite katkhelli BonSafar fabor l ga3 nas. 3awed men b3d chwiya.",
-    "darija-arab":
-      "وصلتي ل 10 ديال البحوث المباشرة فهاد الساعة. هاد الحد كيخلي BonSafar فابور لكاع الناس. عاود من بعد شوية.",
-    ar: "لقد بلغت 10 عمليات بحث مباشر في هذه الساعة. يحافظ هذا الحد على مجانية BonSafar للجميع. حاول مجددًا بعد قليل.",
-  },
-  spend_limit: {
-    en: "Live searches are paused for now: the free demo credits are used up. Please come back later.",
-    fr: "Les recherches en direct sont en pause : les crédits gratuits de la démo sont épuisés. Reviens plus tard.",
-    "darija-latn": "L'recherches f direct w9fin daba: l'crédits l fabor dyal la démo salaw. Rje3 men b3d.",
-    "darija-arab": "البحث المباشر واقف دابا: الكريدي ديال الديمو الفابور سالا. رجع من بعد.",
-    ar: "البحث المباشر متوقف حاليًا: نفدت الأرصدة المجانية للعرض التجريبي. يُرجى العودة لاحقًا.",
-  },
-};
-
-export const GUARD_DISMISS: Record<Lang, string> = {
-  en: "Close",
-  fr: "Fermer",
-  "darija-latn": "Sedd",
-  "darija-arab": "سد",
-  ar: "إغلاق",
-};

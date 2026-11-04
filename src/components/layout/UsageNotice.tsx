@@ -6,13 +6,12 @@ import { Hourglass, X } from "@phosphor-icons/react";
 import { readAgentRun, readServerAgentRun, subscribeAgentRun } from "@/lib/agent-client/store";
 import { isRtl } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
-import { GUARD_COPY, GUARD_DISMISS } from "@/lib/jury/copy";
 import { cn } from "@/lib/utils";
 
 /** The traveller's message when a live search is refused (hourly limit or spend cap). */
 export function UsageNotice() {
   const run = useSyncExternalStore(subscribeAgentRun, readAgentRun, readServerAgentRun);
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const reduced = useReducedMotion();
   /** The refused request the traveller closed the message for; a new search shows it again. */
   const [dismissed, setDismissed] = useState<unknown>(null);
@@ -37,10 +36,12 @@ export function UsageNotice() {
           <span className="flex size-9 shrink-0 items-center justify-center rounded-pill bg-orange-soft text-orange">
             <Hourglass size={18} weight="fill" aria-hidden />
           </span>
-          <p className="min-w-0 flex-1 text-[15px] leading-snug text-ink">{GUARD_COPY[code][lang]}</p>
+          <p className="min-w-0 flex-1 text-[15px] leading-snug text-ink">
+            {t(code === "rate_limited" ? "guard.rateLimited" : "guard.spendLimit")}
+          </p>
           <button
             type="button"
-            aria-label={GUARD_DISMISS[lang]}
+            aria-label={t("common.close")}
             onClick={() => setDismissed(run.request)}
             className="flex size-11 shrink-0 items-center justify-center rounded-pill text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
           >

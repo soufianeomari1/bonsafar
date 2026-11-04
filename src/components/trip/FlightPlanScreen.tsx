@@ -25,7 +25,7 @@ import { readCount, readFlightRows, readHotelRows, readSources, readVisaNeeded }
 import { AGENT_STEPS, type AgentStep } from "@/lib/agent/schema";
 import { formatTime, formatTripDate, formatWhen } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
-import { translate, type TranslationKey } from "@/lib/i18n";
+import { JURY_LANG, translate, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { useProfile } from "@/lib/profile/useProfile";
 import { usePrefetchGoodToKnow } from "@/lib/trip/good-to-know-client";
@@ -71,7 +71,7 @@ function doneSignature(legs: Leg[]): string {
 export function FlightPlanScreen() {
   const run = useAgentRun();
   const trip = useTrip();
-  const { t, lang } = useLanguage();
+  const { t, lang, jury } = useLanguage();
   const { profile } = useProfile();
   // "Good to know" starts the moment the package event lands, not on screen 08.
   usePrefetchGoodToKnow(run, profile, lang);
@@ -146,10 +146,12 @@ export function FlightPlanScreen() {
     <div className="relative flex min-h-0 flex-1 flex-col bg-gradient-to-b from-sky to-bg">
       <Clouds className="h-40" />
       <header className="relative px-6 pt-[22px]">
-        {run.run?.replay && (
+        {jury && run.run?.replay && (
           <p className="mb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-orange">
-            {t("plan.replay")}
-            {run.run.captured_at ? ` · ${t("plan.captured", { time: formatWhen(run.run.captured_at, lang) })}` : ""}
+            {translate(JURY_LANG, "plan.replay")}
+            {run.run.captured_at
+              ? ` · ${translate(JURY_LANG, "plan.captured", { time: formatWhen(run.run.captured_at, JURY_LANG) })}`
+              : ""}
           </p>
         )}
         <div className="flex items-start justify-between gap-3">
@@ -251,12 +253,18 @@ export function FlightPlanScreen() {
           <div role="alert" className="mb-4 flex items-start gap-2">
             <Safar state="oops" size={64} className="shrink-0" />
             <div className="flex min-w-0 flex-1 flex-col gap-3">
-              <p className="text-[15px] leading-snug">{t(ERROR_KEY[run.error.code] ?? "plan.error.agent_failed")}</p>
+              <p className="text-[15px] leading-snug">
+                {jury && run.error.code === "replay_unavailable"
+                  ? translate(JURY_LANG, "plan.error.replay_unavailable")
+                  : t(run.error.code === "replay_unavailable" ? "plan.error.agent_failed" : (ERROR_KEY[run.error.code] ?? "plan.error.agent_failed"))}
+              </p>
               <div className="grid grid-cols-1 gap-2">
                 <Button onClick={() => retryAgentRun()}>{t("common.retry")}</Button>
-                <Button variant="secondary" onClick={() => replayLastTrip()}>
-                  {t("plan.replayLast")}
-                </Button>
+                {jury && (
+                  <Button variant="secondary" onClick={() => replayLastTrip()}>
+                    {translate(JURY_LANG, "plan.replayLast")}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
