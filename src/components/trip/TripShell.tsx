@@ -17,7 +17,14 @@ const STAGES = [
 ] as const;
 
 function stageIndex(pathname: string): number {
-  if (pathname.startsWith("/trip/ready")) return 4;
+  if (
+    pathname.startsWith("/trip/ready") ||
+    pathname.startsWith("/trip/check") ||
+    pathname.startsWith("/trip/file") ||
+    pathname.startsWith("/trip/poster")
+  ) {
+    return 4;
+  }
   if (pathname.startsWith("/trip/package") || pathname.startsWith("/trip/result")) return 3;
   if (pathname.startsWith("/trip/plan") || pathname.startsWith("/trip/search")) return 2;
   if (pathname.startsWith("/trip/understood")) return 1;

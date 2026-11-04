@@ -18,7 +18,9 @@ import { useProfile } from "@/lib/profile/useProfile";
 import type { FlightDelta } from "@/lib/prices/totals";
 import type { FlightOffer, HotelOffer, Offer, TrendOffer } from "@/lib/prices/store";
 import { cn } from "@/lib/utils";
+import { buildChecklist } from "@/lib/trip/checklist";
 import { AirlineMarks } from "./AirlineMark";
+import { ChecklistTiles } from "./ChecklistTiles";
 import { PriceFact } from "./PriceFact";
 import { RouteMap } from "./RouteMap";
 
@@ -42,15 +44,6 @@ const REASONS: Record<string, TranslationKey> = {
   airport_change: "reject.airport_change",
   visa_needed: "reject.visa_needed",
   other: "reject.other",
-};
-
-const VISA_KEY: Record<string, TranslationKey> = {
-  none: "visaKind.none",
-  schengen: "visaKind.schengen",
-  evisa: "visaKind.evisa",
-  on_arrival: "visaKind.on_arrival",
-  consular: "visaKind.consular",
-  unknown: "visaKind.unknown",
 };
 
 export function PackageScreen({ dotationMad }: { dotationMad: number }) {
@@ -87,7 +80,12 @@ export function PackageScreen({ dotationMad }: { dotationMad: number }) {
   const nights = option.totals.hotel.nights || hotel?.attrs.nights || 0;
   const showTip = result.smart_tip.kind !== "none" && result.smart_tip.delta;
   const trends = trendBars(run.offers, result.destination.city);
-  const share = Math.round((option.totals.per_person_display_mad / dotationMad) * 100);
+  const tiles = buildChecklist({
+    entry: result.entry,
+    baggage: flight?.attrs.baggage ?? null,
+    perPersonDisplayMad: option.totals.per_person_display_mad,
+    dotationMad,
+  });
   const spoken: Lang = jury ? "en" : profile.ui_lang;
 
   return (
@@ -197,22 +195,7 @@ export function PackageScreen({ dotationMad }: { dotationMad: number }) {
 
           <div>
             <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{t("package.before")}</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Tile
-                label={t("package.visa")}
-                value={result.entry?.visa_needed ? t("package.visaNeeded") : t("package.visaFree")}
-                hint={result.entry?.visa_needed ? t(VISA_KEY[result.entry.visa_kind] ?? "visaKind.unknown") : undefined}
-                ok={!!result.entry && !result.entry.visa_needed}
-              />
-              <PassportTile entry={result.entry} />
-              <Tile
-                label={t("package.baggage")}
-                value={flight && flight.attrs.baggage.checked_bag > 0 ? t("package.bagChecked") : t("package.bagCabin")}
-                ok={!!flight && flight.attrs.baggage.checked_bag > 0}
-                warn={!!flight && flight.attrs.baggage.checked_bag === 0}
-              />
-              <Tile label={t("package.money")} value={t("package.moneyShare", { percent: share })} ok />
-            </div>
+            <ChecklistTiles tiles={tiles} />
           </div>
 
           <div>
@@ -330,38 +313,6 @@ function TimeBlock({ time, code, align = "start" }: { time: string; code: string
       </p>
     </div>
   );
-}
-
-function Tile({ label, value, hint, ok, warn }: { label: string; value: string; hint?: string; ok?: boolean; warn?: boolean }) {
-  return (
-    <div className={cn("rounded-button px-3 py-2.5", warn || !ok ? "bg-orange-soft" : "bg-green-soft")}>
-      <p className="text-xs text-muted">{label}</p>
-      <p className={cn("font-mono text-[13px] font-semibold", warn || !ok ? "text-orange" : "text-green")}>
-        <SplitFlap value={value} haptic={false} cellClassName="text-[13px]" />
-      </p>
-      {hint && <p className="text-[11px] text-muted">{hint}</p>}
-    </div>
-  );
-}
-
-function PassportTile({ entry }: { entry: { passport_validity_days: number | null; sources: { url: string; title: string }[] } | null }) {
-  const { t } = useLanguage();
-  const days = entry?.passport_validity_days;
-  if (days == null) {
-    const source = entry?.sources[0];
-    return (
-      <div className="rounded-button bg-orange-soft px-3 py-2.5">
-        <p className="text-xs text-muted">{t("package.passport")}</p>
-        <p className="font-mono text-[13px] font-semibold text-orange">{t("package.passportCheck")}</p>
-        {source && (
-          <a href={source.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-[11px] font-semibold text-blue underline">
-            {source.title}
-          </a>
-        )}
-      </div>
-    );
-  }
-  return <Tile label={t("package.passport")} value={t("package.passportDays", { days })} ok />;
 }
 
 function TrendChart({

@@ -314,6 +314,19 @@ export function startAgentRun(request: AgentRunRequest, scenario: string | null)
   })();
 }
 
+/** Appends measured events from a later call (good to know, poster) to the session log. */
+export function appendRunEvents(events: RunEvent[]) {
+  if (!events.length || snapshot.status === "idle") return;
+  const seen = new Set(snapshot.events.map((event) => eventKey(event)));
+  const fresh = events.filter((event) => !seen.has(eventKey(event)));
+  if (!fresh.length) return;
+  commit({ ...snapshot, events: [...snapshot.events, ...fresh] });
+}
+
+function eventKey(event: RunEvent): string {
+  return `${event.t}|${event.step}|${event.model}|${event.latency_ms}|${event.note ?? ""}`;
+}
+
 export function skipAgentAnimation() {
   if (snapshot.skipped) return;
   commit({ ...snapshot, skipped: true });
