@@ -9,7 +9,6 @@ import { JuryPill, SafarMark } from "@/components/bs/Brand";
 import { Composer, ComposerDock } from "@/components/bs/Composer";
 import { Clouds } from "@/components/bs/Clouds";
 import { Safar, type SafarState } from "@/components/bs/Safar";
-import { PulseRings } from "@/components/bs/VoiceRadar";
 import { TrustSheet } from "@/components/screens/TrustSheet";
 import { VocalScreen } from "@/components/screens/VocalScreen";
 import { micHoldStyle, useVoiceCapture, type CaptureError } from "@/components/voice/useVoiceCapture";
@@ -106,15 +105,19 @@ export function HomeScreen() {
         </section>
 
         <section aria-label={t("home.micLabel")} className="relative h-[300px] shrink-0">
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <PulseRings core={96} sweep />
+          <div className="absolute left-1/2 top-1/2 size-[88px] -translate-x-1/2 -translate-y-1/2">
+            <span
+              aria-hidden
+              className="bs-motion pointer-events-none absolute inset-0 rounded-pill bg-blue opacity-[0.32]"
+              style={{ animation: "bs-breathe 2.6s var(--ease-bs) infinite" }}
+            />
             <button
               type="button"
               ref={micRef}
               aria-label={t("home.micLabel")}
               {...micHandlers}
               style={micHoldStyle}
-              className="bs-mic-hold relative flex size-24 items-center justify-center rounded-pill bg-ink text-card shadow-[0_12px_32px_rgba(11,11,15,0.25)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue"
+              className="bs-mic-hold relative flex size-full items-center justify-center rounded-pill bg-mic text-card transition-transform duration-100 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue active:scale-[0.96]"
             >
               <Microphone size={34} weight="fill" aria-hidden />
             </button>

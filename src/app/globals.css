@@ -21,6 +21,7 @@
   --color-red: #dc2626;
   --color-red-soft: #feecec;
   --color-blue: #0a6cff;
+  --color-blue-deep: #0052d6;
   --color-blue-soft: #eaf2ff;
   --color-violet: #a855f7;
 
@@ -153,6 +154,34 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Home mic halo, design/motion/screens/02-home-v2.html. One breath, 2.6s. */
+@keyframes bs-breathe {
+  0% {
+    transform: scale(1);
+    opacity: 0.32;
+  }
+  70%,
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+/* Safar-blue microphone: vertical gradient, soft highlight, blue shadow. */
+@utility bg-mic {
+  background-image:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      color-mix(in srgb, var(--color-card) 28%, transparent) 0%,
+      transparent 45%
+    ),
+    linear-gradient(180deg, var(--color-blue) 0%, var(--color-blue-deep) 100%);
+  box-shadow:
+    0 10px 28px color-mix(in srgb, var(--color-blue) 35%, transparent),
+    0 2px 6px color-mix(in srgb, var(--color-blue) 25%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-card) 35%, transparent);
 }
 
 @keyframes bs-rec {
