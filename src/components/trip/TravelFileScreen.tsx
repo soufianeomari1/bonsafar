@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { AirplaneTilt, Export, GoogleLogo, Star } from "@phosphor-icons/react";
+import { AirplaneTilt, ArrowLeft, Export, GoogleLogo, Star } from "@phosphor-icons/react";
 import { Safar } from "@/components/bs/Safar";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
@@ -96,11 +96,19 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-gradient-to-b from-sky to-bg">
+      <button
+        type="button"
+        aria-label={t("common.back")}
+        onClick={() => router.push(withTripSearch("/trip/check"))}
+        className="absolute start-4 top-4 z-20 flex size-11 items-center justify-center rounded-pill bg-card text-ink shadow-soft"
+      >
+        <ArrowLeft size={20} weight="light" className="rtl:-scale-x-100" aria-hidden />
+      </button>
       <div className="absolute end-4 top-3 z-10">
         <Safar state="bye" size={84} tilt={-12} />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="px-6 pe-24 pt-7">
+        <div className="pe-24 ps-16 pt-7">
           <p className="font-mono text-[11px] font-semibold tracking-[0.08em] text-muted">{t("file.kicker")}</p>
           <h1 className="mt-1.5 text-[32px] font-extrabold leading-none tracking-tight">
             {name ? t("file.title", { name }) : t("file.titleNoName")}
@@ -156,9 +164,9 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
                 </div>
                 <Field label={t("file.nights")} value={String(view.nights)} />
               </div>
-              <div className="flex items-center gap-3 px-4 pb-4">
+              <div className="flex items-center gap-3 px-4 pb-4 pe-28">
                 <DemoQr />
-                <p className="text-xs leading-snug text-muted">{t("file.qr")}</p>
+                <p className="min-w-0 text-xs leading-snug text-muted">{t("file.qr")}</p>
               </div>
               <motion.span
                 aria-hidden
