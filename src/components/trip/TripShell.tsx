@@ -6,6 +6,7 @@ import { MobileFrame } from "@/components/layout/MobileFrame";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { useLanguage } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
+import { UnderTheHood } from "./UnderTheHood";
 
 const STAGES = [
   { href: "/home", label: "1 Voice" },
@@ -64,7 +65,7 @@ export function TripShell({ children }: { children: React.ReactNode }) {
     return <MobileFrame>{children}</MobileFrame>;
   }
   return (
-    <JuryFrame header={<JuryHeader />}>
+    <JuryFrame header={<JuryHeader />} panel={<UnderTheHood />}>
       {children}
     </JuryFrame>
   );
