@@ -11,6 +11,9 @@ import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
 import { placeName } from "@/lib/airports";
 import { legSentence } from "@/lib/trip/describe";
+import { freezeRun } from "@/lib/trip/freeze";
+import { recordDeparture } from "@/lib/trip/partner";
+import { rememberTrip, type Partner } from "@/lib/trip/saved";
 import { HotelPhoto } from "./TripBits";
 import { dateRangeParts, formatEur, formatMad, formatWhen } from "@/lib/format";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -20,7 +23,7 @@ import { asFlight, asHotel, pickOption } from "@/lib/trip/selection";
 import { JuryLine } from "./JuryLine";
 
 /** Screen 09. The photo is Kiwi.com's, untouched. Links are the stored deeplinks. */
-export function CheckScreen() {
+export function CheckScreen({ dotationMad }: { dotationMad: number }) {
   const run = useAgentRun();
   const { t, lang } = useLanguage();
   const router = useRouter();
@@ -61,6 +64,14 @@ export function CheckScreen() {
         ? t("check.adultsOne", { city: origin })
         : t("check.adults", { count: adults, city: origin });
   const edit = () => router.push(withTripSearch("/trip/understood"));
+
+  /** The trip is saved before the traveller leaves, so the return question has a trip to update. */
+  function leaveFor(partner: Partner) {
+    const frozen = freezeRun(run, dotationMad, null);
+    if (!frozen) return;
+    recordDeparture(partner, frozen.run_id);
+    void rememberTrip(frozen);
+  }
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-gradient-to-b from-sky to-bg">
@@ -157,8 +168,8 @@ export function CheckScreen() {
       <Sheet open={pay} onClose={() => setPay(false)} title={t("check.payTitle")}>
         <p className="mt-2 text-[15px] leading-snug text-muted">{t("check.payBody")}</p>
         <div className="mt-4 flex flex-col gap-2">
-          <PartnerLink href={flight.deeplink} label={t("check.openFlight")} />
-          <PartnerLink href={hotel.deeplink} label={t("check.openHotel")} />
+          <PartnerLink href={flight.deeplink} label={t("check.openFlight")} onOpen={() => leaveFor("kiwi.com")} />
+          <PartnerLink href={hotel.deeplink} label={t("check.openHotel")} onOpen={() => leaveFor("trivago")} />
         </div>
         <Button full className="mt-4" onClick={() => router.push(withTripSearch("/trip/file"))}>
           {t("check.booked")}
@@ -224,7 +235,7 @@ function PriceLine({
   );
 }
 
-function PartnerLink({ href, label }: { href: string | null; label: string }) {
+function PartnerLink({ href, label, onOpen }: { href: string | null; label: string; onOpen: () => void }) {
   const { t } = useLanguage();
   if (!href) return <p className="min-h-11 text-sm text-muted">{t("check.linkMissing")}</p>;
   return (
@@ -232,6 +243,7 @@ function PartnerLink({ href, label }: { href: string | null; label: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={onOpen}
       className="flex min-h-11 items-center justify-center rounded-button bg-fill px-4 text-center text-[15px] font-semibold"
     >
       {label}

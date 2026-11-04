@@ -4,6 +4,7 @@ import { LanguageProvider } from "@/lib/i18n/provider";
 import { HapticRing } from "@/components/bs/HapticRing";
 import { IconDefaults } from "@/components/bs/IconDefaults";
 import { InstallRegistrar } from "@/components/pwa/InstallRegistrar";
+import { PartnerReturn } from "@/components/trip/PartnerReturn";
 import { TOKENS } from "@/lib/tokens";
 import "./globals.css";
 
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {children}
             <HapticRing />
             <InstallRegistrar />
+            <PartnerReturn />
           </IconDefaults>
         </LanguageProvider>
       </body>

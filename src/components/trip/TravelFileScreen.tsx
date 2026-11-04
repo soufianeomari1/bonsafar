@@ -8,7 +8,7 @@ import { AirplaneTilt, Export, GoogleLogo, Star } from "@phosphor-icons/react";
 import { Safar } from "@/components/bs/Safar";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
-import { airportCity, placeName } from "@/lib/airports";
+import { placeName } from "@/lib/airports";
 import { formatDay, formatMad, formatTime, formatTripDate } from "@/lib/format";
 import type { Lang, TranslateValues, TranslationKey } from "@/lib/i18n";
 import { legCarriers, legSentence } from "@/lib/trip/describe";
@@ -16,18 +16,16 @@ import { haptic } from "@/lib/haptics";
 import { useLanguage } from "@/lib/i18n/provider";
 import { readPoster, readServerPoster, subscribePoster } from "@/lib/poster/client";
 import { useProfile } from "@/lib/profile/useProfile";
-import { readTrip } from "@/lib/trip/store";
-import { buildChecklist, okCount } from "@/lib/trip/checklist";
+import { freezeRun } from "@/lib/trip/freeze";
 import {
   readSavedTrips,
   readServerSavedTrips,
   rememberTrip,
   subscribeSavedTrips,
   type FrozenPackage,
-  type FrozenTrip,
 } from "@/lib/trip/saved";
-import { asFlight, asHotel, pickOption } from "@/lib/trip/selection";
 import { EASE_DEFAULT } from "@/lib/motion";
+import { BookingPill } from "./BookingPill";
 import { JuryLine } from "./JuryLine";
 
 /** Screen 10. The pass prints, then the stamp lands once. */
@@ -43,41 +41,8 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
   const [stamp, setStamp] = useState(!!reduced);
 
   const live = useMemo(() => {
-    const result = run.result;
-    const option = pickOption(result, run.selectedId);
-    const flight = option ? asFlight(run.offers[option.flight_id]) : null;
-    const hotel = option ? asHotel(run.offers[option.hotel_id]) : null;
-    if (!result || !option || !flight || !hotel || !run.run) return null;
-    const tiles = buildChecklist({
-      entry: result.entry,
-      baggage: flight.attrs.baggage,
-      perPersonDisplayMad: option.totals.per_person_display_mad,
-      dotationMad,
-    });
-    const origin = airportCity(flight.attrs.outbound.from) ?? flight.attrs.outbound.from;
-    const request = run.request;
-    const intent = request && "intent" in request ? request.intent : null;
     const posterUrl = poster.fallback ? poster.url : poster.url?.startsWith("http") ? poster.url : null;
-    const frozen: Omit<FrozenTrip, "id" | "created_at" | "synced_id"> = {
-      run_id: run.run.run_id,
-      transcript: readTrip()?.transcript ?? null,
-      intent,
-      status: "ready",
-      poster_url: posterUrl,
-      package: {
-        destination: result.destination,
-        origin_iata: flight.attrs.outbound.from,
-        origin_city: origin,
-        flight,
-        hotel,
-        totals: option.totals,
-        fx: result.fx,
-        prices_captured_at: result.prices_captured_at,
-        entry: result.entry,
-        ready_ok: okCount(tiles),
-      },
-    };
-    return frozen;
+    return freezeRun(run, dotationMad, posterUrl);
   }, [run, dotationMad, poster.fallback, poster.url]);
 
   useEffect(() => {
@@ -234,6 +199,12 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
             <span className="font-semibold">{t("file.hotelRow")}</span>
             <span className="text-muted">{view.breakfast ? t("file.hotelBreakfast", { count: view.nights }) : t("file.hotelValue", { count: view.nights })}</span>
           </li>
+          {stored?.booking_status && (
+            <li className="flex items-center justify-between gap-3 border-b border-line py-2.5 text-[15px]">
+              <span className="font-semibold">{t("file.booking")}</span>
+              <BookingPill status={stored.booking_status} />
+            </li>
+          )}
           <li className="flex items-center justify-between gap-3 py-2.5 text-[15px]">
             <span className="font-semibold">{t("file.readyRow")}</span>
             <span className={view.readyOk < 4 ? "font-semibold text-orange" : "font-semibold text-green"}>
