@@ -117,21 +117,38 @@ function toNumber(value: string | number | null | undefined): number | null {
   return parseFormattedAmount(value);
 }
 
-/** Keeps the cheapest readable deal of each property. */
-function toHotel(raw: z.infer<typeof Accommodation>): TrivagoHotel | null {
+/** trivago marks a rate that includes breakfast with this price-attribute id. */
+const BREAKFAST_ATTRIBUTE = "breakfastIncluded";
+
+function readDeal(deal: z.infer<typeof Deal>): TrivagoHotel["deal"] | null {
+  const stay = deal.price_per_stay ? parseFormattedAmount(deal.price_per_stay) : null;
+  if (stay == null || stay <= 0 || !deal.currency) return null;
+  return {
+    advertiser: deal.advertiser ?? null,
+    price_per_stay: stay,
+    price_per_night: deal.price_per_night ? parseFormattedAmount(deal.price_per_night) : null,
+    currency: deal.currency,
+    url: deal.deal_url ?? null,
+    attributes: deal.price_attributes.map((attribute) => attribute.id),
+  };
+}
+
+/**
+ * Cheapest readable deal. When breakfast was asked and at least one deal
+ * carries `breakfastIncluded`, the cheapest of those wins. A property whose
+ * deals never mention breakfast keeps the cheapest deal of any kind.
+ */
+function toHotel(raw: z.infer<typeof Accommodation>, breakfastRequested: boolean): TrivagoHotel | null {
+  const readable = raw.deals.flatMap((deal) => {
+    const parsed = readDeal(deal);
+    return parsed ? [parsed] : [];
+  });
+  const withBreakfast = readable.filter((deal) => deal.attributes.includes(BREAKFAST_ATTRIBUTE));
+  const pool = breakfastRequested && withBreakfast.length > 0 ? withBreakfast : readable;
   let best: TrivagoHotel["deal"] | null = null;
-  for (const deal of raw.deals) {
-    const stay = deal.price_per_stay ? parseFormattedAmount(deal.price_per_stay) : null;
-    if (stay == null || stay <= 0 || !deal.currency) continue;
-    if (best && stay >= best.price_per_stay) continue;
-    best = {
-      advertiser: deal.advertiser ?? null,
-      price_per_stay: stay,
-      price_per_night: deal.price_per_night ? parseFormattedAmount(deal.price_per_night) : null,
-      currency: deal.currency,
-      url: deal.deal_url ?? null,
-      attributes: deal.price_attributes.map((a) => a.id),
-    };
+  for (const deal of pool) {
+    if (best && deal.price_per_stay >= best.price_per_stay) continue;
+    best = deal;
   }
   if (!best) return null;
   return {
@@ -162,6 +179,7 @@ async function accommodationCall(
   tool: string,
   args: Record<string, unknown>,
   log: RunLog,
+  breakfastRequested: boolean,
 ): Promise<TrivagoHotel[]> {
   const env = serverEnv();
   const result = await callMcpTool({
@@ -176,7 +194,7 @@ async function accommodationCall(
   });
   const parsed = AccommodationResult.safeParse(result.structured);
   if (!parsed.success) throw new McpToolError(tool, "unexpected result shape");
-  return parsed.data.accommodations.flatMap((a) => toHotel(a) ?? []);
+  return parsed.data.accommodations.flatMap((a) => toHotel(a, breakfastRequested) ?? []);
 }
 
 /**
@@ -210,8 +228,9 @@ export async function searchHotels(params: HotelSearchParams, log: RunLog): Prom
           TRIVAGO_TOOLS.radius,
           { latitude: params.latitude, longitude: params.longitude, ...args },
           log,
+          params.breakfast,
         )
-      : accommodationCall(TRIVAGO_TOOLS.search, { query: params.city, ...args }, log);
+      : accommodationCall(TRIVAGO_TOOLS.search, { query: params.city, ...args }, log, params.breakfast);
 
   const hotels = await run(filtered);
   if (hotels.length || !hasFilters) return hotels;
