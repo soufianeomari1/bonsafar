@@ -93,7 +93,6 @@ export function JuryBoard({ silenceMs, videoUrl }: { silenceMs: number; videoUrl
   const [active, setActive] = useState<Active | null>(null);
   const [overlay, setOverlay] = useState<"onboarding" | "end" | null>(null);
   const [status, setStatus] = useState<JuryStatus | null>(null);
-  const [audio, setAudio] = useState<Record<string, boolean | null>>({});
   const [notice, setNotice] = useState<string | null>(null);
 
   const refreshStatus = useCallback(() => {
@@ -111,11 +110,6 @@ export function JuryBoard({ silenceMs, videoUrl }: { silenceMs: number; videoUrl
       // Blocked storage: the phone shows the card once.
     }
     refreshStatus();
-    for (const scenario of JURY_SCENARIOS) {
-      void fetch(scenario.audio, { method: "HEAD", cache: "no-store" })
-        .then((response) => setAudio((current) => ({ ...current, [scenario.id]: response.ok })))
-        .catch(() => setAudio((current) => ({ ...current, [scenario.id]: false })));
-    }
   }, [refreshStatus]);
 
   useEffect(() => {
@@ -180,6 +174,7 @@ export function JuryBoard({ silenceMs, videoUrl }: { silenceMs: number; videoUrl
   const events = useMemo(() => mergeEvents(phone.trip?.events, phone.run.events), [phone.trip?.events, phone.run.events]);
   const summary = useMemo(() => summarize(phone.run, phone.trip?.events ?? [], events), [phone.run, phone.trip?.events, events]);
   const live = status?.live ?? true;
+  const audio: Record<string, boolean | null> = status?.audio ?? {};
   const canLive = (scenario: JuryScenario) => live && audio[scenario.id] === true;
   const next = nextScenario(active?.scenario ?? null, (scenario) => canLive(scenario) || !!status?.replays[scenario.label]);
 

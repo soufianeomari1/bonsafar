@@ -73,7 +73,7 @@ export const VoiceNote = forwardRef<VoiceNoteHandle, { src: string; available: b
         </span>
         <audio
           ref={audio}
-          src={src}
+          src={available ? src : undefined}
           preload="metadata"
           onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
           onPlay={() => setPlaying(true)}

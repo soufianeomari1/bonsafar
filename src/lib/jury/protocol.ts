@@ -27,6 +27,8 @@ export type PhoneMessage =
 /** GET /api/jury/status: live or replay only, and each scenario's recording. */
 export type JuryStatus = {
   live: boolean;
+  /** Voice note present in public/jury, by scenario id. */
+  audio: Record<string, boolean>;
   replays: Record<string, { captured_at: string; total_ms: number; cost_usd: number; legacy: boolean } | null>;
 };
 

@@ -105,8 +105,9 @@ export function haptic(pattern: HapticPattern): void {
   lastFiredAt = now;
 
   let vibrated = false;
-  if (canVibrate()) {
-    // Chrome throws if the page has never been interacted with.
+  // Before the first tap Chrome blocks the call and logs an error.
+  const activated = navigator.userActivation?.hasBeenActive ?? true;
+  if (canVibrate() && activated) {
     try {
       vibrated = navigator.vibrate(HAPTIC_PATTERNS[pattern]);
     } catch {
