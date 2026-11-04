@@ -4,7 +4,6 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { CaretDown, Check, Globe } from "@phosphor-icons/react";
-import { JuryPill } from "@/components/bs/Brand";
 import { Sheet } from "@/components/bs/Sheet";
 import { haptic } from "@/lib/haptics";
 import type { Lang, TranslationKey } from "@/lib/i18n";
@@ -99,13 +98,6 @@ export function LanguagePicker({
       onClose={() => setOpen(false)}
       title={t("onboarding.language.groupLabel")}
     >
-      {legal && (
-        <JuryPill
-          withIcon
-          label={t("common.juryMode")}
-          className="mt-4 h-11 w-full justify-center text-sm"
-        />
-      )}
       <div
         role="radiogroup"
         aria-label={t("onboarding.language.groupLabel")}
