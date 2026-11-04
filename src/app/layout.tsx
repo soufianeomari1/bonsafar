@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { DEFAULT_LANG, htmlLang, isRtl, type Lang } from "@/lib/i18n";
+import { LANG_HEADER, langFromHeader } from "@/lib/i18n/query";
 import { LanguageProvider } from "@/lib/i18n/provider";
 import { HapticRing } from "@/components/bs/HapticRing";
 import { IconDefaults } from "@/components/bs/IconDefaults";
@@ -50,16 +53,24 @@ const impactSiteVerification = {
   value: "5bae12fb-1556-4355-85ca-7df3f691132b",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * The first HTML depends on `?lang=` (or jury mode). Waiting for that request
+ * is what keeps the shared link from painting in French first.
+ */
+export const instant = false;
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const lang: Lang = langFromHeader((await headers()).get(LANG_HEADER)) ?? DEFAULT_LANG;
+
   return (
     <html
-      lang="fr"
-      dir="ltr"
+      lang={htmlLang(lang)}
+      dir={isRtl(lang) ? "rtl" : "ltr"}
       className={`${geist.variable} ${geistMono.variable} ${ibmPlexSansArabic.variable} h-full antialiased`}
     >
       <meta {...impactSiteVerification} />
       <body className="flex min-h-full flex-col">
-        <LanguageProvider>
+        <LanguageProvider initialLang={lang}>
           <IconDefaults>
             {children}
             <HapticRing />

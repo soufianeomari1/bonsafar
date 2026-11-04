@@ -8,6 +8,7 @@ import {
   signJuryToken,
   verifyJuryToken,
 } from "@/lib/jury/access";
+import { LANG_HEADER, langFromQuery } from "@/lib/i18n/query";
 import { JURY_COOKIE, JURY_UI_COOKIE } from "@/lib/jury/flags";
 
 function redirectTo(request: NextRequest, pathname: string): NextResponse {
@@ -50,6 +51,16 @@ export async function proxy(request: NextRequest) {
   ) {
     // No such route: Next renders its not-found page with a 404 status.
     return NextResponse.rewrite(new URL("/__not-found", request.url));
+  }
+
+  // Same priority as detectLang: jury mode, then ?lang=. The header is what
+  // the server renders, so the first HTML is already in that language.
+  request.headers.delete(LANG_HEADER);
+  if (jury && searchParams.get("jury") === "1") {
+    request.headers.set(LANG_HEADER, "en");
+  } else {
+    const requested = langFromQuery(searchParams.get("lang"));
+    if (requested) request.headers.set(LANG_HEADER, requested);
   }
 
   let supabaseResponse = NextResponse.next({ request });

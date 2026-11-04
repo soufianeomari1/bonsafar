@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import {
+  DEFAULT_LANG,
   htmlLang,
   isRtl,
   translate,
@@ -20,7 +21,6 @@ import {
   readJury,
   readLang,
   readServerJury,
-  readServerLang,
   subscribeToLang,
   writeLang,
 } from "./store";
@@ -40,12 +40,16 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const lang = useSyncExternalStore(
-    subscribeToLang,
-    readLang,
-    readServerLang
-  );
+export function LanguageProvider({
+  initialLang = DEFAULT_LANG,
+  children,
+}: {
+  /** Language already rendered by the server, from `?lang=` or jury mode. */
+  initialLang?: Lang;
+  children: React.ReactNode;
+}) {
+  const getServerLang = useCallback(() => initialLang, [initialLang]);
+  const lang = useSyncExternalStore(subscribeToLang, readLang, getServerLang);
   const jury = useSyncExternalStore(
     subscribeToLang,
     readJury,
@@ -53,6 +57,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   );
 
   // The html element is an external system, so an effect is the right place.
+  // The server already set lang and dir for the first paint.
   useEffect(() => {
     const root = document.documentElement;
     root.lang = htmlLang(lang);

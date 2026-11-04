@@ -1,10 +1,12 @@
 import { JURY_UI_COOKIE } from "@/lib/jury/flags";
 import { DEFAULT_LANG, JURY_LANG, isLang, type Lang } from "./index";
+import { langFromQuery } from "./query";
 
 /**
  * The chosen language as an external store, so components can read it with
  * useSyncExternalStore instead of syncing state inside an effect.
  *
+ * Priority: jury mode, then `?lang=`, then localStorage, then French.
  * It lives in localStorage until the Supabase profile takes over.
  */
 
@@ -47,9 +49,22 @@ export function readServerJuryEmbedded(): boolean {
   return false;
 }
 
+function rememberLang(lang: Lang): void {
+  try {
+    window.localStorage.setItem(LANG_STORAGE_KEY, lang);
+  } catch {
+    // Storage blocked: the choice lasts for this page load only.
+  }
+}
+
 function detectLang(): Lang {
   if (typeof window === "undefined") return DEFAULT_LANG;
   if (readJury()) return JURY_LANG;
+  const fromQuery = langFromQuery(new URLSearchParams(window.location.search).get("lang"));
+  if (fromQuery) {
+    rememberLang(fromQuery);
+    return fromQuery;
+  }
   try {
     const stored = window.localStorage.getItem(LANG_STORAGE_KEY);
     if (isLang(stored)) return stored;
@@ -68,10 +83,6 @@ export function readJury(): boolean {
 export function readLang(): Lang {
   if (langCache === null) langCache = detectLang();
   return langCache;
-}
-
-export function readServerLang(): Lang {
-  return DEFAULT_LANG;
 }
 
 export function readServerJury(): boolean {
