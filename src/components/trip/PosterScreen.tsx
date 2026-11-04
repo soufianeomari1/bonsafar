@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { CaretLeft } from "@phosphor-icons/react";
-import { Clouds } from "@/components/bs/Clouds";
 import { Safar } from "@/components/bs/Safar";
+import { PosterPainting } from "./PosterPainting";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
 import { airportCity } from "@/lib/airports";
@@ -104,12 +104,11 @@ export function PosterScreen() {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={poster.url} alt="" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-b from-sky via-blue-soft to-bg">
-              <Clouds />
-              <p className="absolute inset-x-6 bottom-24 text-center text-sm text-muted">
-                {poster.status === "error" ? t("poster.error") : t("poster.loading")}
-              </p>
-            </div>
+            poster.status === "error" ? (
+              <p className="absolute inset-x-6 bottom-24 text-center text-sm text-muted">{t("poster.error")}</p>
+            ) : (
+              <PosterPainting />
+            )
           )}
           {ready && (
             <>
