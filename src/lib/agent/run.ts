@@ -1,7 +1,8 @@
 import { z } from "zod";
+import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { serverEnv } from "@/lib/env";
-import { callChat } from "@/lib/ai/call";
+import { callChat, type CallChatResult } from "@/lib/ai/call";
 import type { RunLog } from "@/lib/ai/events";
 import { findPlace } from "@/lib/mcp/places";
 import { applyFlightRule } from "@/lib/prices/flight-rule";
@@ -45,12 +46,22 @@ function jsonSchema(schema: z.ZodType): Record<string, unknown> {
 const WONDER_JSON_SCHEMA = jsonSchema(WonderOutputSchema);
 const WONDER_JSON_SCHEMA_AR = jsonSchema(WonderOutputSchemaAr);
 
-const WONDER_EFFORT = "minimal";
-
 /** Wonder turns, repairs included. */
 const MAX_TURNS = 6;
 /** Below this much time left, Wonder must answer without more tool calls. */
 const FINAL_ANSWER_RESERVE_MS = 18_000;
+/** Muse Wonder accepts only tool_choice "auto". This line asks for the package instead. */
+const FINAL_ANSWER =
+  "N'appelle plus aucun outil. Réponds uniquement avec le forfait final au format attendu.";
+
+function functionCalls(message: { tool_calls?: readonly { type: string }[] } | null | undefined) {
+  return (message?.tool_calls ?? []).flatMap((call) => (call.type === "function" ? [call] : []));
+}
+
+/** A 400 means this request shape is refused. Anything else is a real failure. */
+function rejectedRequest(error: unknown): boolean {
+  return error instanceof OpenAI.APIError && error.status === 400;
+}
 
 const cityKey = (text: string) =>
   text
@@ -214,31 +225,83 @@ export async function runAgent({
   let scrubbed = false;
   let repairs = 0;
 
+  const schemaName = arabic ? "BonSafarPackage" : "BonSafarPackage";
+  const jsonSchema = arabic ? WONDER_JSON_SCHEMA_AR : WONDER_JSON_SCHEMA;
+
+  /** Last turn: no tools if the API allows it, otherwise tools with tool_choice auto. */
+  async function requestPlan(turn: number, mustAnswer: boolean, left: number): Promise<CallChatResult> {
+    const timeoutMs = Math.round(Math.min(30_000, left - 2_000));
+    const shared = {
+      model: env.MODEL_WONDER,
+      reasoning_effort: "minimal" as const,
+      response_format: {
+        type: "json_schema" as const,
+        json_schema: { name: schemaName, schema: jsonSchema },
+      },
+      max_completion_tokens: 4000,
+      prompt_cache_key: "bonsafar-agent",
+    };
+
+    if (!mustAnswer) {
+      return callChat({
+        log,
+        step: "agent_plan",
+        note: `turn ${turn}`,
+        timeoutMs,
+        retries: left > 40_000 ? 1 : 0,
+        params: { ...shared, messages, tools: WONDER_TOOLS, tool_choice: "auto" },
+      });
+    }
+
+    try {
+      const answered = await callChat({
+        log,
+        step: "agent_plan",
+        note: `turn ${turn}, final answer, no tools`,
+        timeoutMs,
+        retries: 0,
+        params: { ...shared, messages },
+      });
+      if (functionCalls(answered.completion.choices[0]?.message).length === 0) return answered;
+    } catch (error) {
+      if (!rejectedRequest(error)) throw error;
+    }
+
+    const told: ChatCompletionMessageParam[] = [...messages, { role: "system", content: FINAL_ANSWER }];
+    const locked = { ...shared, tools: WONDER_TOOLS, tool_choice: "auto" as const };
+    let answered = await callChat({
+      log,
+      step: "agent_plan",
+      note: `turn ${turn}, final answer, tool_choice auto`,
+      timeoutMs,
+      retries: 0,
+      params: { ...locked, messages: told },
+    });
+    if (functionCalls(answered.completion.choices[0]?.message).length > 0) {
+      answered = await callChat({
+        log,
+        step: "agent_plan",
+        note: `turn ${turn}, final answer, tool call ignored`,
+        timeoutMs,
+        retries: 0,
+        params: {
+          ...locked,
+          messages: [...told, { role: "user", content: FINAL_ANSWER }],
+        },
+      });
+      if (functionCalls(answered.completion.choices[0]?.message).length > 0) {
+        throw new AgentError("agent_invalid_output", "The planner called a tool instead of returning the package.");
+      }
+    }
+    return answered;
+  }
+
   for (let turn = 1; turn <= MAX_TURNS && !final; turn += 1) {
     const left = deadline - performance.now();
     if (left < 6_000) throw new AgentError("timeout", "No time left for the planner.");
     const mustAnswer = turn === MAX_TURNS || left < FINAL_ANSWER_RESERVE_MS;
 
-    const { completion, content } = await callChat({
-      log,
-      step: "agent_plan",
-      note: `turn ${turn}${mustAnswer ? ", final answer forced" : ""}`,
-      timeoutMs: Math.round(Math.min(30_000, left - 2_000)),
-      retries: left > 40_000 ? 1 : 0,
-      params: {
-        model: env.MODEL_WONDER,
-        reasoning_effort: WONDER_EFFORT,
-        messages,
-        tools: WONDER_TOOLS,
-        tool_choice: mustAnswer ? "none" : "auto",
-        response_format: {
-          type: "json_schema",
-          json_schema: { name: "BonSafarPackage", schema: arabic ? WONDER_JSON_SCHEMA_AR : WONDER_JSON_SCHEMA },
-        },
-        max_completion_tokens: 4000,
-        prompt_cache_key: "bonsafar-agent",
-      },
-    });
+    const { completion, content } = await requestPlan(turn, mustAnswer, left);
 
     const message = completion.choices[0]?.message;
     const calls = (message?.tool_calls ?? []).flatMap((call) =>

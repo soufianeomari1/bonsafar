@@ -91,7 +91,8 @@ Earlier notes from third-party docs, kept for reference:
 
 Verified on 2026-11-03 (block 3, `src/lib/agent/run.ts`):
 - Parallel tool calls come by default: the first turn returns all 4 tool calls at once.
-- `tools` and `response_format: { type: "json_schema" }` work in the same request: the model calls tools, then answers with schema-valid JSON once it has the data. `tool_choice: "none"` forces the answer.
+- `tools` and `response_format: { type: "json_schema" }` work in the same request: the model calls tools, then answers with schema-valid JSON once it has the data.
+- Verified on 2026-11-04: Muse Wonder accepts only `tool_choice: "auto"`. `"none"` returns HTTP 400. The final package turn omits `tools` and `tool_choice`; if that shape is refused, the same turn retries with `tools` and `tool_choice: "auto"` plus an instruction to stop calling tools.
 - `reasoning_effort: "minimal"` works. On the final package turn (about 4k tokens in, 1k out) it took 10 to 14 s, against 11 to 20 s with `"low"`, with the same choices on our two scenarios.
 - Measured full runs (Kiwi.com + trivago + Spark web search + Wonder): Istanbul 25.7 s, $0.068; Paris with the visa-free switch to Istanbul 32.6 s, $0.075.
 
