@@ -324,7 +324,7 @@ export const darijaArab: Dictionary = {
   "package.cancelNo": "ما كيرجعوش الفلوس",
   "package.totalFor": "المجموع · الناس: {count}",
   "package.totalOne": "المجموع لشخص واحد",
-  "package.validate": "واخا، يالله",
+  "package.validate": "نكمّل",
   "package.missing": "حل الفورفي من النتيجة بعدا.",
   "package.perNight": "لليلة",
   "notice.visa_needed": "خاص ڤيزا للمدينة اللي طلبتي.",

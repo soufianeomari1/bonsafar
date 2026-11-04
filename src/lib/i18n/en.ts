@@ -348,7 +348,7 @@ export const en = {
   "package.cancelNo": "Non-refundable",
   "package.totalFor": "Total, {count} people",
   "package.totalOne": "Total, 1 person",
-  "package.validate": "I confirm",
+  "package.validate": "Continue",
   "package.missing": "Open a package from the result first.",
   "package.perNight": "per night",
 

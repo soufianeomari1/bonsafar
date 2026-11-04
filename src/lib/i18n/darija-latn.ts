@@ -325,7 +325,7 @@ export const darijaLatn: Dictionary = {
   "package.cancelNo": "Ma kayrejj3ouch lflous",
   "package.totalFor": "Lmejmo3 · nnas: {count}",
   "package.totalOne": "Lmejmo3 l chakhs wa7ed",
-  "package.validate": "Wakha, yallah",
+  "package.validate": "Nkemmel",
   "package.missing": "7ell lforfait men nnatija b3da.",
   "package.perNight": "l lila",
   "notice.visa_needed": "Khass visa l lmdina lli tlebti.",

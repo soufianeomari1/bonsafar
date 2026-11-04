@@ -323,7 +323,7 @@ export const ar: Dictionary = {
   "package.cancelNo": "غير قابل للاسترداد",
   "package.totalFor": "الإجمالي · الأشخاص: {count}",
   "package.totalOne": "الإجمالي لشخص واحد",
-  "package.validate": "أوافق",
+  "package.validate": "متابعة",
   "package.missing": "افتح باقة من النتيجة أولًا.",
   "package.perNight": "لليلة",
   "notice.visa_needed": "التأشيرة مطلوبة للمدينة التي طلبتها.",

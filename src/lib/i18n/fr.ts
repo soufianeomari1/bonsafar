@@ -332,7 +332,7 @@ export const fr: Dictionary = {
   "package.cancelNo": "Non remboursable",
   "package.totalFor": "Total, {count} personnes",
   "package.totalOne": "Total, 1 personne",
-  "package.validate": "Je valide",
+  "package.validate": "Je continue",
   "package.missing": "Ouvre d'abord un forfait depuis le résultat.",
   "package.perNight": "par nuit",
   "notice.visa_needed": "Un visa est nécessaire pour la ville demandée.",
