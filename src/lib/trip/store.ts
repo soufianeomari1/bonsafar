@@ -243,6 +243,20 @@ export async function startTextTrip(text: string): Promise<void> {
   await understandJob(created.id);
 }
 
+/** The intent saved with a recorded run, shown as is: no model call. */
+export function loadRecordedTrip(intent: Intent): void {
+  begin({
+    source: "text",
+    audioUrl: null,
+    durationMs: 0,
+    levels: [],
+    transcript: intent.translation_en,
+    phase: "ready",
+    wav: null,
+  });
+  if (job) set({ intent, rev: 1 }, job.id);
+}
+
 /**
  * Answer to the one question, or a city typed in the destination chip.
  * `unlock` is a fact this call is allowed to replace (the new city); every

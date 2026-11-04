@@ -116,7 +116,6 @@ export function JuryPill({
 }) {
   return (
     <JuryOnly>
-      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- needs a full page load */}
       <a
         href="/jury"
         className={cn(

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { UsageNotice } from "./UsageNotice";
 
 export type MobileFrameProps = React.ComponentPropsWithoutRef<"div"> & {
   /** Inner background when the screen is not on the default grey. */
@@ -33,6 +34,7 @@ export function MobileFrame({
         )}
       >
         {children}
+        <UsageNotice />
       </div>
     </div>
   );

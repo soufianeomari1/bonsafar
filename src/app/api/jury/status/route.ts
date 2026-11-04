@@ -1,15 +1,8 @@
 import { loadReplayRun } from "@/lib/agent/replay";
 import { isJuryRequest } from "@/lib/jury/access";
 import { JURY_SCENARIOS } from "@/lib/jury/scenarios";
+import type { JuryStatus } from "@/lib/jury/protocol";
 import { liveDisabled } from "@/lib/usage/guard";
-
-export type JuryStatus = {
-  live: boolean;
-  replays: Record<
-    string,
-    { captured_at: string; total_ms: number; cost_usd: number; legacy: boolean } | null
-  >;
-};
 
 /** What the judges' board can offer right now: live or replay only, and each recording. */
 export async function GET(request: Request) {
