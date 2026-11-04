@@ -63,6 +63,26 @@ const SearchResult = z.looseObject({
   error: z.string().nullish(),
 });
 
+export type KiwiSegment = {
+  from: string;
+  to: string;
+  from_city: string | null;
+  to_city: string | null;
+  /** Local times at each airport, as returned by Kiwi.com. */
+  departure: string;
+  arrival: string;
+  carrier_code: string | null;
+  carrier_name: string | null;
+  flight: string | null;
+};
+
+export type KiwiStopover = {
+  airport: string;
+  city: string | null;
+  /** Whole minutes on the ground, computed from the two local times at that airport. */
+  minutes: number;
+};
+
 export type KiwiLeg = {
   from: string;
   to: string;
@@ -74,7 +94,46 @@ export type KiwiLeg = {
   route: string[];
   flights: string[];
   carriers: string[];
+  /** Optional: runs saved before these fields still load. */
+  carrier_codes?: string[];
+  segments?: KiwiSegment[];
+  stopovers?: KiwiStopover[];
 };
+
+/** Minutes between two local times of the same airport. */
+function minutesBetween(from: string, to: string): number | null {
+  const a = Date.parse(`${from.slice(0, 19)}Z`);
+  const b = Date.parse(`${to.slice(0, 19)}Z`);
+  if (Number.isNaN(a) || Number.isNaN(b) || b < a) return null;
+  return Math.round((b - a) / 60_000);
+}
+
+function toSegments(raw: z.infer<typeof Segment>[]): KiwiSegment[] {
+  return raw.flatMap((s) =>
+    s.from && s.to && s.departureTime && s.arrivalTime
+      ? [
+          {
+            from: s.from,
+            to: s.to,
+            from_city: s.fromCity ?? null,
+            to_city: s.toCity ?? null,
+            departure: s.departureTime,
+            arrival: s.arrivalTime,
+            carrier_code: s.carrier ?? null,
+            carrier_name: s.carrierName ?? null,
+            flight: s.flightNumber ?? null,
+          },
+        ]
+      : [],
+  );
+}
+
+function toStopovers(segments: KiwiSegment[]): KiwiStopover[] {
+  return segments.slice(0, -1).flatMap((segment, index) => {
+    const minutes = minutesBetween(segment.arrival, segments[index + 1].departure);
+    return minutes == null ? [] : [{ airport: segment.to, city: segment.to_city, minutes }];
+  });
+}
 
 export type KiwiItinerary = {
   kiwi_id: string | null;
@@ -120,6 +179,7 @@ function toMinutes(seconds: number): number {
 
 function toLeg(leg: z.infer<typeof Leg> | null): KiwiLeg | null {
   if (!leg?.departureTime || !leg.arrivalTime || !leg.from || !leg.to) return null;
+  const segments = toSegments(leg.segments);
   return {
     from: leg.from,
     to: leg.to,
@@ -130,6 +190,9 @@ function toLeg(leg: z.infer<typeof Leg> | null): KiwiLeg | null {
     route: leg.route,
     flights: leg.segments.flatMap((s) => (s.flightNumber ? [s.flightNumber] : [])),
     carriers: [...new Set(leg.segments.flatMap((s) => (s.carrierName ? [s.carrierName] : [])))],
+    carrier_codes: [...new Set(leg.segments.flatMap((s) => (s.carrier ? [s.carrier] : [])))],
+    segments,
+    stopovers: toStopovers(segments),
   };
 }
 

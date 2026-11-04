@@ -52,8 +52,20 @@ const Accommodation = z.looseObject({
   longitude: z.number().nullish(),
   distance: z.string().nullish(),
   country_city: z.string().nullish(),
+  main_image: z.string().nullish(),
   deals: z.array(Deal).default([]),
 });
+
+/** Only trivago's image CDN over https, so the photo never points anywhere else. */
+function trivagoImage(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" && parsed.hostname.endsWith(".trivago.com") ? url : null;
+  } catch {
+    return null;
+  }
+}
 
 const AccommodationResult = z.looseObject({
   accommodations: z.array(Accommodation).default([]),
@@ -70,6 +82,8 @@ export type TrivagoHotel = {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
+  /** trivago photo URL (imgcy.trivago.com), or null. */
+  main_image: string | null;
   deal: {
     advertiser: string | null;
     /** Whole stay, all guests, in `currency`. */
@@ -132,6 +146,7 @@ function toHotel(raw: z.infer<typeof Accommodation>): TrivagoHotel | null {
     city: raw.country_city ?? null,
     latitude: raw.latitude ?? null,
     longitude: raw.longitude ?? null,
+    main_image: trivagoImage(raw.main_image),
     deal: best,
   };
 }
