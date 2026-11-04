@@ -22,7 +22,7 @@ import { ModelText } from "@/components/bs/ModelText";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
 import { placeName } from "@/lib/airports";
-import { addDays, dateRangeParts, formatDay, localeFor } from "@/lib/format";
+import { addDays, dateRangeParts, formatDay, formatLongDate } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import type { Lang, TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -57,17 +57,6 @@ const VISA_KEY: Record<string, TranslationKey> = {
   consular: "visaKind.consular",
   unknown: "visaKind.unknown",
 };
-
-function longDate(iso: string, lang: Lang): string {
-  const [year, month, day] = iso.split("-").map(Number);
-  return new Intl.DateTimeFormat(localeFor(lang), {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-    numberingSystem: "latn",
-  }).format(new Date(Date.UTC(year, month - 1, day)));
-}
 
 /** Screen 08, "08 Prêt à partir v2" of postfetch-compte-v2.html. The poster starts here. */
 export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
@@ -357,7 +346,7 @@ function rowText(
     case "passport": {
       const days = entry?.passport_validity_days ?? null;
       if (days == null || !arrival) return t("ready.passportCheckLine");
-      return t("ready.passportLine", { date: longDate(addDays(arrival, days), lang), days });
+      return t("ready.passportLine", { date: formatLongDate(addDays(arrival, days), lang), days });
     }
     case "baggage":
       return tile.ok ? t("ready.bagOkLine") : t("ready.bagLine");

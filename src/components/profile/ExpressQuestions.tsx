@@ -13,7 +13,7 @@ import {
 import { ChoiceButton, ChoiceCard } from "@/components/bs/Choice";
 import { Switch, SwitchGroup } from "@/components/bs/Switch";
 import { AIRPORTS as AIRPORT_TABLE, placeName } from "@/lib/airports";
-import { localeFor } from "@/lib/format";
+import { formatMonthName } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import type { TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -240,8 +240,7 @@ function MonthYear({
   const now = new Date();
   const [year, month] = value ? value.split("-").map(Number) : [null, null];
   const years = Array.from({ length: 11 }, (_, i) => now.getFullYear() + i);
-  const monthName = (m: number) =>
-    new Intl.DateTimeFormat(localeFor(lang), { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(2026, m - 1, 1)));
+  const monthName = (m: number) => formatMonthName(m, lang, "long");
   const set = (m: number | null, y: number | null) => {
     if (m && y) onChange(`${y}-${String(m).padStart(2, "0")}`);
   };
@@ -375,8 +374,7 @@ function sixMonthsAhead(yearMonth: string): boolean {
 /** Q4: budget per person, hotel standard, breakfast and favourite months. */
 export function StyleQuestion({ profile, update }: QuestionProps) {
   const { t, lang } = useLanguage();
-  const monthShort = (m: number) =>
-    new Intl.DateTimeFormat(localeFor(lang), { month: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2026, m - 1, 1)));
+  const monthShort = (m: number) => formatMonthName(m, lang, "short");
   return (
     <div className="flex flex-col gap-3">
       <Label>{t("express.style.budget")}</Label>

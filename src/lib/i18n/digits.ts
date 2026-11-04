@@ -1,7 +1,7 @@
 import type { Lang } from "./index";
 
 /**
- * Models sometimes write "سبع ليالٍ" or "sb3 lyali" although the prompts ask
+ * Models sometimes write "سبع ليالٍ" or "sb3 lyali" / "sb3 lilat" although the prompts ask
  * for digits. Before display, the most common number words (1 to 365) in
  * front of a day, night, week, month, hour or year are turned into Latin
  * digits. Only in front of those words, so "كل واحد" (each one) stays.
@@ -35,7 +35,7 @@ const AR_UNITS: Record<string, number> = {
 const AR_TEEN = /^(أحد|إحدى|احدى|اثنا|اثني|اثنتا|اثنتي)$/;
 
 const AR_AFTER =
-  "(?:يوم|يومًا|يوما|يومين|أيام|ايام|يام|نهار|ليلة|ليال|ليالٍ|ليالي|أسبوع|أسابيع|سيمانة|سيمانات|شهر|شهرًا|شهرا|أشهر|شهور|ساعة|ساعات|سوايع|دقيقة|دقائق|دقايق|سنة|سنوات|عام|أعوام|كيلومتر|كلم)";
+  "(?:يوم|يومًا|يوما|يومين|أيام|ايام|يام|نهار|ليلة|ليال|ليالٍ|ليالي|ليلات|أسبوع|أسابيع|سيمانة|سيمانات|شهر|شهرًا|شهرا|أشهر|شهور|ساعة|ساعات|سوايع|دقيقة|دقائق|دقايق|سنة|سنوات|عام|أعوام|كيلومتر|كلم)";
 
 const LATN_UNITS: Record<string, number> = {
   wa7ed: 1, wahed: 1, wa7da: 1, jouj: 2, jooj: 2, zouj: 2, tlata: 3, tlat: 3, rb3a: 4, reb3a: 4, rab3a: 4,
@@ -46,7 +46,7 @@ const LATN_UNITS: Record<string, number> = {
   sb3in: 70, seb3in: 70, tmanin: 80, ts3in: 90, tes3in: 90, mya: 100, myatin: 200,
 };
 
-const LATN_AFTER = "(?:youm|yom|iyam|ayam|yam|lila|lyali|liali|simana|simanat|chhar|chhor|chhour|sa3a|sa3at|d9i9a|dqiqa|3am|snin|km)";
+const LATN_AFTER = "(?:youm|yom|iyam|ayam|yam|lila|lilat|lyali|liali|simana|simanat|chhar|chhor|chhour|sa3a|sa3at|d9i9a|dqiqa|3am|snin|km)";
 
 function escape(word: string): string {
   return word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

@@ -1,9 +1,10 @@
 import type { Lang } from "@/lib/i18n";
 
 /**
- * fr-MA for travellers, en-GB for the judges and the English UI. Darija in
- * Arabic letters keeps the Moroccan months (دجنبر, ar-MA); Modern Standard
- * Arabic takes the standard ones (ديسمبر, ar). Digits stay Latin everywhere.
+ * fr-MA for French, en-GB for English, ar for Modern Standard Arabic.
+ * Darija does not trust ICU for month names: Latin letters always use the
+ * French names, Arabic letters the Moroccan French-origin names. Digits stay
+ * Latin everywhere.
  */
 export function localeFor(lang: Lang): string {
   switch (lang) {
@@ -16,6 +17,108 @@ export function localeFor(lang: Lang): string {
     default:
       return "fr-MA";
   }
+}
+
+const FRENCH_LONG = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
+] as const;
+
+const FRENCH_SHORT = [
+  "janv.",
+  "févr.",
+  "mars",
+  "avr.",
+  "mai",
+  "juin",
+  "juil.",
+  "août",
+  "sept.",
+  "oct.",
+  "nov.",
+  "déc.",
+] as const;
+
+/** Moroccan months of French origin, used in darija written with Arabic letters. */
+const DARIJA_ARAB_MONTHS = [
+  "يناير",
+  "فبراير",
+  "مارس",
+  "أبريل",
+  "ماي",
+  "يونيو",
+  "يوليوز",
+  "غشت",
+  "شتنبر",
+  "أكتوبر",
+  "نونبر",
+  "دجنبر",
+] as const;
+
+function imposedMonth(lang: Lang, index: number, width: "long" | "short"): string | null {
+  if (index < 0 || index > 11) return null;
+  if (lang === "darija-latn") return width === "long" ? FRENCH_LONG[index] : FRENCH_SHORT[index];
+  if (lang === "darija-arab") return DARIJA_ARAB_MONTHS[index];
+  return null;
+}
+
+function monthIndexInZone(date: Date, timeZone: string | undefined): number {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    month: "numeric",
+    timeZone,
+    numberingSystem: "latn",
+  }).formatToParts(date);
+  const value = parts.find((part) => part.type === "month")?.value;
+  return value ? Number(value) - 1 : date.getUTCMonth();
+}
+
+function formatInLocale(date: Date, lang: Lang, options: Intl.DateTimeFormatOptions): string {
+  const fmt = new Intl.DateTimeFormat(localeFor(lang), { ...options, numberingSystem: "latn" });
+  const width = options.month === "long" ? "long" : options.month ? "short" : null;
+  const imposed = width
+    ? imposedMonth(
+        lang,
+        monthIndexInZone(date, typeof options.timeZone === "string" ? options.timeZone : undefined),
+        width,
+      )
+    : null;
+  if (!imposed) return fmt.format(date);
+  return fmt.formatToParts(date).map((part) => (part.type === "month" ? imposed : part.value)).join("");
+}
+
+/** Month name for pickers. 1 = January. Darija uses the imposed tables. */
+export function formatMonthName(month: number, lang: Lang, width: "long" | "short" = "short"): string {
+  return formatInLocale(new Date(Date.UTC(2026, month - 1, 1)), lang, { month: width, timeZone: "UTC" });
+}
+
+/** "15 novembre 2026" style, Latin digits, calendar date of an ISO day. */
+export function formatLongDate(iso: string, lang: Lang): string {
+  return formatInLocale(utcDate(iso), lang, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+/** "novembre 2026", in the viewer's timezone. */
+export function formatMonthYear(date: Date, lang: Lang): string {
+  return formatInLocale(date, lang, { month: "long", year: "numeric" });
+}
+
+/** "novembre 2026" for an ISO departure day. Passed to models as the travel month. */
+export function formatTravelMonth(iso: string, lang: Lang): string {
+  return formatInLocale(utcDate(iso), lang, { month: "long", year: "numeric", timeZone: "UTC" });
 }
 
 /**
@@ -42,28 +145,18 @@ export function dateRangeParts(
 ): { from: string; to: string } {
   const a = utcDate(depart);
   const b = utcDate(ret);
-  const locale = localeFor(lang);
-  const full = new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    numberingSystem: "latn",
-  });
+  const full = (date: Date) =>
+    formatInLocale(date, lang, { day: "numeric", month: "short", timeZone: "UTC" });
   const sameMonth =
     a.getUTCMonth() === b.getUTCMonth() && a.getUTCFullYear() === b.getUTCFullYear();
   const from = sameMonth
-    ? new Intl.DateTimeFormat(locale, { day: "numeric", timeZone: "UTC", numberingSystem: "latn" }).format(a)
-    : full.format(a);
-  return { from, to: full.format(b) };
+    ? formatInLocale(a, lang, { day: "numeric", timeZone: "UTC" })
+    : full(a);
+  return { from, to: full(b) };
 }
 
 export function formatDay(iso: string, lang: Lang): string {
-  return new Intl.DateTimeFormat(localeFor(lang), {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    numberingSystem: "latn",
-  }).format(utcDate(iso));
+  return formatInLocale(utcDate(iso), lang, { day: "numeric", month: "short", timeZone: "UTC" });
 }
 
 export function nightsBetween(depart: string, ret: string): number {
@@ -153,37 +246,26 @@ export function formatTime(value: string): string {
 
 /** "Tue 15 Dec" style, Latin digits, the calendar date of an ISO day. */
 export function formatTripDate(iso: string, lang: Lang): string {
-  return new Intl.DateTimeFormat(localeFor(lang), {
+  return formatInLocale(utcDate(iso), lang, {
     weekday: "short",
     day: "numeric",
     month: "short",
     timeZone: "UTC",
-    numberingSystem: "latn",
-  }).format(utcDate(iso));
+  });
 }
 
 /** "Dec" from "2026-12". */
 export function formatMonth(yearMonth: string, lang: Lang): string {
   const [year, month] = yearMonth.split("-").map(Number);
   if (!year || !month) return yearMonth;
-  return new Intl.DateTimeFormat(localeFor(lang), {
-    month: "short",
-    timeZone: "UTC",
-    numberingSystem: "latn",
-  }).format(new Date(Date.UTC(year, month - 1, 1)));
+  return formatInLocale(new Date(Date.UTC(year, month - 1, 1)), lang, { month: "short", timeZone: "UTC" });
 }
 
 /** When a price was captured, with the time. Latin digits. */
 export function formatWhen(iso: string, lang: Lang): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat(localeFor(lang), {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    numberingSystem: "latn",
-  }).format(date);
+  return formatInLocale(date, lang, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
 /** Whole days from today in Morocco until an ISO departure date. */

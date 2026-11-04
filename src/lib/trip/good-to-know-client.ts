@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { appendRunEvents, rememberGoodToKnow, type AgentRunSnapshot } from "@/lib/agent-client/store";
 import type { RunEvent } from "@/lib/ai/events";
 import { airportCity } from "@/lib/airports";
+import { formatTravelMonth } from "@/lib/format";
 import type { Lang } from "@/lib/i18n";
 import { scriptForLang, type Profile } from "@/lib/profile/schema";
 import { asFlight, asHotel, pickOption } from "./selection";
@@ -16,7 +17,7 @@ export type GoodToKnowNotes = {
   weather: GoodToKnowLine;
 };
 
-const CACHE = "bonsafar.good-to-know.v2";
+const CACHE = "bonsafar.good-to-know.v3";
 
 type Payload = { ok: true; notes: GoodToKnowNotes; events: RunEvent[] } | { ok: false; events?: RunEvent[] };
 
@@ -127,12 +128,10 @@ export function peekGoodToKnow(run: AgentRunSnapshot, lang: Lang): GoodToKnowNot
   return typeof window === "undefined" ? null : (readCache(key)?.notes ?? null);
 }
 
-function monthLabel(iso: string): string {
+function monthLabel(iso: string, lang: Lang): string {
   const [year, month, day] = iso.split("-").map(Number);
   if (!year || !month || !day) return iso;
-  return new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(
-    new Date(Date.UTC(year, month - 1, day)),
-  );
+  return formatTravelMonth(iso, lang);
 }
 
 /** What /api/good-to-know needs for the chosen package of this run. */
@@ -155,7 +154,7 @@ export function goodToKnowInput(run: AgentRunSnapshot, profile: Profile, lang: L
     originIata,
     destinationIata,
     departDate: depart,
-    month: monthLabel(depart),
+    month: monthLabel(depart, lang),
     script: scriptForLang(lang, profile.darija_script),
     lang,
   };

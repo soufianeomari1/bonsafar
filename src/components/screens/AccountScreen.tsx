@@ -27,7 +27,7 @@ import { InstallButton } from "@/components/pwa/InstallButton";
 import { BookingPill } from "@/components/trip/BookingPill";
 import { HotelPhoto, SectionTitle } from "@/components/trip/TripBits";
 import { placeName } from "@/lib/airports";
-import { dateRangeParts, localeFor } from "@/lib/format";
+import { dateRangeParts, formatMonthName, formatMonthYear } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import { translate, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -53,7 +53,7 @@ export function AccountScreen() {
   const nextQuestion = QUESTIONS.find((question) => !isAnswered(profile, question)) ?? null;
   const name = profile.first_name?.trim() || null;
   const since = user?.created_at
-    ? new Intl.DateTimeFormat(localeFor(lang), { month: "long", year: "numeric", numberingSystem: "latn" }).format(new Date(user.created_at))
+    ? formatMonthYear(new Date(user.created_at), lang)
     : null;
 
   const prefRows: { id: Exclude<Editing, null | "whatsapp" | "delete">; icon: Icon; label: TranslationKey; value: string | null }[] = [
@@ -303,9 +303,9 @@ function tripCity(trip: FrozenTrip, lang: Parameters<typeof placeName>[1]): stri
   return placeName(trip.package.destination.iata, lang, trip.package.destination.city);
 }
 
-function tripMonth(trip: FrozenTrip, lang: Parameters<typeof localeFor>[0]): string {
-  const [y, m] = trip.package.hotel.attrs.arrival.split("-").map(Number);
-  return new Intl.DateTimeFormat(localeFor(lang), { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, 1)));
+function tripMonth(trip: FrozenTrip, lang: Parameters<typeof formatMonthName>[1]): string {
+  const [, m] = trip.package.hotel.attrs.arrival.split("-").map(Number);
+  return m ? formatMonthName(m, lang, "long") : "";
 }
 
 function TripCard({ trip }: { trip: FrozenTrip }) {
