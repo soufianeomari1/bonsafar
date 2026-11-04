@@ -281,6 +281,7 @@ export const darijaArab: Dictionary = {
   "plan.error.interrupted": "البحث تقطع. عاود.",
   "result.title": "الفورفي ديالك",
   "result.subtitle": "قارنت ليك {count} ديال الاختيارات",
+  "result.subtitleOne": "اختيار واحد ختارناه ليك",
   "result.recommended": "مقترح",
   "result.direct": "ديريكت",
   "result.cheapest": "أرخص واحد",

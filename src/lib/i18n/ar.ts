@@ -280,6 +280,7 @@ export const ar: Dictionary = {
   "plan.error.interrupted": "انقطع البحث. أعد المحاولة.",
   "result.title": "باقتك",
   "result.subtitle": "الخيارات التي قارنّاها لك: {count}",
+  "result.subtitleOne": "خيار واحد اخترناه لك",
   "result.recommended": "موصى به",
   "result.direct": "مباشر",
   "result.cheapest": "الأرخص",

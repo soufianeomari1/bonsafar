@@ -128,8 +128,17 @@ function review(raw: WonderOutput, ctx: AgentContext, store: PriceStore, log: Ru
     if (flight && cityKey(f.destination) !== cityKey(flight.destination)) return false;
     if (cityKey(f.destination) !== cityKey(h.destination)) return false;
     if (alt.flight_id === output.recommended.flight_id && alt.hotel_id === output.recommended.hotel_id) return false;
-    if (alt.label === "direct" && totalStops(f) !== 0) return false;
-    if (alt.label === "cheapest" && f.price_mad + h.price_mad >= recTotal) return false;
+    if (alt.label === "direct" && (totalStops(f) !== 0 || (flight != null && totalStops(flight) === 0))) return false;
+    if (alt.label === "cheapest") {
+      const altTotal = f.price_mad + h.price_mad;
+      if (altTotal >= recTotal) return false;
+      const people = Math.max(
+        1,
+        (flight?.attrs.passengers.adults ?? 0) + (flight?.attrs.passengers.children ?? 0),
+      );
+      const minimum = Math.max(recTotal * 0.1, 250 * people);
+      if (recTotal - altTotal < minimum) return false;
+    }
     labels.add(alt.label);
     return true;
   });

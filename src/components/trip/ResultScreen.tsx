@@ -94,7 +94,9 @@ export function ResultScreen() {
         <section className="relative -mt-[22px] flex flex-col gap-3 rounded-t-[26px] bg-bg px-5 pb-6 pt-[22px]">
           <div>
             <h1 className="text-[27px] font-extrabold tracking-[-0.03em] rtl:tracking-normal">{t("result.title")}</h1>
-            <p className="mt-0.5 text-sm text-muted">{t("result.subtitle", { count: rows.length })}</p>
+            <p className="mt-0.5 text-sm text-muted">
+              {rows.length === 1 ? t("result.subtitleOne") : t("result.subtitle", { count: rows.length })}
+            </p>
             {pack.entry?.visa_needed && (
               <p className="mt-2 inline-flex h-7 items-center rounded-pill bg-orange-soft px-[11px] text-[12.5px] font-semibold text-orange">
                 {t("package.pillVisa")}

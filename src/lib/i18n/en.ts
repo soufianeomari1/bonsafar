@@ -303,6 +303,7 @@ export const en = {
   // 6 · Result
   "result.title": "Your package",
   "result.subtitle": "{count} options compared for you",
+  "result.subtitleOne": "1 option picked for you",
   "result.recommended": "RECOMMENDED",
   "result.direct": "DIRECT",
   "result.cheapest": "CHEAPEST",

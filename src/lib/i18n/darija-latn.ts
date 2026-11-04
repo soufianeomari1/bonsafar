@@ -282,6 +282,7 @@ export const darijaLatn: Dictionary = {
   "plan.error.interrupted": "Lb7ath t9te3. 3awed.",
   "result.title": "Lforfait dyalek",
   "result.subtitle": "9arent lik {count} d lkhtiyarat",
+  "result.subtitleOne": "1 ikhtiyar khtarnah lik",
   "result.recommended": "MO9TARA7",
   "result.direct": "DIRECT",
   "result.cheapest": "Arkhass wa7d",

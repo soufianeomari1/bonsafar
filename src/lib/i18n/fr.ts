@@ -289,6 +289,7 @@ export const fr: Dictionary = {
   "plan.error.interrupted": "La recherche a été interrompue. Réessaie.",
   "result.title": "Ton forfait",
   "result.subtitle": "{count} options comparées pour toi",
+  "result.subtitleOne": "1 option choisie pour toi",
   "result.recommended": "RECOMMANDÉ",
   "result.direct": "DIRECT",
   "result.cheapest": "LE MOINS CHER",
