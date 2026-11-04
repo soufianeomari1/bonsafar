@@ -90,7 +90,7 @@ No non-Meta AI model is used at runtime. Code was written with AI coding assista
 
 - **No audio is ever stored.** The voice note is transcribed, then dropped; only the transcript is kept.
 - **Progressive profile:** BonSafar asks only what it needs to plan a trip it can actually book (home airport, who travels, papers held), works without an account, and keeps the profile in the browser until you sign in.
-- **Export and deletion:** you can ask for an export or the deletion of your data (see the privacy page); deleting an account removes its profile and trips from the database.
+- **Export and deletion:** the account screen downloads all your data as a JSON file and deletes everything in one tap; deleting an account removes its profile and trips from the database.
 - No payment data ever reaches BonSafar: you pay on the partner's site.
 - The voice notes of the demo were recorded by two people close to the project, with their written consent.
 
