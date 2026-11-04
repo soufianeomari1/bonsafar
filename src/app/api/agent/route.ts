@@ -96,8 +96,15 @@ export async function POST(request: Request) {
   const agentRequest = {
     ...parsed.data,
     jury: parsed.data.jury && jury,
-    // Only jury runs are labelled, so a tester's run never becomes a judges' replay.
-    scenario: jury && parsed.data.scenario && JURY_LABELS.includes(parsed.data.scenario) ? parsed.data.scenario : null,
+    // Jury labels and the two public demos. Anything else stays unlabelled.
+    scenario:
+      jury &&
+      parsed.data.scenario &&
+      (JURY_LABELS.includes(parsed.data.scenario) ||
+        parsed.data.scenario === "istanbul" ||
+        parsed.data.scenario === "paris")
+        ? parsed.data.scenario
+        : null,
   };
 
   const blocked = await admitLiveRun(request, jury);
