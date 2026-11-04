@@ -8,8 +8,10 @@ import { AirplaneTilt, Export, GoogleLogo, Star } from "@phosphor-icons/react";
 import { Safar } from "@/components/bs/Safar";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
-import { airportCity } from "@/lib/airports";
-import { formatDay, formatFlightNumbers, formatMad, formatTime, formatTripDate } from "@/lib/format";
+import { airportCity, placeName } from "@/lib/airports";
+import { formatDay, formatMad, formatTime, formatTripDate } from "@/lib/format";
+import type { Lang, TranslateValues, TranslationKey } from "@/lib/i18n";
+import { legCarriers, legSentence } from "@/lib/trip/describe";
 import { haptic } from "@/lib/haptics";
 import { useLanguage } from "@/lib/i18n/provider";
 import { readPoster, readServerPoster, subscribePoster } from "@/lib/poster/client";
@@ -106,7 +108,7 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
     );
   }
 
-  const view = describe(pack, lang);
+  const view = describe(pack, lang, t);
   const name = profile.first_name?.trim() ?? "";
 
   async function share() {
@@ -160,19 +162,23 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
               }
             >
               <div className="bg-green px-4 pb-3.5 pt-4 text-card">
-                <div className="flex items-center justify-between font-mono text-[11px] font-semibold tracking-wide opacity-90">
-                  <span>{t("file.demo")}</span>
-                  <span>
-                    <bdi>{view.flights}</bdi>
-                  </span>
+                <div className="flex items-center justify-between gap-2 font-mono text-[11px] font-semibold tracking-wide opacity-90">
+                  <span className="shrink-0 whitespace-nowrap">{t("file.demo")}</span>
+                  <span className="min-w-0 truncate font-sans normal-case tracking-normal">{view.carriers}</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-[44px] font-extrabold leading-none tracking-tight">
-                    <bdi>{view.from}</bdi>
+                <div className="mt-2 flex items-center justify-between" dir="ltr">
+                  <span className="flex flex-col">
+                    <span className="text-[44px] font-extrabold leading-none tracking-tight">{view.from}</span>
+                    <span className="mt-1 text-xs font-semibold opacity-90" dir="auto">
+                      {view.fromCity}
+                    </span>
                   </span>
-                  <AirplaneTilt size={28} weight="fill" aria-hidden />
-                  <span className="text-[44px] font-extrabold leading-none tracking-tight">
-                    <bdi>{view.to}</bdi>
+                  <AirplaneTilt size={28} weight="light" aria-hidden />
+                  <span className="flex flex-col items-end">
+                    <span className="text-[44px] font-extrabold leading-none tracking-tight">{view.to}</span>
+                    <span className="mt-1 text-xs font-semibold opacity-90" dir="auto">
+                      {view.toCity}
+                    </span>
                   </span>
                 </div>
               </div>
@@ -204,7 +210,7 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
                 animate={stamp ? { opacity: 1, scale: 1, rotate: -12 } : { opacity: 0, scale: 1.4, rotate: -20 }}
                 transition={reduced ? { duration: 0.2 } : { type: "spring", duration: 0.4, bounce: 0.4 }}
               >
-                <Star size={26} weight="bold" className="text-stamp-green" aria-hidden />
+                <Star size={26} weight="light" className="text-stamp-green" aria-hidden />
                 <span className="mt-0.5 font-mono text-[10px] font-bold tracking-[0.08em]">{t("file.stamp")}</span>
                 <span className="font-mono text-[9px] font-semibold">BONSAFAR</span>
               </motion.div>
@@ -248,7 +254,7 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
             onClick={() => void signInWithGoogle(withTripSearch("/trip/file"))}
             className="mb-2.5 flex h-14 w-full items-center justify-center gap-2 rounded-button bg-card text-base font-bold shadow-soft"
           >
-            <GoogleLogo size={18} weight="bold" aria-hidden />
+            <GoogleLogo size={18} weight="light" aria-hidden />
             {t("file.saveGoogle")}
           </button>
         )}
@@ -265,7 +271,7 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
             onClick={() => void share()}
             className="flex h-14 items-center justify-center gap-2 rounded-button bg-blue text-base font-bold text-card"
           >
-            <Export size={18} weight="bold" aria-hidden />
+            <Export size={18} weight="light" aria-hidden />
             {t("file.share")}
           </button>
         </div>
@@ -295,27 +301,33 @@ function DemoQr() {
   );
 }
 
-function describe(pack: FrozenPackage, lang: Parameters<typeof formatTripDate>[1]) {
+function describe(
+  pack: FrozenPackage,
+  lang: Lang,
+  t: (key: TranslationKey, values?: TranslateValues) => string,
+) {
   const out = pack.flight.attrs.outbound;
   const back = pack.flight.attrs.inbound;
   const date = formatDay(out.departure.slice(0, 10), lang);
   const backDate = back ? formatTripDate(back.departure.slice(0, 10), lang) : "";
-  const backFlight = back?.flights[0] ?? "";
+  const backLine = back ? legSentence(back, lang, t) : null;
   const rangeFrom = formatDay(pack.hotel.attrs.arrival, lang);
   const rangeTo = formatDay(pack.hotel.attrs.departure, lang);
   return {
     from: out.from,
     to: out.to,
-    flights: formatFlightNumbers(out.flights),
+    fromCity: placeName(out.from, lang, out.segments?.[0]?.from_city),
+    toCity: placeName(out.to, lang, out.segments?.at(-1)?.to_city),
+    carriers: legCarriers(out, t),
     date: date.toLocaleUpperCase(lang === "en" ? "en-GB" : "fr-FR"),
     time: formatTime(out.departure),
     passengers: pack.totals.passengers,
     hotel: pack.hotel.attrs.name,
     nights: pack.hotel.attrs.nights || pack.totals.hotel.nights,
     breakfast: pack.hotel.attrs.breakfast,
-    returnLabel: [backDate, backFlight].filter(Boolean).join(" · "),
+    returnLabel: [backDate, backLine?.carriers, backLine?.detail].filter(Boolean).join(" · "),
     readyOk: pack.ready_ok,
-    city: pack.destination.city,
+    city: placeName(pack.destination.iata, lang, pack.destination.city),
     dates: `${rangeFrom} – ${rangeTo}`,
     total: formatMad(pack.totals.total_display_mad),
   };
