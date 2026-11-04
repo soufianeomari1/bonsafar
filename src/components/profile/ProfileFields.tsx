@@ -50,7 +50,7 @@ export function LanguageFields({ profile, update }: FieldsProps) {
           choice.script === "latn"
             ? t("onboarding.language.scriptLatin")
             : choice.script === "arab"
-              ? native("onboarding.language.scriptArabic")
+              ? t("onboarding.language.scriptArabic")
               : null;
         return (
           <ChoiceCard

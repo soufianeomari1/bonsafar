@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useModelText, type ModelLine } from "@/lib/agent-client/model-text";
 import { haptic } from "@/lib/haptics";
 import { useLanguage } from "@/lib/i18n/provider";
 import type { Intent } from "@/lib/intent/schema";
@@ -10,7 +11,7 @@ import { enterTransition, enterVariants } from "@/lib/motion";
 
 type Question = NonNullable<Intent["question"]>;
 
-/** The single question of mockup 04, with quick replies. */
+/** The single question of mockup 04, with quick replies, in the interface language. */
 export function QuestionCard({
   question,
   onAnswer,
@@ -22,17 +23,13 @@ export function QuestionCard({
   const reduced = useReducedMotion();
   const [other, setOther] = useState(false);
   const [text, setText] = useState("");
-
-  const english = jury || lang === "en";
-  const title = english ? question.en : question.darija;
-  const subtitle = english ? question.darija : question.fr;
-  const asked = english ? question.en : question.fr;
+  const title = useModelText(question, lang);
 
   function answer(value: string) {
     const trimmed = value.trim();
     if (!trimmed) return;
     haptic("select");
-    onAnswer(asked, trimmed);
+    onAnswer(title.text || question.en, trimmed);
   }
 
   return (
@@ -47,29 +44,24 @@ export function QuestionCard({
         {t("understood.questionBadge")}
       </span>
       <span className="flex flex-col gap-0.5">
-        <span className="text-xl font-extrabold" dir="auto">
-          {title}
-        </span>
-        <span className="text-[15px] text-muted" dir="auto">
-          {subtitle}
-        </span>
+        {title.pending ? (
+          <span aria-busy="true" className="block h-7 w-4/5 animate-pulse rounded-full bg-fill" />
+        ) : (
+          <span className={title.arabic ? "font-arabic text-xl font-extrabold" : "text-xl font-extrabold"} dir="auto">
+            {title.text}
+          </span>
+        )}
+        {jury && (
+          <span className="text-[15px] text-muted" dir="auto">
+            {question.darija}
+          </span>
+        )}
       </span>
       {question.options.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
-          {question.options.map((option, index) => {
-            const label = english ? option.en : option.darija;
-            return (
-              <button
-                key={index}
-                type="button"
-                onClick={() => answer(english ? option.en : option.fr)}
-                dir="auto"
-                className="flex min-h-[52px] items-center justify-center rounded-button-sm bg-fill px-3 text-center text-[17px] font-bold text-ink"
-              >
-                {label}
-              </button>
-            );
-          })}
+          {question.options.map((option, index) => (
+            <OptionButton key={index} option={option} onPick={answer} />
+          ))}
         </div>
       )}
       {other ? (
@@ -108,5 +100,25 @@ export function QuestionCard({
         </button>
       )}
     </motion.section>
+  );
+}
+
+function OptionButton({ option, onPick }: { option: ModelLine; onPick: (answer: string) => void }) {
+  const { lang } = useLanguage();
+  const label = useModelText(option, lang);
+  return (
+    <button
+      type="button"
+      disabled={label.pending}
+      onClick={() => onPick(label.text || option.en)}
+      dir="auto"
+      className={
+        label.arabic
+          ? "flex min-h-[52px] items-center justify-center rounded-button-sm bg-fill px-3 text-center font-arabic text-[17px] font-bold text-ink"
+          : "flex min-h-[52px] items-center justify-center rounded-button-sm bg-fill px-3 text-center text-[17px] font-bold text-ink"
+      }
+    >
+      {label.pending ? <span aria-hidden className="block h-4 w-16 animate-pulse rounded-full bg-line" /> : label.text}
+    </button>
   );
 }

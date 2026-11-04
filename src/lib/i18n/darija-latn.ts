@@ -10,8 +10,10 @@ export const darijaLatn: Dictionary = {
   "common.retry": "3awed",
   "common.share": "Chareki",
   "common.understood": "Mfhoum",
-  "common.juryMode": "Mode jury",
-  "common.signIn": "Kmel m3a Google",
+  // TODO(i18n)
+  "common.juryMode": "Mod dyal lajna",
+  // TODO(i18n)
+  "common.signIn": "Continuer avec Google",
   "common.signOut": "Khrouj",
   "common.signedInAs": "Dakhel b {name}",
   "common.signedOut": "Machi dakhel",
@@ -20,8 +22,10 @@ export const darijaLatn: Dictionary = {
   "common.save": "Sjjel",
   "common.remove": "7eyyed",
   "common.other": "Chi 7aja khra",
-  "common.privacy": "Confidentialité",
-  "common.terms": "Conditions",
+  // TODO(i18n)
+  "common.privacy": "Lkhossossiya",
+  // TODO(i18n)
+  "common.terms": "Churut",
 
   "welcome.tagline": "trik slama",
   // TODO: review before the demo
@@ -29,7 +33,8 @@ export const darijaLatn: Dictionary = {
   // TODO: review before the demo
   "welcome.step2": "[[Safar]] 3lina.",
   // TODO: review before the demo
-  "welcome.sub": "Tiyara, otel, visa w bagages, kolchi mt7a99e9, b taman l7a9i9i.",
+  // TODO(i18n)
+  "welcome.sub": "Tiyara, otel, visa w lbagaj, kolchi mt7a99e9, b taman l7a9i9i.",
   // TODO: review before the demo
   "welcome.pitch": "Safrek jay wajed f d9i9a.",
   "welcome.google": "Continuer avec Google",
@@ -56,9 +61,11 @@ export const darijaLatn: Dictionary = {
   "welcome.demo.city": "Istanbul",
   // TODO: review before the demo
   "welcome.demo.country": "Turkia · 7 lyali",
-  "welcome.demo.dates": "15 → 22 déc.",
+  // TODO(i18n)
+  "welcome.demo.dates": "15 → 22 dujanbir",
   // TODO: review before the demo
-  "welcome.demo.when": "nouss décembre",
+  // TODO(i18n)
+  "welcome.demo.when": "nouss dujanbir",
   // TODO: review before the demo
   "welcome.demo.adults": "2 kbar",
   // TODO: review before the demo
@@ -69,7 +76,8 @@ export const darijaLatn: Dictionary = {
 
   "onboarding.step": "Khatwa {current} men {total}",
   "onboarding.hello": "Salam {name}",
-  "onboarding.language.ask": "Salam ! B ach t7eb nhdro ?",
+  // TODO(i18n)
+  "onboarding.language.ask": "Salam ! Mr7ba bik f BonSafar.",
   // TODO: translated by the agent, not taken from the mockup.
   "onboarding.language.note": "Tqder tbddel hadchi weqt ma bghiti f profil dyalek.",
   "onboarding.language.title": "Bghiti nhedro b…",
@@ -77,10 +85,12 @@ export const darijaLatn: Dictionary = {
   "onboarding.language.groupLabel": "Logha",
   "onboarding.language.scriptLabel": "Kteb darija b",
   "onboarding.language.scriptLatin": "7rouf latiniya",
-  "onboarding.language.scriptArabic": "حروف عربية",
+  // TODO(i18n)
+  "onboarding.language.scriptArabic": "7rouf 3arbiya",
   "onboarding.trip.title": "Mnin katkhrej, w m3a men ?",
   "onboarding.trip.subtitle": "Ma n3awdch nsewlek had sou2al.",
-  "onboarding.trip.airportLabel": "L'aéroport dyalek",
+  // TODO(i18n)
+  "onboarding.trip.airportLabel": "Lmatar dyalek",
   "onboarding.trip.companionsLabel": "Katsafer",
   "onboarding.trip.children": "Drari",
   "onboarding.trip.childrenLess": "Weld 9al",
@@ -93,13 +103,15 @@ export const darijaLatn: Dictionary = {
   "onboarding.papers.schengenHint": "Katfta7 Fransa, Sbanya, Italya…",
   "onboarding.papers.passport6m": "Passport sal7 kter men 6 chhor",
   "onboarding.papers.passport6mHint": "Bzzaf d charikat katalbo hadchi",
-  "onboarding.papers.card": "Carte bancaire internationale",
+  // TODO(i18n)
+  "onboarding.papers.card": "Lkarta bankiya dawliya",
   "onboarding.papers.cardHint": "Bach tkhelles 3end charik",
   "onboarding.papers.note":
     "Bla visa Schengen, kan9terh 3lik l'blayes li tqder tmchi lihom bla visa, w nwerrik kifach tatleb Schengen.",
   "onboarding.style.title": "Style dyalek",
   "onboarding.style.subtitle": "Bach nkhtar lik otelat w tiyarat li kay3jbouk.",
-  "onboarding.style.optionsLabel": "Options",
+  // TODO(i18n)
+  "onboarding.style.optionsLabel": "Lkhiyarat",
   "passport.moroccan": "Maghribi",
   "passport.french": "Franssawi",
   "passport.both": "Bjouj",
@@ -117,7 +129,8 @@ export const darijaLatn: Dictionary = {
   "airport.OUD": "Wejda",
   "style.budget": "Budget sghir",
   "style.budget.hint": "Otelat 3 njoum, a7san taman",
-  "style.comfort": "Confort",
+  // TODO(i18n)
+  "style.comfort": "Konfor",
   "style.comfort.hint": "Otelat 4 njoum, f blasa mzyana",
   "style.premium": "Premium",
   "style.premium.hint": "Otelat 5 njoum, tiyarat direct",
@@ -126,10 +139,14 @@ export const darijaLatn: Dictionary = {
   "prefs.breakfast": "Ftour dakhel",
   "prefs.breakfast.hint": "F l'otel, kol sba7",
   "prefs.halal": "Halal 9rib",
-  "prefs.halal.hint": "Restaurants 9rab l'otel",
-  "prefs.accessibility": "Accessibilité",
-  "prefs.accessibility.hint": "Mobilité réduite",
-  "prefs.haptics": "Vibrations",
+  // TODO(i18n)
+  "prefs.halal.hint": "Ristorat 9rab l'otel",
+  // TODO(i18n)
+  "prefs.accessibility": "Lwoulouj",
+  // TODO(i18n)
+  "prefs.accessibility.hint": "7araka m7douda",
+  // TODO(i18n)
+  "prefs.haptics": "Vibreur",
   "prefs.haptics.hint": "Rez9a sghira m3a kol 7araka",
 
   "trust.title": "Taman l7a9i9i, daba.",
@@ -142,7 +159,8 @@ export const darijaLatn: Dictionary = {
 
   "profile.title": "Profil dyalek",
   "profile.open": "Profil dyalek",
-  "profile.account": "Compte",
+  // TODO(i18n)
+  "profile.account": "L7sab",
   "profile.anonymous": "Profil dyalek b9a f had tilifoun.",
   "profile.keepWithGoogle": "7tafed b profil m3a Google",
   "profile.sectionLanguage": "Logha",
@@ -159,48 +177,63 @@ export const darijaLatn: Dictionary = {
   "home.micTitle": "Brek w hder",
   "home.micHint": "Brek w hder, b darija wla b franssawiya",
   "home.bubble": "Brek w hder",
-  "home.bubbleHint": "Brek w hder, b darija wla b franssawiya",
+  // TODO(i18n)
+  "home.bubbleHint": "Kanfhem darija w franssawiya.",
   "home.ideasVisa": "AFKAR BLA VISA LIK",
   "home.ideasLabel": "AFKAR DYAL SAFAR",
   "home.muse": "MUSE IMAGE",
   "home.writeLabel": "Kteb talab dyalek",
   "home.writePlaceholder": "wla kteb hna…",
   "home.send": "Sifet",
-  "home.example.istanbul": "Istanbul m3a rajli f décembre, chi semaine",
-  "home.example.marrakech": "Weekend f Marrakech, otel b piscine",
-  "home.example.visa": "Fin nmchi bla visa had l'été ?",
-  "home.example.family": "Bghit nsafer m3a l'wlad f les vacances",
-  "home.chip.istanbul": "Istanbul f décembre",
-  "home.chip.visa": "Bla visa had l'été",
-  "home.chip.marrakech": "Weekend f Marrakech",
+  // TODO(i18n)
+  "home.example.istanbul": "Istanbul m3a rajli f dujanbir, chi simana",
+  // TODO(i18n)
+  "home.example.marrakech": "Wikand f Marrakech, otel fih lpisin",
+  // TODO(i18n)
+  "home.example.visa": "Fin nmchi bla visa had sif ?",
+  // TODO(i18n)
+  "home.example.family": "Bghit nsafer m3a lwlad f l3otla",
+  // TODO(i18n)
+  "home.chip.istanbul": "Istanbul f dujanbir",
+  // TODO(i18n)
+  "home.chip.visa": "Bla visa had sif",
+  // TODO(i18n)
+  "home.chip.marrakech": "Wikand f Marrakech",
   "home.bubbleWrite": "Ktebha liya",
-  "home.bubbleWriteHint": "Wla kteb liya rihla dyalek",
+  // TODO(i18n)
+  "home.bubbleWriteHint": "Kanqra darija, franssawiya w ngliziya.",
   "home.holdLead": "Brek",
-  "home.holdRest": "w hder · darija wla français",
-  "home.micDenied":
-    "Micro msdoud. 7ellou f réglages dyal navigateur, wla kteb talab dyalek lta7t.",
+  // TODO(i18n)
+  "home.holdRest": "w hder · darija wla franssawiya",
+  // TODO(i18n)
+  "home.micDenied": "Lmicro msdoud. 7ellou f i3dadat dyal navigateur, wla kteb talab dyalek lta7t.",
   "home.micUnsupported": "Had navigateur ma kaysjjelch. Kteb talab dyalek lta7t.",
   "home.tooShort": "9sir bzzaf. Khelli sbe3 m7tout mli kathder.",
-  "idea.istanbul.title": "Istanbul f décembre",
+  // TODO(i18n)
+  "idea.istanbul.title": "Istanbul f dujanbir",
   "idea.istanbul.sub": "Bla visa · 4 h 40 d tiyara",
-  "idea.paris.title": "Paris weekend",
+  // TODO(i18n)
+  "idea.paris.title": "Paris f wikand",
   "idea.paris.sub": "3 h d tiyara · visa Schengen",
   "idea.paris.subFree": "3 h d tiyara · bla visa",
   "idea.omra.title": "L3omra",
   "idea.omra.sub": "Lwraq khatwa b khatwa",
   "idea.tunis.title": "Tounes f rbi3",
   "idea.tunis.sub": "Bla visa",
-  "idea.barcelona.title": "Barcelona weekend",
+  // TODO(i18n)
+  "idea.barcelona.title": "Barcelona f wikand",
   "idea.barcelona.sub": "Visa Schengen",
   "idea.barcelona.subFree": "Bla visa",
 
   // TODO: translated by the agent, not taken from the mockup.
   "voice.pill": "Safar kaysme3 lik",
-  "voice.max": "max 1:00",
+  // TODO(i18n)
+  "voice.max": "7ta 1:00",
   "voice.headerStatus": "kaysme3 lik…",
   "voice.title": "Kansme3 lik…",
   "voice.subtitle": "Kansme3 lik. Khoud wqtek.",
-  "voice.locked": "Msdoud: tqder tlaq l'écran",
+  // TODO(i18n)
+  "voice.locked": "Msdoud: tqder tlaq chacha",
   "voice.slideCancel": "Jerr l lisser bach tlghi",
   "voice.slideLock": "Jerr l fo9 bach tsedd",
   "voice.pause": "Wqef",
@@ -211,14 +244,13 @@ export const darijaLatn: Dictionary = {
 
   "understood.title": "BonSafar fhem",
   "understood.safar": "Mfhoum ! Hadchi li fhemt :",
-  // TODO: translated by the agent, not taken from the mockup.
-  "understood.safarGloss": "Fhemt! Hada li 7fedt.",
   "understood.originLead": "Khrouj mn {city}",
   "understood.originTail": ", 7sab profil dyalek.",
   "understood.noQuestion": "Walo ma bqa ntsqek.",
   "understood.tapHint": "Dghhet 3la chi 7aja bach tbeddelha.",
   "understood.editHint": "brek bach tbeddel",
-  "understood.enToggle": "EN partout",
+  // TODO(i18n)
+  "understood.enToggle": "Ngliziya f kolchi",
   "understood.transcribing": "Kanktb klamek…",
   "understood.thinking": "Kanfhem safar dyalek…",
   "understood.questionBadge": "1 SOU2AL",
@@ -227,7 +259,8 @@ export const darijaLatn: Dictionary = {
   "understood.go": "Yallah, qelleb !",
   "understood.error": "Ma fhemtch had lmerra. 3awed, wla kteb talab dyalek.",
   "understood.nothingHeard": "Ma sme3t walou. Qerreb mn l-micro, wla kteb talab dyalk.",
-  "understood.fallback": "Transcription dyal l7ala, jawda 9lila",
+  // TODO(i18n)
+  "understood.fallback": "Ktaba dyal l7tiyat, jawda 9lila",
   "understood.play": "Sme3 l vocal",
   "understood.pauseAudio": "Wqef l vocal",
   "understood.empty": "Mazal walou hna.",
@@ -264,21 +297,26 @@ export const darijaLatn: Dictionary = {
   "plan.replay": "replay",
   "plan.captured": "L'as3ar tcheddu {time}",
   "plan.pricesNote": "L'as3ar jayin direct men **Kiwi.com** w **trivago**. Safar ma kaykhtare3homch.",
-  "plan.step.flights.dj": "Kanqelleb 3la tiyarat",
-  "plan.step.flights.fr": "Je cherche les vols · Kiwi.com",
-  "plan.step.flights.en": "Searching flights",
-  "plan.step.hotels.dj": "Kanqarn l'otelat",
-  "plan.step.hotels.fr": "Je compare les hôtels · trivago",
-  "plan.step.hotels.en": "Comparing hotels",
-  "plan.step.price_trends.dj": "Kanchouf l'as3ar",
-  "plan.step.price_trends.fr": "Je regarde les prix du mois",
-  "plan.step.price_trends.en": "Checking monthly prices",
-  "plan.step.entry_requirements.dj": "Kanverifi l'wraq",
-  "plan.step.entry_requirements.fr": "Je vérifie visa et papiers",
-  "plan.step.entry_requirements.en": "Checking visa and papers",
-  "plan.step.package.dj": "Kanwjjed lik l'forfait",
-  "plan.step.package.fr": "Je prépare ton forfait",
-  "plan.step.package.en": "Building your package",
+  // TODO(i18n)
+  "plan.step.flights": "Kanqelleb 3la tiyarat",
+  // TODO(i18n)
+  "plan.step.flights.hint": "Kiwi.com, direct",
+  // TODO(i18n)
+  "plan.step.hotels": "Kanqarn l'otelat",
+  // TODO(i18n)
+  "plan.step.hotels.hint": "trivago, direct",
+  // TODO(i18n)
+  "plan.step.price_trends": "Kanchouf l'as3ar",
+  // TODO(i18n)
+  "plan.step.price_trends.hint": "As3ar l'otelat chhar b chhar",
+  // TODO(i18n)
+  "plan.step.entry_requirements": "Kanverifi l'wraq",
+  // TODO(i18n)
+  "plan.step.entry_requirements.hint": "Masader rasmiya",
+  // TODO(i18n)
+  "plan.step.package": "Kanwjjed lik l'forfait",
+  // TODO(i18n)
+  "plan.step.package.hint": "Tiyara, otel w lwraq m3a ba3d",
   "plan.status.next": "JAY",
   "plan.status.running": "KHDAM",
   "plan.status.done": "SALIT",
@@ -290,7 +328,8 @@ export const darijaLatn: Dictionary = {
   "plan.stops.other": "{count} escales",
   "plan.visa.title": "{city} khassha visa {kind}",
   "plan.visa.source": "Lmasdar",
-  "plan.alt.title": "Destination bla visa : {city}",
+  // TODO(i18n)
+  "plan.alt.title": "Blasa bla visa : {city}",
   "plan.landed": "Hbetna : l'forfait dyalek wajed",
   "plan.seePackage": "Chouf l'forfait",
   "plan.replayLast": "Chouf akhir safar msajjal",
@@ -303,7 +342,8 @@ export const darijaLatn: Dictionary = {
   "plan.error.replay_unavailable": "Ma kaynch safar msajjal.",
   "plan.error.interrupted": "Lqalb tqte3. 3awed.",
   "result.title": "L'forfait dyalek",
-  "result.subtitle": "Hada howa l'forfait dyalk · {count} options",
+  // TODO(i18n)
+  "result.subtitle": "{count} d lkhiyarat qarnthom lik",
   "result.recommended": "MQTARA7",
   "result.direct": "DIRECT",
   "result.cheapest": "RKHES",
@@ -330,9 +370,11 @@ export const darijaLatn: Dictionary = {
   "package.moneyShare": "{percent} % DOTATION",
   "package.why": "3LACH HAD LKHTIYAR",
   "package.tip": "NASIHAT SAFAR",
-  "package.tipFaster": "+{eur} ≈ {mad} 3la {duration} 9al",
+  // TODO(i18n)
+  "package.tipFaster": "{eur} ≈ {mad} 3la {duration} 9al",
   "package.tipFasterMad": "{mad} 3la {duration} 9al",
-  "package.tipSlower": "−{eur} ≈ {mad} 3la {duration} kter",
+  // TODO(i18n)
+  "package.tipSlower": "{eur} ≈ {mad} 3la {duration} kter",
   "package.tipSlowerMad": "{mad} 3la {duration} kter",
   "package.trends": "AS3AR L'OTELAT B CHEHR",
   "package.cheapestMonth": "Rkhis",
@@ -341,7 +383,8 @@ export const darijaLatn: Dictionary = {
   "package.reviews": "{count} ray",
   "package.breakfastYes": "Ftour dakhel",
   "package.breakfastNo": "Bla ftour",
-  "package.cancelYes": "Annulation bla flous",
+  // TODO(i18n)
+  "package.cancelYes": "Tlghi bla flous",
   "package.cancelNo": "Ma kaytraddch",
   "package.totalFor": "Lmejmo3, {count} d nass",
   "package.totalOne": "Lmejmo3, 1",
@@ -392,16 +435,22 @@ export const darijaLatn: Dictionary = {
   "ready.sources": "Tverifa Muse Spark 3la {count} d masader · {date}",
   "ready.sourcesOne": "Tverifa Muse Spark 3la masdar wa7ed · {date}",
   "ready.sourcesNone": "Tverifa Muse Spark · {date}",
-  "ready.continue": "Kemmel · Kmel",
+  // TODO(i18n)
+  "ready.continue": "Kemmel",
   "ready.missing": "Kemmel lforfait lwlan.",
-  "check.title": "Vérifie w kemmel",
-  "check.subtitle": "Chouf w kmel",
+  // TODO(i18n)
+  "check.title": "Chouf w kemmel",
+  // TODO(i18n)
+  "check.subtitle": "Chouf akhir merra qbel ma tkhelles 3end chorakae.",
   "check.nights": "{city} · {count} lilat",
   "check.nightsOne": "{city} · lila wehda",
-  "check.photo": "Photo · Kiwi.com",
-  "check.dates": "Tawari",
+  // TODO(i18n)
+  "check.photo": "Tswira · Kiwi.com",
+  // TODO(i18n)
+  "check.dates": "Tawarikh",
   "check.datesValue": "Men {from} l {to}",
-  "check.travellers": "Voyageurs",
+  // TODO(i18n)
+  "check.travellers": "Li msafrin",
   "check.adults": "{count} kbar, mn {city}",
   "check.adultsOne": "Wa7ed kbir, mn {city}",
   "check.party": "{adults} kbar, {children} drari, mn {city}",
@@ -410,7 +459,8 @@ export const darijaLatn: Dictionary = {
   "check.edit": "Beddel",
   "check.detail": "Tafsil",
   "check.hide": "Khbi",
-  "check.cancel": "Annulation",
+  // TODO(i18n)
+  "check.cancel": "Lilgha2",
   "check.cancelFree": "Otel tqder telghih bla flous. Tiyarat 3la hsab charika.",
   "check.cancelNo": "Otel ma kaytrj3ch. Tiyarat 3la hsab charika.",
   "check.shield": "Katkhalles 3nd Kiwi.com w f site d otel. BonSafar 3omro ma ychouf lcarte dyalek.",
@@ -427,13 +477,15 @@ export const darijaLatn: Dictionary = {
   "file.kicker": "DOSSIER DYALEK WAJED",
   "file.title": "Trik slama, {name} !",
   "file.titleNoName": "Trik slama !",
-  "file.demo": "BOARDING PASS · DÉMO",
+  // TODO(i18n)
+  "file.demo": "BITAQAT RKOUB · DIMO",
   "file.date": "TARIKH",
   "file.depart": "MCHI",
   "file.passengers": "NAS",
   "file.hotel": "OTEL",
   "file.nights": "LILAT",
-  "file.qr": "QR d démonstration. La carte lhaqiqiya katji men lpartenaire men b3d lkhellas.",
+  // TODO(i18n)
+  "file.qr": "QR dyal dimo. Lkarta l7a9i9iya katji men charik men b3d lkhlas.",
   "file.stamp": "TRIK SLAMA",
   "file.return": "Rjou3",
   "file.hotelRow": "Otel",
@@ -450,11 +502,15 @@ export const darijaLatn: Dictionary = {
   "file.missing": "Dossier mazal ma wajed.",
   "file.copied": "Ttnsekh. Tqder tcollih bach tcharkou.",
   "poster.bslama": "BSLAMA {city}",
-  "poster.next": "NEXT : {city}",
-  "poster.made": "MADE WITH BONSAFAR",
-  "poster.rihla": "رحلة",
+  // TODO(i18n)
+  "poster.next": "MHATTA JAYA : {city}",
+  // TODO(i18n)
+  "poster.made": "MSAWWEB B BONSAFAR",
+  // TODO(i18n)
+  "poster.rihla": "RI7LA",
   "poster.loading": "Safar kayrsem l'affiche dyalek",
-  "poster.fallback": "pre-generated with Muse Image",
+  // TODO(i18n)
+  "poster.fallback": "mwajjda men qbel b Muse Image",
   "poster.share": "Charek",
   "poster.error": "L'affiche ma tqdrnach nrsmuha.",
   "poster.retry": "3awed",

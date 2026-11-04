@@ -25,23 +25,20 @@ import { readCount, readFlightRows, readHotelRows, readSources, readVisaNeeded }
 import { AGENT_STEPS, type AgentStep } from "@/lib/agent/schema";
 import { formatTime, formatTripDate, formatWhen } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
-import type { TranslationKey } from "@/lib/i18n";
+import { translate, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
+import { useProfile } from "@/lib/profile/useProfile";
 import { useTrip } from "@/lib/trip/useTrip";
 import { cn } from "@/lib/utils";
 import { AirlineMarks } from "./AirlineMark";
 import { PriceFact } from "./PriceFact";
 
-const COPY: Record<AgentStep, { dj: TranslationKey; fr: TranslationKey; en: TranslationKey }> = {
-  flights: { dj: "plan.step.flights.dj", fr: "plan.step.flights.fr", en: "plan.step.flights.en" },
-  hotels: { dj: "plan.step.hotels.dj", fr: "plan.step.hotels.fr", en: "plan.step.hotels.en" },
-  price_trends: { dj: "plan.step.price_trends.dj", fr: "plan.step.price_trends.fr", en: "plan.step.price_trends.en" },
-  entry_requirements: {
-    dj: "plan.step.entry_requirements.dj",
-    fr: "plan.step.entry_requirements.fr",
-    en: "plan.step.entry_requirements.en",
-  },
-  package: { dj: "plan.step.package.dj", fr: "plan.step.package.fr", en: "plan.step.package.en" },
+const COPY: Record<AgentStep, { title: TranslationKey; hint: TranslationKey }> = {
+  flights: { title: "plan.step.flights", hint: "plan.step.flights.hint" },
+  hotels: { title: "plan.step.hotels", hint: "plan.step.hotels.hint" },
+  price_trends: { title: "plan.step.price_trends", hint: "plan.step.price_trends.hint" },
+  entry_requirements: { title: "plan.step.entry_requirements", hint: "plan.step.entry_requirements.hint" },
+  package: { title: "plan.step.package", hint: "plan.step.package.hint" },
 };
 
 const ERROR_KEY: Record<string, TranslationKey> = {
@@ -274,11 +271,14 @@ export function FlightPlanScreen() {
 
 function StepRow({ leg, name }: { leg: Leg; name: AgentStep }) {
   const { t, jury, lang } = useLanguage();
+  const { profile } = useProfile();
   const run = useAgentRun();
   const phase = leg.steps[name].phase;
   const copy = COPY[name];
-  const title = jury ? t(copy.en) : t(copy.dj);
-  const gloss = jury ? t(copy.dj) : t(copy.fr);
+  const title = t(copy.title);
+  const darija = profile.darija_script === "arab" ? "darija-arab" : "darija-latn";
+  const gloss = jury ? translate(darija, copy.title) : t(copy.hint);
+  const glossArabic = jury && darija === "darija-arab";
   const running = phase === "start" || phase === "progress";
   const count = readCount(leg.steps[name].done);
   const label =
@@ -302,7 +302,11 @@ function StepRow({ leg, name }: { leg: Leg; name: AgentStep }) {
         <div className="min-w-0">
           <p className="text-[17px] font-extrabold">{title}</p>
           {(!jury || run.showGloss) && (
-            <p className={cn("text-[13px]", running && "shimmer font-semibold", jury ? "italic text-muted" : "text-muted")}>
+            <p
+              className={cn("text-[13px]", running && "shimmer font-semibold", jury ? "italic text-muted" : "text-muted", glossArabic && "font-arabic")}
+              dir={glossArabic ? "rtl" : undefined}
+              lang={glossArabic ? "ar" : undefined}
+            >
               {gloss}
             </p>
           )}

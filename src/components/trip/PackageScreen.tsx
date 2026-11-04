@@ -4,23 +4,24 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { AirplaneTakeoff, CaretLeft, Coffee, SealCheck, Suitcase } from "@phosphor-icons/react";
+import { ModelText } from "@/components/bs/ModelText";
 import { Safar } from "@/components/bs/Safar";
 import { SplitFlap } from "@/components/bs/SplitFlap";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { packageOptionId, withTripSearch } from "@/lib/agent-client/store";
-import type { AgentNotice, PackageOption, TrilingualText } from "@/lib/agent/schema";
+import type { AgentNotice, PackageOption } from "@/lib/agent/schema";
 import { airportCity } from "@/lib/airports";
 import { daysUntil, formatDuration, formatEur, formatFlightNumbers, formatMad, formatMadNumber, formatMonth, formatTime, formatTripDate, formatWhen } from "@/lib/format";
 import type { TranslationKey } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
-import { useProfile } from "@/lib/profile/useProfile";
 import type { FlightDelta } from "@/lib/prices/totals";
 import type { FlightOffer, HotelOffer, Offer, TrendOffer } from "@/lib/prices/store";
 import { cn } from "@/lib/utils";
 import { buildChecklist } from "@/lib/trip/checklist";
 import { AirlineMarks } from "./AirlineMark";
 import { ChecklistTiles } from "./ChecklistTiles";
+import { JuryLabel } from "./JuryLine";
 import { PriceFact } from "./PriceFact";
 import { RouteMap } from "./RouteMap";
 
@@ -48,8 +49,7 @@ const REASONS: Record<string, TranslationKey> = {
 
 export function PackageScreen({ dotationMad }: { dotationMad: number }) {
   const run = useAgentRun();
-  const { t, lang, jury } = useLanguage();
-  const { profile } = useProfile();
+  const { t, lang } = useLanguage();
   const reduced = useReducedMotion();
   const router = useRouter();
   const [safarInTip, setSafarInTip] = useState(!!reduced);
@@ -86,7 +86,6 @@ export function PackageScreen({ dotationMad }: { dotationMad: number }) {
     perPersonDisplayMad: option.totals.per_person_display_mad,
     dotationMad,
   });
-  const spoken: Lang = jury ? "en" : profile.ui_lang;
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-sea">
@@ -202,18 +201,12 @@ export function PackageScreen({ dotationMad }: { dotationMad: number }) {
             <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{t("package.why")}</p>
             <ul className="flex flex-col gap-2">
               {result.why.map((line, index) => {
-                const text = whyText(line, spoken, jury, profile.darija_script === "arab");
                 const Icon = index === 1 ? Coffee : index === 2 ? Suitcase : SealCheck;
                 return (
                   <li key={index} className="flex items-start gap-2.5 rounded-button bg-card px-3 py-2.5">
                     <Icon size={18} weight="fill" className="mt-0.5 shrink-0 text-blue" aria-hidden />
-                    <span>
-                      <span className={cn("block text-sm leading-snug", text.rtl && "font-arabic")} dir={text.rtl ? "rtl" : undefined} lang={text.rtl ? "ar" : undefined}>
-                        {text.primary}
-                      </span>
-                      {text.secondary && (jury ? run.showGloss : false) && (
-                        <span className="mt-0.5 block text-[13px] italic text-muted">{text.secondary}</span>
-                      )}
+                    <span className="min-w-0 flex-1">
+                      <ModelText line={line} runId={run.run?.run_id} gloss={run.showGloss} className="text-sm leading-snug" />
                     </span>
                   </li>
                 );
@@ -287,7 +280,7 @@ export function PackageScreen({ dotationMad }: { dotationMad: number }) {
             onClick={() => router.push(withTripSearch("/trip/ready"))}
             className="flex h-14 items-center gap-2 rounded-button bg-ink px-[18px] text-base font-bold text-card"
           >
-            {t("package.validate")}
+            <JuryLabel k="package.validate" />
             <motion.span
               aria-hidden
               animate={reduced ? undefined : { x: [0, 14, -8, 0], y: [0, -10, 6, 0], rotate: [0, -20, 0, 0], opacity: [1, 0, 0, 1] }}
@@ -352,24 +345,23 @@ function TrendChart({
   );
 }
 
-function whyText(line: TrilingualText, lang: Lang, jury: boolean, arabicScript: boolean) {
-  if (jury) return { primary: line.en, secondary: line.darija, rtl: arabicScript };
-  if (lang === "fr") return { primary: line.fr, secondary: undefined, rtl: false };
-  if (lang === "en") return { primary: line.en, secondary: undefined, rtl: false };
-  return { primary: line.darija, secondary: undefined, rtl: true };
-}
-
 function tipText(
   delta: FlightDelta,
   kind: "direct_upgrade" | "cheaper_flight" | "none",
   t: (key: TranslationKey, values?: Record<string, string | number>) => string,
 ): string {
-  const mad = formatMad(Math.abs(delta.extra_display_mad));
-  const duration = formatDuration(Math.abs(delta.saved_minutes));
+  // Each value is isolated left to right so signs and digits keep their order on RTL screens.
+  const ltr = (text: string) => `\u2066${text}\u2069`;
+  const sign = kind === "cheaper_flight" ? "\u2212" : "+";
+  const mad = ltr(formatMad(Math.abs(delta.extra_display_mad)));
+  const duration = ltr(formatDuration(Math.abs(delta.saved_minutes)));
   const eur = delta.extra
-    ? delta.extra.currency === "EUR"
-      ? formatEur(Math.abs(delta.extra.amount))
-      : `${Math.abs(delta.extra.amount)} ${delta.extra.currency}`
+    ? ltr(
+        sign +
+          (delta.extra.currency === "EUR"
+            ? formatEur(Math.abs(delta.extra.amount))
+            : `${Math.abs(delta.extra.amount)} ${delta.extra.currency}`),
+      )
     : null;
   if (kind === "cheaper_flight") {
     return eur ? t("package.tipSlower", { eur, mad, duration }) : t("package.tipSlowerMad", { mad, duration });

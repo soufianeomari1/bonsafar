@@ -39,7 +39,34 @@ export type SplitFlapProps = {
 export function SplitFlap(props: SplitFlapProps) {
   // Remounting on a new value is what restarts the animation, and it keeps the
   // whole sequence out of effect-driven state updates.
+  if (ARABIC.test(props.value)) return <WordFlap key={props.value} {...props} />;
   return <Flap key={props.value} {...props} />;
+}
+
+const ARABIC = /[\u0600-\u06FF]/;
+
+/** Arabic letters join, so an Arabic label flips as one word, right to left. */
+function WordFlap({ value, className, cellClassName, haptic: vibrate = true }: SplitFlapProps) {
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    if (!vibrate) return;
+    const timer = setTimeout(() => haptic("tick"), reduced ? 0 : FLIPS * FLIP_MS);
+    return () => clearTimeout(timer);
+  }, [reduced, vibrate]);
+
+  return (
+    <span dir="auto" className={cn("inline-block font-arabic normal-case [perspective:200px]", className, cellClassName)}>
+      <motion.span
+        className="inline-block"
+        initial={reduced ? false : { rotateX: 90, opacity: 0.35 }}
+        animate={{ rotateX: 0, opacity: 1 }}
+        transition={{ duration: FLIPS * FLIP_MS / 1000, ease: "easeOut" }}
+      >
+        {value}
+      </motion.span>
+    </span>
+  );
 }
 
 function Flap({ value, className, cellClassName, haptic: vibrate = true }: SplitFlapProps) {

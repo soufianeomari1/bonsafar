@@ -53,7 +53,8 @@ export const ar: Dictionary = {
   "welcome.demo.transcript":
     "« بغيت نسافر لـ[[إسطنبول]] مع راجلي ف[[نص دجنبر]]… »",
   // TODO: review before the demo
-  "welcome.demo.understood": "فهم بون سفر طلبك",
+  // TODO(i18n)
+  "welcome.demo.understood": "BONSAFAR فهم طلبك",
   // TODO: review before the demo
   "welcome.demo.city": "إسطنبول",
   // TODO: review before the demo
@@ -73,7 +74,8 @@ export const ar: Dictionary = {
   "onboarding.step": "الخطوة {current} من {total}",
   "onboarding.hello": "مرحبا {name}",
   // TODO: translated by the agent, not taken from the mockup.
-  "onboarding.language.ask": "سلام! بماذا تحب أن نتحدث؟",
+  // TODO(i18n)
+  "onboarding.language.ask": "مرحبًا! أهلًا بك في BonSafar.",
   "onboarding.language.note": "يمكنك تغيير هذا في أي وقت من ملفك.",
   "onboarding.language.title": "تفضل أن نتحدث بـ…",
   "onboarding.language.subtitle": "يمكنك دائمًا المزج، BonSafar يفهم.",
@@ -107,7 +109,8 @@ export const ar: Dictionary = {
   "passport.both": "كلاهما",
   "passport.other": "آخر",
   "companions.solo": "وحدي",
-  "companions.duo": "شخصان",
+  // TODO(i18n)
+  "companions.duo": "ثنائي",
   "companions.family": "مع العائلة",
   "companions.friends": "مع الأصدقاء",
   "airport.CMN": "الدار البيضاء",
@@ -152,15 +155,19 @@ export const ar: Dictionary = {
   "profile.sectionStyle": "الأسلوب",
   "profile.restart": "أعد الأسئلة الأربعة",
 
-  "home.title": "سلام!\nإلى أين تريد السفر؟",
+  // TODO(i18n)
+  "home.title": "مرحبًا!\nإلى أين تريد السفر؟",
   // TODO: translated by the agent, not taken from the mockup.
-  "home.titleNamed": "سلام {name}!\nإلى أين تريد السفر؟",
+  // TODO(i18n)
+  "home.titleNamed": "مرحبًا {name}!\nإلى أين تريد السفر؟",
   "home.subtitle": "قل لي كل شيء، كما على واتساب.",
   "home.micLabel": "اضغط مع الاستمرار وتحدث",
   "home.micTitle": "اضغط وتحدث",
   "home.micHint": "اضغط وتحدث، بالدارجة أو بالفرنسية",
-  "home.bubble": "برك وهضر",
-  "home.bubbleHint": "اضغط وتحدث",
+  // TODO(i18n)
+  "home.bubble": "اضغط وتحدث",
+  // TODO(i18n)
+  "home.bubbleHint": "أفهم الدارجة والفرنسية.",
   "home.ideasVisa": "أفكار بلا تأشيرة لك",
   "home.ideasLabel": "أفكار لك",
   "home.muse": "MUSE IMAGE",
@@ -175,7 +182,8 @@ export const ar: Dictionary = {
   "home.chip.visa": "بدون تأشيرة هذا الصيف",
   "home.chip.marrakech": "عطلة في مراكش",
   "home.bubbleWrite": "اكتبها لي",
-  "home.bubbleWriteHint": "أو اكتب لي رحلتك",
+  // TODO(i18n)
+  "home.bubbleWriteHint": "أقرأ الدارجة والفرنسية والإنجليزية.",
   "home.holdLead": "اضغط باستمرار",
   "home.holdRest": "للتحدث · الدارجة أو الفرنسية",
   "home.micDenied": "الميكروفون محظور. اسمح به في إعدادات المتصفح، أو اكتب طلبك أدناه.",
@@ -195,8 +203,10 @@ export const ar: Dictionary = {
   "idea.barcelona.subFree": "بدون تأشيرة",
 
   // TODO: translated by the agent, not taken from the mockup.
-  "voice.pill": "سفر يستمع إليك",
-  "voice.max": "max 1:00",
+  // TODO(i18n)
+  "voice.pill": "سافار يستمع إليك",
+  // TODO(i18n)
+  "voice.max": "حتى 1:00",
   "voice.headerStatus": "يستمع إليك…",
   "voice.title": "أستمع إليك…",
   "voice.subtitle": "أنا أستمع. خذ وقتك.",
@@ -210,21 +220,22 @@ export const ar: Dictionary = {
   "voice.send": "إرسال الرسالة الصوتية",
 
   "understood.title": "BonSafar فهم",
-  "understood.safar": "مفهوم! هذا ما فهمته:",
-  // TODO: translated by the agent, not taken from the mockup.
-  "understood.safarGloss": "فهمت! هذا ما احتفظت به.",
+  // TODO(i18n)
+  "understood.safar": "حسنًا! هذا ما فهمته:",
   "understood.originLead": "المغادرة من {city}",
   "understood.originTail": "، حسب ملفك.",
   "understood.noQuestion": "لا سؤال آخر.",
   "understood.tapHint": "المس معلومة لتصحيحها.",
   "understood.editHint": "المس للتعديل",
-  "understood.enToggle": "EN في كل مكان",
+  // TODO(i18n)
+  "understood.enToggle": "بالإنجليزية في كل مكان",
   "understood.transcribing": "أكتب كلامك…",
   "understood.thinking": "أفهم رحلتك…",
   "understood.questionBadge": "سؤال واحد",
   "understood.otherAnswer": "جواب آخر",
   "understood.answerPlaceholder": "اكتب جوابك…",
-  "understood.go": "يالله، ابحث!",
+  // TODO(i18n)
+  "understood.go": "هيا، ابحث!",
   "understood.error": "لم أفهم هذه المرة. أعد المحاولة، أو اكتب طلبك.",
   "understood.nothingHeard": "لم أسمع شيئًا. اقترب من الميكروفون، أو اكتب طلبك.",
   "understood.fallback": "تفريغ احتياطي، جودة أقل",
@@ -260,24 +271,31 @@ export const ar: Dictionary = {
 
   "plan.skip": "تجاوز",
   "plan.title": "سافار يجهّز\nرحلتك",
-  "plan.replay": "replay",
+  // TODO(i18n)
+  "plan.replay": "إعادة عرض",
   "plan.captured": "الأسعار التُقطت {time}",
-  "plan.pricesNote": "الأسعار تأتي مباشرة من **Kiwi.com** و**trivago**. سفار لا يخترعها.",
-  "plan.step.flights.dj": "كنقلب على الطيارات",
-  "plan.step.flights.fr": "Je cherche les vols · Kiwi.com",
-  "plan.step.flights.en": "Searching flights",
-  "plan.step.hotels.dj": "كنقارن الأوتيلات",
-  "plan.step.hotels.fr": "Je compare les hôtels · trivago",
-  "plan.step.hotels.en": "Comparing hotels",
-  "plan.step.price_trends.dj": "كنشوف الأسعار",
-  "plan.step.price_trends.fr": "Je regarde les prix du mois",
-  "plan.step.price_trends.en": "Checking monthly prices",
-  "plan.step.entry_requirements.dj": "كنتحقق من الوراق",
-  "plan.step.entry_requirements.fr": "Je vérifie visa et papiers",
-  "plan.step.entry_requirements.en": "Checking visa and papers",
-  "plan.step.package.dj": "كنوجد ليك الفورفي",
-  "plan.step.package.fr": "Je prépare ton forfait",
-  "plan.step.package.en": "Building your package",
+  // TODO(i18n)
+  "plan.pricesNote": "الأسعار تأتي مباشرة من **Kiwi.com** و**trivago**. سافار لا يخترعها.",
+  // TODO(i18n)
+  "plan.step.flights": "أبحث عن الرحلات",
+  // TODO(i18n)
+  "plan.step.flights.hint": "Kiwi.com، مباشرة",
+  // TODO(i18n)
+  "plan.step.hotels": "أقارن الفنادق",
+  // TODO(i18n)
+  "plan.step.hotels.hint": "trivago، مباشرة",
+  // TODO(i18n)
+  "plan.step.price_trends": "أراجع أسعار الشهر",
+  // TODO(i18n)
+  "plan.step.price_trends.hint": "أسعار الفنادق شهرًا بشهر",
+  // TODO(i18n)
+  "plan.step.entry_requirements": "أتحقق من التأشيرة والوثائق",
+  // TODO(i18n)
+  "plan.step.entry_requirements.hint": "مصادر رسمية",
+  // TODO(i18n)
+  "plan.step.package": "أجهّز باقتك",
+  // TODO(i18n)
+  "plan.step.package.hint": "الرحلة والفندق والوثائق معًا",
   "plan.status.next": "لاحقًا",
   "plan.status.running": "جارٍ",
   "plan.status.done": "تم",
@@ -293,7 +311,8 @@ export const ar: Dictionary = {
   "plan.landed": "تم الهبوط: باقتك جاهزة",
   "plan.seePackage": "عرض الباقة",
   "plan.replayLast": "عرض آخر رحلة محفوظة",
-  "plan.empty": "أخبر بون سفار أولًا إلى أين تريد السفر.",
+  // TODO(i18n)
+  "plan.empty": "أخبر BonSafar أولًا إلى أين تريد السفر.",
   "plan.error.intent_incomplete": "ما زالت الوجهة أو التواريخ ناقصة.",
   "plan.error.origin_missing": "لا أعرف من أي مطار تنطلق.",
   "plan.error.timeout": "استغرق البحث وقتًا طويلًا. أعد المحاولة.",
@@ -302,7 +321,8 @@ export const ar: Dictionary = {
   "plan.error.replay_unavailable": "لا توجد رحلة محفوظة لإعادتها.",
   "plan.error.interrupted": "انقطع البحث. أعد المحاولة.",
   "result.title": "باقتك",
-  "result.subtitle": "هادا هو الفورفي ديالك · {count} خيارات",
+  // TODO(i18n)
+  "result.subtitle": "قارنّا {count} خيارات من أجلك",
   "result.recommended": "موصى به",
   "result.direct": "مباشر",
   "result.cheapest": "الأرخص",
@@ -328,10 +348,13 @@ export const ar: Dictionary = {
   "package.money": "المال",
   "package.moneyShare": "{percent}% من المخصص",
   "package.why": "لماذا هذا الاختيار",
-  "package.tip": "نصيحة سفار",
-  "package.tipFaster": "+{eur} ≈ {mad} مقابل {duration} أقل",
+  // TODO(i18n)
+  "package.tip": "نصيحة سافار",
+  // TODO(i18n)
+  "package.tipFaster": "{eur} ≈ {mad} مقابل {duration} أقل",
   "package.tipFasterMad": "{mad} مقابل {duration} أقل",
-  "package.tipSlower": "−{eur} ≈ {mad} مقابل {duration} أكثر",
+  // TODO(i18n)
+  "package.tipSlower": "{eur} ≈ {mad} مقابل {duration} أكثر",
   "package.tipSlowerMad": "{mad} مقابل {duration} أكثر",
   "package.trends": "أسعار الفنادق حسب الشهر",
   "package.cheapestMonth": "الأرخص",
@@ -390,13 +413,16 @@ export const ar: Dictionary = {
   "ready.sources": "تحقق Muse Spark من {count} مصادر · {date}",
   "ready.sourcesOne": "تحقق Muse Spark من مصدر واحد · {date}",
   "ready.sourcesNone": "تحقق Muse Spark · {date}",
-  "ready.continue": "Kemmel · تابع",
+  // TODO(i18n)
+  "ready.continue": "متابعة",
   "ready.missing": "أنهِ الباقة أولًا.",
   "check.title": "راجع وأكمل",
-  "check.subtitle": "تحقق وتابع",
+  // TODO(i18n)
+  "check.subtitle": "نظرة أخيرة قبل الدفع لدى الشركاء.",
   "check.nights": "{city} · {count} ليالٍ",
   "check.nightsOne": "{city} · ليلة واحدة",
-  "check.photo": "Photo · Kiwi.com",
+  // TODO(i18n)
+  "check.photo": "صورة · Kiwi.com",
   "check.dates": "التواريخ",
   "check.datesValue": "من {from} إلى {to}",
   "check.travellers": "المسافرون",
@@ -423,9 +449,12 @@ export const ar: Dictionary = {
   "check.hotel": "الفندق",
   "check.missing": "أنهِ الباقة أولًا.",
   "file.kicker": "ملفك جاهز",
-  "file.title": "طريق السلامة، {name}!",
-  "file.titleNoName": "طريق السلامة!",
-  "file.demo": "BOARDING PASS · DÉMO",
+  // TODO(i18n)
+  "file.title": "رحلة سعيدة، {name}!",
+  // TODO(i18n)
+  "file.titleNoName": "رحلة سعيدة!",
+  // TODO(i18n)
+  "file.demo": "بطاقة صعود · عرض تجريبي",
   "file.date": "التاريخ",
   "file.depart": "المغادرة",
   "file.passengers": "المسافرون",
@@ -441,18 +470,23 @@ export const ar: Dictionary = {
   "file.readyValue": "{ok} من 4",
   "file.poster": "عرض الملصق",
   "file.share": "مشاركة",
-  "file.shareText": "طريق السلامة — {city}، {dates}. {total}. صُنع مع BonSafar.",
+  // TODO(i18n)
+  "file.shareText": "trik slama — {city}، {dates}. {total}. صُنع مع BonSafar.",
   "file.saveGoogle": "احفظ هذه الرحلة مع Google",
   "file.savedLocal": "حُفظ على هذا الهاتف.",
   "file.savedAccount": "حُفظ في حسابك.",
   "file.missing": "الملف ليس جاهزًا بعد.",
   "file.copied": "تم النسخ. يمكنك لصقه للمشاركة.",
-  "poster.bslama": "BSLAMA {city}",
-  "poster.next": "NEXT : {city}",
-  "poster.made": "MADE WITH BONSAFAR",
+  // TODO(i18n)
+  "poster.bslama": "وداعًا {city}",
+  // TODO(i18n)
+  "poster.next": "المحطة التالية: {city}",
+  // TODO(i18n)
+  "poster.made": "صُنع مع BonSafar",
   "poster.rihla": "رحلة",
   "poster.loading": "سافار يرسم ملصقك",
-  "poster.fallback": "pre-generated with Muse Image",
+  // TODO(i18n)
+  "poster.fallback": "مُعدّ مسبقًا باستخدام Muse Image",
   "poster.share": "مشاركة",
   "poster.error": "تعذر إنشاء الملصق.",
   "poster.retry": "أعد المحاولة",
@@ -463,5 +497,6 @@ export const ar: Dictionary = {
   "safar.thinking": "سافار يفكر، ناظر إلى الأعلى، وثلاث نقاط فوق رأسه",
   "safar.found": "سافار مسرور، يقفز فرحًا وفمه مفتوح",
   "safar.oops": "سافار قلق، حاجباه مشدودان وقطرة عرق",
-  "safar.bye": "سافار يغمز ويطير: تريك سلامة",
+  // TODO(i18n)
+  "safar.bye": "سافار يغمز ويطير: trik slama",
 };

@@ -11,7 +11,8 @@ export const darijaArab: Dictionary = {
   "common.share": "شارك",
   "common.understood": "مفهوم",
   "common.juryMode": "وضع لجنة التحكيم",
-  "common.signIn": "كمل مع Google",
+  // TODO(i18n)
+  "common.signIn": "المتابعة باستخدام Google",
   "common.signOut": "خروج",
   "common.signedInAs": "داخل بـ {name}",
   "common.signedOut": "ماشي داخل",
@@ -53,7 +54,8 @@ export const darijaArab: Dictionary = {
   "welcome.demo.transcript":
     "« بغيت نسافر لـ[[إسطنبول]] مع راجلي ف[[نص دجنبر]]… »",
   // TODO: review before the demo
-  "welcome.demo.understood": "بون سفر فهم",
+  // TODO(i18n)
+  "welcome.demo.understood": "BONSAFAR فهم",
   // TODO: review before the demo
   "welcome.demo.city": "إسطنبول",
   // TODO: review before the demo
@@ -73,7 +75,8 @@ export const darijaArab: Dictionary = {
   "onboarding.step": "خطوة {current} من {total}",
   "onboarding.hello": "سلام {name}",
   // TODO: translated by the agent, not taken from the mockup.
-  "onboarding.language.ask": "سلام! بأش تحب نهضرو؟",
+  // TODO(i18n)
+  "onboarding.language.ask": "سلام! مرحبا بيك ف BonSafar.",
   "onboarding.language.note": "تقدر تبدل هادشي وقت ما بغيتي ف البروفيل ديالك.",
   "onboarding.language.title": "بغيتي نهضرو بـ…",
   "onboarding.language.subtitle": "تقدر ديما تخلط، BonSafar كيفهم.",
@@ -161,7 +164,8 @@ export const darijaArab: Dictionary = {
   "home.micTitle": "برك وهضر",
   "home.micHint": "برك وهضر، بالدارجة ولا بالفرنسية",
   "home.bubble": "برك وهضر",
-  "home.bubbleHint": "برك وهضر، بالدارجة ولا بالفرنسية",
+  // TODO(i18n)
+  "home.bubbleHint": "كنفهم الدارجة والفرنسية.",
   "home.ideasVisa": "أفكار بلا فيزا ليك",
   "home.ideasLabel": "أفكار ديال السفر",
   "home.muse": "MUSE IMAGE",
@@ -176,7 +180,8 @@ export const darijaArab: Dictionary = {
   "home.chip.visa": "بلا فيزا هاد الصيف",
   "home.chip.marrakech": "ويكند ف مراكش",
   "home.bubbleWrite": "كتبها ليا",
-  "home.bubbleWriteHint": "ولا كتب ليا الرحلة ديالك",
+  // TODO(i18n)
+  "home.bubbleWriteHint": "كنقرا الدارجة، الفرنسية والإنجليزية.",
   "home.holdLead": "برك",
   "home.holdRest": "وهضر · الدارجة ولا الفرنسية",
   "home.micDenied": "الميكرو مسدود. حلو ف إعدادات المتصفح، ولا كتب الطلب ديالك لتحت.",
@@ -196,8 +201,10 @@ export const darijaArab: Dictionary = {
   "idea.barcelona.subFree": "بلا فيزا",
 
   // TODO: translated by the agent, not taken from the mockup.
-  "voice.pill": "سفر كيسمع ليك",
-  "voice.max": "max 1:00",
+  // TODO(i18n)
+  "voice.pill": "سافار كيسمع ليك",
+  // TODO(i18n)
+  "voice.max": "حتى 1:00",
   "voice.headerStatus": "كيسمع ليك…",
   "voice.title": "كنسمع ليك…",
   "voice.subtitle": "كنسمع ليك. خود وقتك.",
@@ -212,14 +219,13 @@ export const darijaArab: Dictionary = {
 
   "understood.title": "BonSafar فهم",
   "understood.safar": "مفهوم! هادشي اللي فهمت:",
-  // TODO: translated by the agent, not taken from the mockup.
-  "understood.safarGloss": "فهمت! هادا اللي حفظت.",
   "understood.originLead": "الخروج من {city}",
   "understood.originTail": "، على حساب البروفيل ديالك.",
   "understood.noQuestion": "والو ما بقا نتسقّك.",
   "understood.tapHint": "دغّط على شي حاجة باش تبدلها.",
   "understood.editHint": "برك باش تبدل",
-  "understood.enToggle": "EN ف كلشي",
+  // TODO(i18n)
+  "understood.enToggle": "بالإنجليزية ف كلشي",
   "understood.transcribing": "كنكتب الكلام ديالك…",
   "understood.thinking": "كنفهم السفر ديالك…",
   "understood.questionBadge": "1 سؤال",
@@ -228,7 +234,8 @@ export const darijaArab: Dictionary = {
   "understood.go": "يالله، قلب !",
   "understood.error": "ما فهمتش هاد المرة. عاود، ولا كتب الطلب ديالك.",
   "understood.nothingHeard": "ما سمعت والو. قرّب من الميكرو، ولا كتب الطلب ديالك.",
-  "understood.fallback": "ترانسكريبسيون ديال الحالة، جودة قليلة",
+  // TODO(i18n)
+  "understood.fallback": "كتابة احتياطية، جودة قليلة",
   "understood.play": "سمع الفوكال",
   "understood.pauseAudio": "وقف الفوكال",
   "understood.empty": "مازال والو هنا.",
@@ -262,24 +269,31 @@ export const darijaArab: Dictionary = {
   // TODO: darija lines below that are not in the mockups were written for this screen.
   "plan.skip": "تجاوز",
   "plan.title": "سافار كيوجد\nالسفر ديالك",
-  "plan.replay": "replay",
+  // TODO(i18n)
+  "plan.replay": "إعادة",
   "plan.captured": "الأسعار تشدّو {time}",
-  "plan.pricesNote": "الأسعار جايين ديريكت من **Kiwi.com** و**trivago**. سفار ما كيخترعهمش.",
-  "plan.step.flights.dj": "كنقلب على الطيارات",
-  "plan.step.flights.fr": "Je cherche les vols · Kiwi.com",
-  "plan.step.flights.en": "Searching flights",
-  "plan.step.hotels.dj": "كنقارن الأوتيلات",
-  "plan.step.hotels.fr": "Je compare les hôtels · trivago",
-  "plan.step.hotels.en": "Comparing hotels",
-  "plan.step.price_trends.dj": "كنشوف الأسعار",
-  "plan.step.price_trends.fr": "Je regarde les prix du mois",
-  "plan.step.price_trends.en": "Checking monthly prices",
-  "plan.step.entry_requirements.dj": "كنتحقق من الوراق",
-  "plan.step.entry_requirements.fr": "Je vérifie visa et papiers",
-  "plan.step.entry_requirements.en": "Checking visa and papers",
-  "plan.step.package.dj": "كنوجد ليك الفورفي",
-  "plan.step.package.fr": "Je prépare ton forfait",
-  "plan.step.package.en": "Building your package",
+  // TODO(i18n)
+  "plan.pricesNote": "الأسعار جايين ديريكت من **Kiwi.com** و**trivago**. سافار ما كيخترعهمش.",
+  // TODO(i18n)
+  "plan.step.flights": "كنقلب على الطيارات",
+  // TODO(i18n)
+  "plan.step.flights.hint": "Kiwi.com، ديريكت",
+  // TODO(i18n)
+  "plan.step.hotels": "كنقارن الأوتيلات",
+  // TODO(i18n)
+  "plan.step.hotels.hint": "trivago، ديريكت",
+  // TODO(i18n)
+  "plan.step.price_trends": "كنشوف الأسعار",
+  // TODO(i18n)
+  "plan.step.price_trends.hint": "أسعار الأوتيلات شهر بشهر",
+  // TODO(i18n)
+  "plan.step.entry_requirements": "كنتحقق من الوراق",
+  // TODO(i18n)
+  "plan.step.entry_requirements.hint": "مصادر رسمية",
+  // TODO(i18n)
+  "plan.step.package": "كنوجد ليك الفورفي",
+  // TODO(i18n)
+  "plan.step.package.hint": "الطيارة، الأوتيل والوراق مجموعين",
   "plan.status.next": "جاي",
   "plan.status.running": "خدام",
   "plan.status.done": "سالى",
@@ -295,7 +309,8 @@ export const darijaArab: Dictionary = {
   "plan.landed": "هبطنا : الفورفي ديالك واجد",
   "plan.seePackage": "شوف الفورفي",
   "plan.replayLast": "شوف آخر سفر مسجّل",
-  "plan.empty": "قول لبون سفار فين بغيتي تمشي.",
+  // TODO(i18n)
+  "plan.empty": "قول لـ BonSafar فين بغيتي تمشي.",
   "plan.error.intent_incomplete": "باقي خاصنا المدينة ولا التواريخ.",
   "plan.error.origin_missing": "ما عرفتش من أي مطار غادي تخرج.",
   "plan.error.timeout": "القلب طوّل بزاف. عاود.",
@@ -330,10 +345,13 @@ export const darijaArab: Dictionary = {
   "package.money": "فلوس",
   "package.moneyShare": "{percent} % من الدوتاسيون",
   "package.why": "علاش هاد الاختيار",
-  "package.tip": "نصيحة سفار",
-  "package.tipFaster": "+{eur} ≈ {mad} على {duration} قل",
+  // TODO(i18n)
+  "package.tip": "نصيحة سافار",
+  // TODO(i18n)
+  "package.tipFaster": "{eur} ≈ {mad} على {duration} قل",
   "package.tipFasterMad": "{mad} على {duration} قل",
-  "package.tipSlower": "−{eur} ≈ {mad} على {duration} كتر",
+  // TODO(i18n)
+  "package.tipSlower": "{eur} ≈ {mad} على {duration} كتر",
   "package.tipSlowerMad": "{mad} على {duration} كتر",
   "package.trends": "أسعار الأوتيلات بالشهر",
   "package.cheapestMonth": "رخص شهر",
@@ -393,13 +411,17 @@ export const darijaArab: Dictionary = {
   "ready.sources": "تڤيريفا Muse Spark على {count} د المصادر · {date}",
   "ready.sourcesOne": "تڤيريفا Muse Spark على مصدر واحد · {date}",
   "ready.sourcesNone": "تڤيريفا Muse Spark · {date}",
-  "ready.continue": "كمّل · كمل",
+  // TODO(i18n)
+  "ready.continue": "كمّل",
   "ready.missing": "كمّل الفورفي اللول.",
-  "check.title": "ڤيريفي و كمّل",
-  "check.subtitle": "شوف و كمل",
+  // TODO(i18n)
+  "check.title": "شوف وكمّل",
+  // TODO(i18n)
+  "check.subtitle": "شوف آخر مرة قبل ما تخلص عند الشركاء.",
   "check.nights": "{city} · {count} ليلات",
   "check.nightsOne": "{city} · ليلة وحدة",
-  "check.photo": "Photo · Kiwi.com",
+  // TODO(i18n)
+  "check.photo": "صورة · Kiwi.com",
   "check.dates": "التواريخ",
   "check.datesValue": "من {from} ل {to}",
   "check.travellers": "المسافرين",
@@ -426,9 +448,12 @@ export const darijaArab: Dictionary = {
   "check.hotel": "أوطيل",
   "check.missing": "كمّل الفورفي اللول.",
   "file.kicker": "الدوسيي ديالك واجد",
-  "file.title": "تريك سلامة، {name} !",
-  "file.titleNoName": "تريك سلامة !",
-  "file.demo": "BOARDING PASS · DÉMO",
+  // TODO(i18n)
+  "file.title": "طريق السلامة، {name}!",
+  // TODO(i18n)
+  "file.titleNoName": "طريق السلامة!",
+  // TODO(i18n)
+  "file.demo": "بطاقة الركوب · ديمو",
   "file.date": "التاريخ",
   "file.depart": "المشي",
   "file.passengers": "الناس",
@@ -444,18 +469,23 @@ export const darijaArab: Dictionary = {
   "file.readyValue": "{ok} من 4",
   "file.poster": "شوف الأفيش",
   "file.share": "شارك",
-  "file.shareText": "تريك سلامة — {city}، {dates}. {total}. مصنوع ب BonSafar.",
+  // TODO(i18n)
+  "file.shareText": "trik slama — {city}، {dates}. {total}. مصاوب ب BonSafar.",
   "file.saveGoogle": "خلي هاد السفري مع Google",
   "file.savedLocal": "تسجّل فالتليفون.",
   "file.savedAccount": "تسجّل فالحساب ديالك.",
   "file.missing": "الدوسيي مازال ما واجد.",
   "file.copied": "تنسخ. تقدر تلصقه باش تشاركو.",
-  "poster.bslama": "BSLAMA {city}",
-  "poster.next": "NEXT : {city}",
-  "poster.made": "MADE WITH BONSAFAR",
+  // TODO(i18n)
+  "poster.bslama": "بسلامة {city}",
+  // TODO(i18n)
+  "poster.next": "المحطة الجاية: {city}",
+  // TODO(i18n)
+  "poster.made": "مصاوب ب BonSafar",
   "poster.rihla": "رحلة",
   "poster.loading": "سافار كيرسم الأفيش ديالك",
-  "poster.fallback": "pre-generated with Muse Image",
+  // TODO(i18n)
+  "poster.fallback": "مصاوبة من قبل ب Muse Image",
   "poster.share": "شارك",
   "poster.error": "الأفيش ما قدرناش نرسموها.",
   "poster.retry": "عاود",
@@ -466,5 +496,6 @@ export const darijaArab: Dictionary = {
   "safar.thinking": "سافار كيفكّر، شايف لفوق، ثلاثة د النقاط فوق راسو",
   "safar.found": "سافار فرحان، كينقّز، فمو محلول",
   "safar.oops": "سافار مقلّق، حواجبو مهمّمين وقطرة د العرق",
-  "safar.bye": "سافار كيغمز بعينو وكيطير: تريك سلامة",
+  // TODO(i18n)
+  "safar.bye": "سافار كيغمز بعينو وكيطير: trik slama",
 };

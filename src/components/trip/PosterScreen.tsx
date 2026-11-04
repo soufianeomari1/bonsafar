@@ -27,7 +27,7 @@ export function PosterScreen() {
   const run = useAgentRun();
   const saved = useSyncExternalStore(subscribeSavedTrips, readSavedTrips, readServerSavedTrips);
   const poster = useSyncExternalStore(subscribePoster, readPoster, readServerPoster);
-  const { t, lang } = useLanguage();
+  const { t, lang, rtl } = useLanguage();
   const { profile } = useProfile();
   const router = useRouter();
   const frame = useRef<HTMLDivElement>(null);
@@ -137,7 +137,9 @@ export function PosterScreen() {
                   <div className="relative min-w-0 flex-1 px-3 py-3">
                     <div className="flex items-start justify-between gap-2">
                       <p className="font-mono text-[9px] font-semibold tracking-wide text-muted">{t("poster.made")}</p>
-                      <p className="font-arabic text-base font-semibold text-stamp-red" lang="ar" dir="rtl">
+                      <p
+                        className={rtl ? "font-arabic text-base font-semibold text-stamp-red" : "font-mono text-[13px] font-bold tracking-wide text-stamp-red"}
+                      >
                         {t("poster.rihla")}
                       </p>
                     </div>

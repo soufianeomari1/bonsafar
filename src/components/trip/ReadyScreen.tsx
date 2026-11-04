@@ -5,21 +5,22 @@ import { useRouter } from "next/navigation";
 import { Clock, CloudSun, CurrencyCircleDollar, Plug, type Icon } from "@phosphor-icons/react";
 import { CaretLeft } from "@phosphor-icons/react";
 import { Button } from "@/components/bs/Button";
+import { ModelText } from "@/components/bs/ModelText";
 import { Safar } from "@/components/bs/Safar";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
 import type { GoodToKnowNotes } from "@/lib/trip/good-to-know-client";
 import { airportCity } from "@/lib/airports";
 import { formatDay } from "@/lib/format";
-import type { Lang } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { ensurePoster } from "@/lib/poster/client";
+import { scriptForLang } from "@/lib/profile/schema";
 import { useProfile } from "@/lib/profile/useProfile";
 import { buildChecklist, todoCount } from "@/lib/trip/checklist";
 import { loadGoodToKnow } from "@/lib/trip/good-to-know-client";
 import { asFlight, asHotel, pickOption } from "@/lib/trip/selection";
 import { ChecklistBoard, boardLandedDelay } from "./ChecklistTiles";
-import { JuryLine } from "./JuryLine";
+import { JuryLabel, JuryLine } from "./JuryLine";
 
 const TOPICS: { id: keyof GoodToKnowNotes; icon: Icon }[] = [
   { id: "timezone", icon: Clock },
@@ -38,22 +39,10 @@ function monthLabel(iso: string): string {
   }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
-function noteOf(
-  line: GoodToKnowNotes["timezone"],
-  lang: Lang,
-  jury: boolean,
-  arabic: boolean,
-): { primary: string; secondary?: string; rtl: boolean } {
-  if (jury) return { primary: line.en, secondary: line.darija, rtl: arabic };
-  if (lang === "en") return { primary: line.en, rtl: false };
-  if (lang === "darija-latn" || lang === "darija-arab") return { primary: line.darija, rtl: true };
-  return { primary: line.fr, rtl: false };
-}
-
 /** Screen 08. Tiles land, then Safar jumps once. The poster starts here. */
 export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
   const run = useAgentRun();
-  const { t, lang, jury } = useLanguage();
+  const { t, lang } = useLanguage();
   const { profile } = useProfile();
   const router = useRouter();
   const [celebrate, setCelebrate] = useState(false);
@@ -67,6 +56,7 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
   const runId = run.run?.run_id ?? null;
   const city = result?.destination.city ?? "";
   const depart = hotel?.attrs.arrival ?? flight?.attrs.outbound.departure.slice(0, 10) ?? "";
+  const script = scriptForLang(lang, profile.darija_script);
 
   useEffect(() => {
     const timer = setTimeout(() => setCelebrate(true), boardLandedDelay(4));
@@ -90,7 +80,8 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
       country: result.destination.country,
       origin,
       month: monthLabel(depart),
-      script: profile.darija_script === "arab" ? "arab" : "latn",
+      script,
+      lang,
     }).then((value) => {
       if (!alive) return;
       setNotes(value);
@@ -99,7 +90,7 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
     return () => {
       alive = false;
     };
-  }, [runId, city, depart, result, flight?.attrs.outbound.from, profile.darija_script, run.scenario]);
+  }, [runId, city, depart, result, flight?.attrs.outbound.from, script, lang, run.scenario]);
 
   if (!result || !option) {
     return (
@@ -131,7 +122,6 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
         : sourceDate
           ? t("ready.sourcesNone", { date: formatDay(sourceDate, lang) })
           : "";
-  const arabic = profile.darija_script === "arab";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-green-soft to-bg">
@@ -170,24 +160,14 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
           {notesState === "error" && <p className="text-sm text-muted">{t("ready.knowError")}</p>}
           {notes && (
             <ul className="flex flex-col gap-2">
-              {TOPICS.map(({ id, icon: Icon }) => {
-                const text = noteOf(notes[id], lang, jury, arabic);
-                return (
-                  <li key={id} className="flex items-start gap-2.5 text-sm leading-snug">
-                    <Icon size={18} weight="fill" className="mt-0.5 shrink-0 text-blue" aria-hidden />
-                    <span>
-                      <span className={text.rtl ? "block font-arabic" : "block"} dir={text.rtl ? "rtl" : undefined} lang={text.rtl ? "ar" : undefined}>
-                        {text.primary}
-                      </span>
-                      {text.secondary && jury && (
-                        <span className={arabic ? "mt-0.5 block font-arabic text-[13px] italic text-muted" : "mt-0.5 block text-[13px] italic text-muted"} dir={arabic ? "rtl" : undefined} lang={arabic ? "ar" : undefined}>
-                          {text.secondary}
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                );
-              })}
+              {TOPICS.map(({ id, icon: Icon }) => (
+                <li key={id} className="flex items-start gap-2.5 text-sm leading-snug">
+                  <Icon size={18} weight="fill" className="mt-0.5 shrink-0 text-blue" aria-hidden />
+                  <span className="min-w-0 flex-1">
+                    <ModelText line={notes[id]} runId={runId} gloss />
+                  </span>
+                </li>
+              ))}
             </ul>
           )}
         </section>
@@ -208,7 +188,7 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
       </div>
       <div className="px-5 pb-5 pt-3">
         <Button full onClick={() => router.push(withTripSearch("/trip/check"))}>
-          {t("ready.continue")}
+          <JuryLabel k="ready.continue" />
         </Button>
       </div>
     </div>

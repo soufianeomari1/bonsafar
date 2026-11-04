@@ -13,7 +13,7 @@ import { TrustSheet } from "@/components/screens/TrustSheet";
 import { VocalScreen } from "@/components/screens/VocalScreen";
 import { micHoldStyle, useVoiceCapture, type CaptureError } from "@/components/voice/useVoiceCapture";
 import { haptic } from "@/lib/haptics";
-import type { TranslationKey } from "@/lib/i18n";
+import { translate, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { ideasFor } from "@/lib/ideas";
 import { useProfile } from "@/lib/profile/useProfile";
@@ -31,9 +31,10 @@ const ERROR_KEYS: Record<CaptureError, TranslationKey> = {
 
 /** Screen 2. Look: design/motion/screens/02-home-v2.html. */
 export function HomeScreen() {
-  const { t, lang } = useLanguage();
+  const { t, lang, jury } = useLanguage();
   const router = useRouter();
   const { ready, profile } = useProfile();
+  const juryArabic = profile.darija_script === "arab";
   const [trustSeen, setTrustSeen] = useLocalFlag(TRUST_KEY);
   const [text, setText] = useState("");
   const [writing, setWriting] = useState(false);
@@ -120,9 +121,19 @@ export function HomeScreen() {
               <p className="text-sm font-bold leading-tight">
                 {writing ? t("home.bubbleWrite") : t("home.bubble")}
               </p>
-              <p className="text-[13px] leading-tight text-muted">
-                {writing ? t("home.bubbleWriteHint") : t("home.bubbleHint")}
-              </p>
+              {jury ? (
+                <p
+                  className={juryArabic ? "font-arabic text-[13px] italic leading-tight text-muted" : "text-[13px] italic leading-tight text-muted"}
+                  dir={juryArabic ? "rtl" : undefined}
+                  lang={juryArabic ? "ar" : undefined}
+                >
+                  {translate(juryArabic ? "darija-arab" : "darija-latn", writing ? "home.bubbleWrite" : "home.bubble")}
+                </p>
+              ) : (
+                <p className="text-[13px] leading-tight text-muted">
+                  {writing ? t("home.bubbleWriteHint") : t("home.bubbleHint")}
+                </p>
+              )}
             </div>
           </div>
           <div className="absolute left-1/2 top-[150px] z-20 size-[88px] -translate-x-1/2 -translate-y-1/2">

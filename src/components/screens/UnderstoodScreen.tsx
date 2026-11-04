@@ -8,6 +8,7 @@ import { CaretLeft, Check, MagnifyingGlass } from "@phosphor-icons/react";
 import { Button } from "@/components/bs/Button";
 import { Safar, SafarBubble } from "@/components/bs/Safar";
 import { ChipEditor } from "@/components/trip/ChipEditor";
+import { JuryLabel, JuryLine } from "@/components/trip/JuryLine";
 import { QuestionCard } from "@/components/trip/QuestionCard";
 import { TranscriptBubble } from "@/components/trip/TranscriptBubble";
 import {
@@ -22,7 +23,7 @@ import { hasIndispensableInfo } from "@/lib/intent/edits";
 import type { Intent } from "@/lib/intent/schema";
 import { useLanguage } from "@/lib/i18n/provider";
 import { PRESS_SCALE, PRESS_TRANSITION } from "@/lib/motion";
-import type { Airport } from "@/lib/profile/schema";
+import { profileForLang, type Airport } from "@/lib/profile/schema";
 import { useProfile } from "@/lib/profile/useProfile";
 import { scenarioFor, startAgentRun, replayFromLocation, withTripSearch } from "@/lib/agent-client/store";
 import { answerTrip, retryTrip } from "@/lib/trip/store";
@@ -190,7 +191,7 @@ export function UnderstoodScreen() {
               {showFound && (
                 <SafarBubble state="found" size={64} className="-ms-2">
                   <p className="text-base font-bold">{t("understood.safar")}</p>
-                  <p className="mt-0.5 text-[13px] text-muted">{t("understood.safarGloss")}</p>
+                  <JuryLine k="understood.safar" />
                 </SafarBubble>
               )}
 
@@ -288,14 +289,14 @@ export function UnderstoodScreen() {
             if (replay) startAgentRun({ replay: true, scenario: replay }, replay);
             else if (intent) {
               const scenario = scenarioFor(intent);
-              startAgentRun({ intent, profile, lang, jury, scenario }, scenario);
+              startAgentRun({ intent, profile: profileForLang(profile, lang), lang, jury, scenario }, scenario);
             }
             router.push(withTripSearch("/trip/plan"));
           }}
           className="font-bold"
         >
           <MagnifyingGlass size={18} weight="bold" aria-hidden />
-          {t("understood.go")}
+          <JuryLabel k="understood.go" />
         </Button>
       </div>
 
