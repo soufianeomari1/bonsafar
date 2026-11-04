@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CaretDown, Check, Globe } from "@phosphor-icons/react";
 import { JuryPill } from "@/components/bs/Brand";
 import { Sheet } from "@/components/bs/Sheet";
+import { InstallButton } from "@/components/pwa/InstallButton";
 import { haptic } from "@/lib/haptics";
 import type { Lang, TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
@@ -154,6 +155,7 @@ export function LanguagePicker({
           );
         })}
       </div>
+      <InstallButton className="mt-4" onDone={() => setOpen(false)} />
       {legal && (
         <nav className="mt-5 flex justify-center gap-4 border-t border-line pt-4 text-[13px]">
           <Link

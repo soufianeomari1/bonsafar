@@ -611,4 +611,9 @@ export const darijaLatn: Dictionary = {
   "map.credit": "Natural Earth",
   "package.kmFromCentre": "{km} km mn centre",
   "package.kmAway": "b3id b {km} km",
+  // TODO(i18n)
+  "install.button": "Zid BonSafar l telephone",
+  "install.iosTitle": "Zid BonSafar l l'écran dyalek",
+  "install.iosStep1": "Brek 3la Partager lta7t f Safari",
+  "install.iosStep2": "Men b3d khtar « Sur l'écran d'accueil »",
 };

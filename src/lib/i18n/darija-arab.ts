@@ -589,4 +589,9 @@ export const darijaArab: Dictionary = {
   "map.credit": "Natural Earth",
   "package.kmFromCentre": "{km} كلم من السونطر",
   "package.kmAway": "بعيد ب{km} كلم",
+  // TODO(i18n)
+  "install.button": "زيد BonSafar للتيليفون",
+  "install.iosTitle": "زيد BonSafar للشاشة ديالك",
+  "install.iosStep1": "برك على «مشاركة» لتحت ف Safari",
+  "install.iosStep2": "من بعد ختار «إضافة إلى الشاشة الرئيسية»",
 };

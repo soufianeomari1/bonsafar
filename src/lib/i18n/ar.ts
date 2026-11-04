@@ -590,4 +590,9 @@ export const ar: Dictionary = {
   "map.credit": "Natural Earth",
   "package.kmFromCentre": "{km} كم من المركز",
   "package.kmAway": "على بعد {km} كم",
+  // TODO(i18n)
+  "install.button": "ثبّت BonSafar",
+  "install.iosTitle": "أضف BonSafar إلى شاشتك الرئيسية",
+  "install.iosStep1": "اضغط على «مشاركة» أسفل Safari",
+  "install.iosStep2": "ثم اختر «إضافة إلى الشاشة الرئيسية»",
 };

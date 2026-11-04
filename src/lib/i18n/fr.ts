@@ -533,4 +533,8 @@ export const fr: Dictionary = {
   "map.credit": "Natural Earth",
   "package.kmFromCentre": "{km} km du centre",
   "package.kmAway": "à {km} km",
+  "install.button": "Installer BonSafar",
+  "install.iosTitle": "Ajoute BonSafar à ton écran d'accueil",
+  "install.iosStep1": "Touche Partager en bas de Safari",
+  "install.iosStep2": "Puis choisis « Sur l'écran d'accueil »",
 };

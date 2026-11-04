@@ -603,6 +603,10 @@ export const en = {
   "map.credit": "Natural Earth",
   "package.kmFromCentre": "{km} km from the centre",
   "package.kmAway": "{km} km away",
+  "install.button": "Install BonSafar",
+  "install.iosTitle": "Add BonSafar to your home screen",
+  "install.iosStep1": "Tap Share at the bottom of Safari",
+  "install.iosStep2": "Then choose “Add to Home Screen”",
 } as const;
 
 export type TranslationKey = keyof typeof en;

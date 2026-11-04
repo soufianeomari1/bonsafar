@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { LanguageProvider } from "@/lib/i18n/provider";
 import { HapticRing } from "@/components/bs/HapticRing";
 import { IconDefaults } from "@/components/bs/IconDefaults";
+import { InstallRegistrar } from "@/components/pwa/InstallRegistrar";
+import { TOKENS } from "@/lib/tokens";
 import "./globals.css";
 
 const geist = Geist({
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f2f2f7",
+  themeColor: TOKENS.bg,
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -59,6 +61,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <IconDefaults>
             {children}
             <HapticRing />
+            <InstallRegistrar />
           </IconDefaults>
         </LanguageProvider>
       </body>
