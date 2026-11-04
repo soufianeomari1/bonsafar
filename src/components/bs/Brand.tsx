@@ -66,10 +66,13 @@ export function Logo({
 export function JuryPill({
   label,
   withIcon = false,
+  dot = false,
   className,
 }: {
   label: string;
   withIcon?: boolean;
+  /** Small blue dot, as on the home header. */
+  dot?: boolean;
   className?: string;
 }) {
   return (
@@ -82,6 +85,7 @@ export function JuryPill({
         className
       )}
     >
+      {dot && <span aria-hidden className="size-[7px] rounded-pill bg-blue" />}
       {withIcon && <Play size={14} weight="fill" className="text-blue" aria-hidden />}
       {label}
     </a>

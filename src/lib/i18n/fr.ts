@@ -155,6 +155,10 @@ export const fr: Dictionary = {
   "home.chip.istanbul": "Istanbul en décembre",
   "home.chip.visa": "Sans visa cet été",
   "home.chip.marrakech": "Weekend à Marrakech",
+  "home.bubbleWrite": "Ktebha liya",
+  "home.bubbleWriteHint": "Ou écris-moi ton voyage",
+  "home.holdLead": "Maintiens",
+  "home.holdRest": "pour parler · darija ou français",
   "home.micDenied":
     "Le micro est bloqué. Autorise-le dans les réglages du navigateur, ou écris ta demande ci-dessous.",
   "home.micUnsupported":

@@ -161,6 +161,10 @@ export const en = {
   "home.chip.istanbul": "Istanbul in December",
   "home.chip.visa": "No visa this summer",
   "home.chip.marrakech": "A weekend in Marrakech",
+  "home.bubbleWrite": "Ktebha liya",
+  "home.bubbleWriteHint": "Or write me your trip",
+  "home.holdLead": "Press and hold",
+  "home.holdRest": "to speak · darija or French",
   "home.micDenied":
     "The microphone is blocked. Allow it in your browser settings, or write your request below.",
   "home.micUnsupported":

@@ -79,9 +79,10 @@ export function Composer({
     onFocusChange?.(true);
   }
 
-  function focusOut(event: FocusEvent<HTMLFormElement>) {
+  function focusOut(event: FocusEvent<HTMLElement>) {
     const next = event.relatedTarget;
-    if (next instanceof Node && event.currentTarget.contains(next)) return;
+    const form = event.currentTarget.closest("form");
+    if (next instanceof Node && form?.contains(next)) return;
     setFocused(false);
     onFocusChange?.(false);
   }
@@ -93,8 +94,6 @@ export function Composer({
         if (!filled) return;
         onSubmit(value);
       }}
-      onFocus={focusIn}
-      onBlur={focusOut}
       className={cn("flex items-end gap-2", className)}
     >
       {mic ? (
@@ -170,6 +169,8 @@ export function Composer({
               enterKeyHint="send"
               autoComplete="off"
               aria-label={label}
+              onFocus={focusIn}
+              onBlur={focusOut}
               onChange={(event) => onValueChange(event.target.value)}
               className="relative w-full bg-transparent text-base text-ink outline-none"
             />

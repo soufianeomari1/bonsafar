@@ -9,6 +9,12 @@ export type CloudLayer = {
   opacity: number;
   duration: number;
   delay: number;
+  /** Stay in a corner. Without this, the cloud crosses the whole screen. */
+  pin?: "start" | "end";
+  /** Inset from that side. Negative hangs the cloud off the edge. */
+  inset?: number;
+  /** Local drift in px. Negative moves toward the inline start. */
+  drift?: number;
 };
 
 /** Three layers, slower the further away, as in docs section 3 (A9). */
@@ -32,32 +38,49 @@ export function Clouds({ className, layers = LAYERS }: CloudsProps) {
       aria-hidden
       className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
     >
-      {layers.map((layer, index) => (
-        <motion.svg
-          key={index}
-          viewBox="0 0 90 34"
-          width={layer.width}
-          height={(layer.width * 34) / 90}
-          className="absolute left-0 text-card"
-          style={{ top: layer.top, opacity: layer.opacity }}
-          animate={reduced ? { x: "60%" } : { x: ["-120%", "640%"] }}
-          transition={
-            reduced
-              ? { duration: 0.2 }
-              : {
-                  duration: layer.duration,
-                  delay: layer.delay,
-                  ease: "linear",
-                  repeat: Infinity,
-                }
-          }
-        >
-          <path
-            d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z"
-            fill="currentColor"
-          />
-        </motion.svg>
-      ))}
+      {layers.map((layer, index) => {
+        const pinned = layer.pin !== undefined;
+        return (
+          <motion.svg
+            key={index}
+            viewBox="0 0 90 34"
+            width={layer.width}
+            height={(layer.width * 34) / 90}
+            className={cn("absolute text-card", !pinned && "left-0")}
+            style={{
+              top: layer.top,
+              opacity: layer.opacity,
+              ...(layer.pin === "end"
+                ? { insetInlineEnd: layer.inset ?? 0 }
+                : layer.pin === "start"
+                  ? { insetInlineStart: layer.inset ?? 0 }
+                  : {}),
+            }}
+            animate={
+              pinned
+                ? { x: reduced ? 0 : [0, layer.drift ?? -26, 0] }
+                : reduced
+                  ? { x: "60%" }
+                  : { x: ["-120%", "640%"] }
+            }
+            transition={
+              reduced
+                ? { duration: 0.2 }
+                : {
+                    duration: layer.duration,
+                    delay: layer.delay,
+                    ease: pinned ? "easeInOut" : "linear",
+                    repeat: Infinity,
+                  }
+            }
+          >
+            <path
+              d="M20 30h52a12 12 0 0 0 0-24 16 16 0 0 0-30-4A14 14 0 0 0 20 30z"
+              fill="currentColor"
+            />
+          </motion.svg>
+        );
+      })}
     </div>
   );
 }
