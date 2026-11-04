@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Export } from "@phosphor-icons/react";
+import { AirplaneTilt, Bed, CheckCircle, Export, IdentificationCard, SealCheck, type Icon } from "@phosphor-icons/react";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { packageOptionId, selectPackage, withTripSearch } from "@/lib/agent-client/store";
 import type { PackageOption } from "@/lib/agent/schema";
@@ -16,6 +17,8 @@ import { usePrefetchGoodToKnow } from "@/lib/trip/good-to-know-client";
 import { useProfile } from "@/lib/profile/useProfile";
 import { useTrip } from "@/lib/trip/useTrip";
 import { cn } from "@/lib/utils";
+import { Sheet } from "@/components/bs/Sheet";
+import type { Offer } from "@/lib/prices/store";
 import { PriceFact } from "./PriceFact";
 import { RouteMap } from "./RouteMap";
 import { HotelPhoto } from "./TripBits";
@@ -35,6 +38,7 @@ export function ResultScreen() {
   const { profile } = useProfile();
   const trip = useTrip();
   const router = useRouter();
+  const [detail, setDetail] = useState(false);
   usePrefetchGoodToKnow(run, profile, lang);
   const result = run.result;
   const recommended = result ? asFlight(run.offers[result.recommended.flight_id]) : null;
@@ -61,7 +65,7 @@ export function ResultScreen() {
   const city = placeName(pack.destination.iata, lang, pack.destination.city);
   const landedMs = run.end?.recorded?.total_ms ?? run.end?.total_ms ?? pack.total_ms;
   const seconds = Math.max(1, Math.round(landedMs / 1000));
-  const landed = lang === "ar" || lang === "darija-arab" ? `${seconds} ث` : `${seconds} s`;
+  const prepared = preparedCounts(run.offers, pack.entry != null);
 
   async function share() {
     const text = `${city} · ${formatMad(pack.recommended.totals.total_display_mad)}`;
@@ -119,15 +123,16 @@ export function ResultScreen() {
           <p className="mt-1 flex items-center gap-2 text-sm text-muted">
             <CheckCircle size={20} weight="light" className="shrink-0 text-green" aria-hidden />
             <span>
-              {t("result.landed", { time: landed })}
+              {t("result.landed", { s: seconds })}
               {" · "}
-              <a href="#under-the-hood" className="font-bold text-blue">
+              <button type="button" onClick={() => setDetail(true)} className="font-bold text-blue">
                 {t("result.how")}
-              </a>
+              </button>
             </span>
           </p>
         </section>
       </div>
+      <PreparedSheet open={detail} counts={prepared} onClose={() => setDetail(false)} />
     </div>
   );
 }
@@ -187,5 +192,83 @@ function OptionCard({ row, budget }: { row: Row; budget: number | null }) {
         />
       </span>
     </li>
+  );
+}
+
+type PreparedCounts = { flights: number; hotels: number; visa: boolean; prices: boolean };
+
+function preparedCounts(offers: Record<string, Offer>, visa: boolean): PreparedCounts {
+  let flights = 0;
+  let hotels = 0;
+  let priced = false;
+  for (const offer of Object.values(offers)) {
+    if (offer.kind === "flight") flights += 1;
+    else if (offer.kind === "hotel") hotels += 1;
+    if (Number.isFinite(offer.price_mad_display)) priced = true;
+  }
+  return { flights, hotels, visa, prices: priced && flights + hotels > 0 };
+}
+
+function PreparedSheet({
+  open,
+  counts,
+  onClose,
+}: {
+  open: boolean;
+  counts: PreparedCounts;
+  onClose: () => void;
+}) {
+  const { t } = useLanguage();
+  const rows: { icon: Icon; title: string; note: string }[] = [];
+  if (counts.flights > 0) {
+    rows.push({
+      icon: AirplaneTilt,
+      title: counts.flights === 1 ? t("result.sheetFlightsOne") : t("result.sheetFlights", { count: counts.flights }),
+      note: t("result.sheetFlightsNote"),
+    });
+  }
+  if (counts.hotels > 0) {
+    rows.push({
+      icon: Bed,
+      title: counts.hotels === 1 ? t("result.sheetHotelsOne") : t("result.sheetHotels", { count: counts.hotels }),
+      note: t("result.sheetHotelsNote"),
+    });
+  }
+  if (counts.visa) {
+    rows.push({ icon: IdentificationCard, title: t("result.sheetVisa"), note: t("result.sheetVisaNote") });
+  }
+  if (counts.prices) {
+    rows.push({ icon: SealCheck, title: t("result.sheetPrices"), note: t("result.sheetPricesNote") });
+  }
+
+  return (
+    <Sheet open={open} onClose={onClose} title={t("result.sheetTitle")} hideTitle showClose={false} dragDismiss>
+      <div aria-hidden className="mx-auto mb-3 h-1.5 w-10 rounded-pill bg-line" />
+      <h2 className="text-[22px] font-extrabold tracking-[-0.02em]">{t("result.sheetTitle")}</h2>
+      <p className="mt-1 text-sm leading-snug text-muted">{t("result.sheetLead")}</p>
+      <ul className="mt-2">
+        {rows.map((row) => {
+          const RowIcon = row.icon;
+          return (
+            <li key={row.title} className="flex items-start gap-3 border-t border-line py-3 first:border-t-0">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-soft text-green">
+                <RowIcon size={20} weight="light" aria-hidden />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[15px] font-bold">{row.title}</span>
+                <span className="mt-0.5 block text-[13px] leading-snug text-muted">{row.note}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <button
+        type="button"
+        onClick={onClose}
+        className="mt-2 flex h-12 w-full items-center justify-center rounded-button bg-fill text-base font-semibold"
+      >
+        {t("result.sheetClose")}
+      </button>
+    </Sheet>
   );
 }

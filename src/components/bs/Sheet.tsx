@@ -15,6 +15,8 @@ export type SheetProps = {
   /** Hide the visible heading when the sheet draws its own. */
   hideTitle?: boolean;
   showClose?: boolean;
+  /** Drag the sheet down to close it. */
+  dragDismiss?: boolean;
   className?: string;
   children: React.ReactNode;
 };
@@ -26,6 +28,7 @@ export function Sheet({
   title,
   hideTitle = false,
   showClose = true,
+  dragDismiss = false,
   className,
   children,
 }: SheetProps) {
@@ -67,6 +70,12 @@ export function Sheet({
             animate={reduced ? { opacity: 1 } : { y: 0 }}
             exit={reduced ? { opacity: 0 } : { y: "100%" }}
             transition={reduced ? { duration: 0.2 } : SHEET_TRANSITION}
+            drag={dragDismiss && !reduced ? "y" : false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.45 }}
+            onDragEnd={(_, info) => {
+              if (dragDismiss && info.offset.y > 72) onClose();
+            }}
           >
             {showClose && (
               <div className="flex justify-end">
