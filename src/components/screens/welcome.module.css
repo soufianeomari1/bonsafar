@@ -55,6 +55,21 @@
   padding: 0 var(--gutter) 18px;
 }
 
+/* On a tall desktop the phone is 844px and the elastic spacers open large
+   gaps. Keep the column at 760px and center it. Phones stay full height. */
+@media (min-width: 768px) and (min-height: 861px) {
+  .scene {
+    justify-content: center;
+  }
+
+  .wrap {
+    flex: none;
+    height: 760px;
+    max-height: 760px;
+    min-height: 0;
+  }
+}
+
 .demo {
   display: contents;
 }
