@@ -23,7 +23,8 @@ import { hasIndispensableInfo } from "@/lib/intent/edits";
 import type { Intent } from "@/lib/intent/schema";
 import { useLanguage } from "@/lib/i18n/provider";
 import { PRESS_SCALE, PRESS_TRANSITION } from "@/lib/motion";
-import { profileForLang, type Airport } from "@/lib/profile/schema";
+import { AIRPORTS, profileForLang, type Airport } from "@/lib/profile/schema";
+import { placeName } from "@/lib/airports";
 import { useProfile } from "@/lib/profile/useProfile";
 import { scenarioFor, startAgentRun, replayFromLocation, withTripSearch } from "@/lib/agent-client/store";
 import { answerTrip, retryTrip } from "@/lib/trip/store";
@@ -244,7 +245,7 @@ export function UnderstoodScreen() {
                   </span>
                   <span className="text-sm leading-snug">
                     <strong className="font-bold">
-                      {t("understood.originLead", { city: t(`airport.${home}`) })} (<bdi dir="ltr">{home}</bdi>)
+                      {t("understood.originLead", { city: (AIRPORTS as readonly string[]).includes(home) ? t(`airport.${home as (typeof AIRPORTS)[number]}`) : placeName(home, lang) })} (<bdi dir="ltr">{home}</bdi>)
                     </strong>
                     {t("understood.originTail")}
                     {!intent?.question && <> {t("understood.noQuestion")}</>}

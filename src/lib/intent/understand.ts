@@ -4,6 +4,7 @@ import { callChat } from "@/lib/ai/call";
 import type { RunLog } from "@/lib/ai/events";
 import { collectStrings, containsMoney, scrubMoney } from "@/lib/prices/guardrail";
 import type { Lang } from "@/lib/i18n";
+import { airportCity } from "@/lib/airports";
 import { profileTravellers, type Profile } from "@/lib/profile/schema";
 import { applyLocks } from "./edits";
 import {
@@ -85,7 +86,7 @@ function describeProfile(profile: Profile): string {
   const lines = [
     `- Home airport: ${
       profile.home_airport
-        ? `${profile.home_airport} (${AIRPORT_CITIES[profile.home_airport]})`
+        ? `${profile.home_airport} (${AIRPORT_CITIES[profile.home_airport] ?? airportCity(profile.home_airport) ?? "airport"})`
         : "not known"
     }`,
     `- Usually travels: ${profile.companions ? companions[profile.companions] : "not known"}`,

@@ -2,13 +2,18 @@ import { z } from "zod";
 import { LANGUAGES, type Lang } from "@/lib/i18n";
 
 /** Values allowed by the `profiles` table checks in supabase/schema.sql. */
+/** The Moroccan airports offered first; any IATA code is accepted. */
 export const AIRPORTS = ["CMN", "RAK", "RBA", "TNG", "FEZ", "AGA", "OUD"] as const;
 export const COMPANIONS = ["solo", "duo", "family", "friends"] as const;
 export const PASSPORTS = ["ma", "fr", "both", "other"] as const;
 export const STYLES = ["budget", "comfort", "premium"] as const;
 export const DARIJA_SCRIPTS = ["latn", "arab"] as const;
+export const BUDGETS = ["lt5k", "5to10k", "10to15k", "15to25k", "gt25k"] as const;
 
-export type Airport = (typeof AIRPORTS)[number];
+export type Airport = string;
+export type Budget = (typeof BUDGETS)[number];
+
+const YearMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 export type Companions = (typeof COMPANIONS)[number];
 export type Passport = (typeof PASSPORTS)[number];
 export type TravelStyle = (typeof STYLES)[number];
@@ -27,14 +32,23 @@ export const ProfileSchema = z.object({
   first_name: z.string().trim().max(60).nullable().default(null),
   ui_lang: z.enum(LANGUAGES).default("fr"),
   darija_script: z.enum(DARIJA_SCRIPTS).default("latn"),
-  home_airport: z.enum(AIRPORTS).nullable().default(null),
+  home_airport: z.string().regex(/^[A-Z]{3}$/).nullable().default(null),
   companions: z.enum(COMPANIONS).nullable().default(null),
   children_count: z.number().int().min(0).max(9).default(0),
+  children_ages: z.array(z.number().int().min(0).max(17)).max(9).default([]),
   passport_country: z.enum(PASSPORTS).nullable().default(null),
+  /** Month and year only. Never a passport number. */
+  passport_expiry: YearMonth.nullable().default(null),
   has_schengen: z.boolean().default(false),
+  schengen_expiry: YearMonth.nullable().default(null),
   passport_6m: z.boolean().default(true),
   intl_card: z.boolean().default(true),
   travel_style: z.enum(STYLES).nullable().default(null),
+  budget_band: z.enum(BUDGETS).nullable().default(null),
+  fav_months: z.array(z.number().int().min(1).max(12)).max(12).default([]),
+  whatsapp_number: z.string().regex(/^\+\d{8,15}$/).nullable().default(null),
+  /** Set only when the separate consent box is ticked. */
+  whatsapp_consent_at: z.string().nullable().default(null),
   prefs: PrefsSchema.default(PrefsSchema.parse({})),
   haptics: z.boolean().default(true),
 });
@@ -51,14 +65,53 @@ export const PROFILE_COLUMNS = [
   "home_airport",
   "companions",
   "children_count",
+  "children_ages",
   "passport_country",
+  "passport_expiry",
   "has_schengen",
+  "schengen_expiry",
   "passport_6m",
   "intl_card",
   "travel_style",
+  "budget_band",
+  "fav_months",
+  "whatsapp_number",
+  "whatsapp_consent_at",
   "prefs",
   "haptics",
 ] as const satisfies readonly (keyof Profile)[];
+
+/** The four express questions (screen 01, account). */
+export const QUESTIONS = ["airport", "who", "papers", "style"] as const;
+export type Question = (typeof QUESTIONS)[number];
+
+export function isAnswered(profile: Profile, question: Question): boolean {
+  switch (question) {
+    case "airport":
+      return profile.home_airport != null;
+    case "who":
+      return profile.companions != null;
+    case "papers":
+      return profile.passport_country != null && profile.passport_expiry != null;
+    case "style":
+      return profile.budget_band != null && profile.travel_style != null && profile.fav_months.length > 0;
+  }
+}
+
+/** Share of the profile filled, for the ring in "Mon espace". */
+export function completion(profile: Profile): number {
+  const facts = [
+    profile.home_airport != null,
+    profile.companions != null,
+    profile.passport_country != null,
+    profile.passport_expiry != null,
+    profile.travel_style != null,
+    profile.budget_band != null,
+    profile.fav_months.length > 0,
+    profile.first_name != null,
+  ];
+  return Math.round((facts.filter(Boolean).length / facts.length) * 100);
+}
 
 /** Lenient read: anything unknown or invalid falls back to the default. */
 export function parseProfile(value: unknown): Profile {
