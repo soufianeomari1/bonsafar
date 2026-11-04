@@ -104,7 +104,7 @@ export function OnboardingScreen() {
           onClick={back}
           className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-card text-ink"
         >
-          <CaretLeft size={18} weight="bold" className="rtl:-scale-x-100" />
+          <CaretLeft size={18} weight="light" className="rtl:-scale-x-100" />
         </button>
         <ProgressSegments
           total={STEPS.length}

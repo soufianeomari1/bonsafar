@@ -91,7 +91,7 @@ export function HomeScreen() {
               aria-label={t("profile.open")}
               className="flex size-10 items-center justify-center rounded-pill border border-line bg-card text-[15px] font-bold text-ink"
             >
-              {initial || <UserCircle size={22} weight="bold" aria-hidden />}
+              {initial || <UserCircle size={22} weight="light" aria-hidden />}
             </Link>
           </div>
         </header>
@@ -147,7 +147,7 @@ export function HomeScreen() {
               style={micHoldStyle}
               className="bs-mic-hold relative flex size-full items-center justify-center rounded-pill bg-mic text-card transition-transform duration-100 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue active:scale-[0.96]"
             >
-              <Microphone size={34} weight="fill" aria-hidden />
+              <Microphone size={34} weight="light" aria-hidden />
             </button>
           </div>
         </section>
@@ -196,7 +196,7 @@ export function HomeScreen() {
               exit={{ opacity: 0 }}
               className="mb-2.5 flex items-start gap-2 rounded-button bg-red-soft px-3.5 py-3 text-sm leading-[1.45] text-ink"
             >
-              <WarningCircle size={20} weight="fill" className="shrink-0 text-red" aria-hidden />
+              <WarningCircle size={20} weight="light" className="shrink-0 text-red" aria-hidden />
               {t(ERROR_KEYS[error])}
             </motion.p>
           )}

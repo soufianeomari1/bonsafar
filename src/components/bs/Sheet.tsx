@@ -76,7 +76,7 @@ export function Sheet({
                   onClick={onClose}
                   className="flex size-10 items-center justify-center rounded-pill bg-fill text-ink"
                 >
-                  <X size={16} weight="bold" />
+                  <X size={20} weight="light" />
                 </button>
               </div>
             )}

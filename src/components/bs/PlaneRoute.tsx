@@ -79,7 +79,7 @@ export function PlaneRoute({ stops, activeStep, className }: PlaneRouteProps) {
           transition={{ type: "spring", duration: 0.6, bounce: 0.2 }}
         >
           {/* AirplaneTilt points up and right: turn it so it flies down the route. */}
-          <AirplaneTilt size={24} weight="fill" className="rotate-[135deg]" />
+          <AirplaneTilt size={24} weight="light" className="rotate-[135deg]" />
         </motion.span>
       )}
 

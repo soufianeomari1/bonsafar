@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { LanguageProvider } from "@/lib/i18n/provider";
 import { HapticRing } from "@/components/bs/HapticRing";
+import { IconDefaults } from "@/components/bs/IconDefaults";
 import "./globals.css";
 
 const geist = Geist({
@@ -55,8 +56,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <meta {...impactSiteVerification} />
       <body className="flex min-h-full flex-col">
         <LanguageProvider>
-          {children}
-          <HapticRing />
+          <IconDefaults>
+            {children}
+            <HapticRing />
+          </IconDefaults>
         </LanguageProvider>
       </body>
     </html>

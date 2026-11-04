@@ -20,7 +20,7 @@ export function SearchPlaceholder() {
           onClick={() => router.push("/trip/understood")}
           className="flex size-11 items-center justify-center text-ink"
         >
-          <CaretLeft size={20} weight="bold" className="rtl:-scale-x-100" />
+          <CaretLeft size={20} weight="light" className="rtl:-scale-x-100" />
         </button>
       </header>
       <main className="relative flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">

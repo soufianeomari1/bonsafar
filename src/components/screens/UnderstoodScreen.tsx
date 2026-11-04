@@ -106,7 +106,7 @@ export function UnderstoodScreen() {
           onClick={() => router.push("/home")}
           className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-card text-ink"
         >
-          <CaretLeft size={18} weight="bold" className="rtl:-scale-x-100" />
+          <CaretLeft size={18} weight="light" className="rtl:-scale-x-100" />
         </button>
         <h1 className="min-w-0 flex-1 text-xl font-extrabold tracking-[-0.02em]">
           {t("understood.title")}
@@ -228,7 +228,7 @@ export function UnderstoodScreen() {
                         className="flex h-11 items-center gap-2 rounded-pill border border-line bg-card pe-3.5 ps-2 text-[15px] font-bold text-ink"
                       >
                         <span className={cn("flex size-[30px] items-center justify-center rounded-pill", chip.tone)}>
-                          <chip.icon size={16} weight="fill" aria-hidden />
+                          <chip.icon size={16} weight="light" aria-hidden />
                         </span>
                         <bdi>{chip.label}</bdi>
                       </motion.button>
@@ -240,7 +240,7 @@ export function UnderstoodScreen() {
               {showChips && fromProfile && home && job.phase === "ready" && (
                 <div className="flex items-center gap-2.5 rounded-[18px] bg-green-soft px-3.5 py-3">
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-green-bright text-card">
-                    <Check size={12} weight="bold" aria-hidden />
+                    <Check size={12} weight="light" aria-hidden />
                   </span>
                   <span className="text-sm leading-snug">
                     <strong className="font-bold">
@@ -295,7 +295,7 @@ export function UnderstoodScreen() {
           }}
           className="font-bold"
         >
-          <MagnifyingGlass size={18} weight="bold" aria-hidden />
+          <MagnifyingGlass size={18} weight="light" aria-hidden />
           <JuryLabel k="understood.go" />
         </Button>
       </div>

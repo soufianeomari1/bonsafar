@@ -95,7 +95,7 @@ export function PosterScreen() {
           onClick={() => router.push(withTripSearch("/trip/file"))}
           className="flex size-11 items-center justify-center rounded-pill bg-card"
         >
-          <CaretLeft size={18} weight="bold" className="rtl:-scale-x-100" aria-hidden />
+          <CaretLeft size={18} weight="light" className="rtl:-scale-x-100" aria-hidden />
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">

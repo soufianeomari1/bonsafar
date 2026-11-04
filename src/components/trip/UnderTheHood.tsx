@@ -212,7 +212,7 @@ export function UnderTheHood() {
       </div>
 
       <div className="flex items-start gap-2.5 rounded-[14px] bg-green-soft px-3.5 py-3 text-sm leading-snug">
-        <CheckCircle size={20} weight="fill" className="mt-0.5 shrink-0 text-green" aria-hidden />
+        <CheckCircle size={20} weight="light" className="mt-0.5 shrink-0 text-green" aria-hidden />
         <p>
           <strong>{t("hood.guardrail")}</strong> {t("hood.guardrailBody", { passed, blocked })}
         </p>
