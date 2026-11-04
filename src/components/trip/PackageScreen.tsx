@@ -201,11 +201,14 @@ export function PackageScreen() {
             );
           })}
 
-          {hotel && <HotelCard hotel={hotel} />}
+          {hotel && <HotelCard hotel={hotel} nights={nights} />}
 
-          {out && (
+          {out && flight && (
             <>
-              <SectionTitle className="mt-7">{t("package.flightsTitle")}</SectionTitle>
+              <div className="mt-7 flex items-baseline justify-between gap-3">
+                <SectionTitle>{t("package.flightsTitle")}</SectionTitle>
+                <SectionPrice amount={flight.price_mad_display} caption={t("package.roundTrip")} />
+              </div>
               <div className="mt-3 rounded-card bg-card px-4 py-1.5 shadow-soft">
                 <LegBlock leg={out} label={t("package.outbound")} />
                 {back && (
@@ -252,7 +255,16 @@ function RoundButton({
   );
 }
 
-function HotelCard({ hotel }: { hotel: HotelOffer }) {
+function SectionPrice({ amount, caption }: { amount: number; caption: string }) {
+  return (
+    <p className="shrink-0 text-end text-[15px] font-bold tabular-nums">
+      <bdi>{formatMad(amount)}</bdi>
+      <span className="mt-px block text-[11px] font-medium text-muted">{caption}</span>
+    </p>
+  );
+}
+
+function HotelCard({ hotel, nights }: { hotel: HotelOffer; nights: number }) {
   const { t, lang } = useLanguage();
   const [kept, setKept] = useState(false);
   const rating = hotel.attrs.review_rating;
@@ -272,7 +284,10 @@ function HotelCard({ hotel }: { hotel: HotelOffer }) {
 
   return (
     <>
-      <SectionTitle className="mt-[26px]">{t("package.hotelTitle")}</SectionTitle>
+      <div className="mt-[26px] flex items-baseline justify-between gap-3">
+        <SectionTitle>{t("package.hotelTitle")}</SectionTitle>
+        <SectionPrice amount={hotel.price_mad_display} caption={nightsText(nights, t)} />
+      </div>
       <div className="mt-3 overflow-hidden rounded-card bg-card shadow-soft">
         <HotelPhoto src={hotel.attrs.main_image} alt={hotel.attrs.name} className="h-[190px]">
           {(shown) => (
@@ -478,10 +493,10 @@ function TotalBar({
   const [open, setOpen] = useState(false);
   const totals = option.totals;
   const rate = totals.fx ?? fx;
-  const perPerson =
+  const parts =
     totals.passengers === 1
-      ? t("package.perPersonOne")
-      : t("package.perPerson", { count: totals.passengers, amount: ltr(formatMad(totals.per_person_display_mad)) });
+      ? t("package.partsOne")
+      : t("package.parts", { count: totals.passengers });
 
   return (
     <div className="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3.5 border-t border-line bg-card px-5 pb-[22px] pt-3.5 shadow-[0_-10px_30px_rgb(11_11_15/0.06)]">
@@ -495,7 +510,7 @@ function TotalBar({
           <span className="block text-2xl font-extrabold tabular-nums tracking-[-0.02em]">
             <bdi>{formatMad(totals.total_display_mad)}</bdi>
           </span>
-          <span className="block text-[12.5px] text-muted">{perPerson}</span>
+          <span className="block text-[12.5px] text-muted">{parts}</span>
         </button>
         {open && (
           <span
