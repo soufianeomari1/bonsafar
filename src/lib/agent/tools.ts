@@ -2,7 +2,7 @@ import type { ChatCompletionTool } from "openai/resources/chat/completions";
 import type { RunLog } from "@/lib/ai/events";
 import type { Lang } from "@/lib/i18n";
 import type { Intent } from "@/lib/intent/schema";
-import { searchFlights } from "@/lib/mcp/kiwi";
+import { mergeFlightSearches, searchFlights, type FlightSearchParams } from "@/lib/mcp/kiwi";
 import { findPlace } from "@/lib/mcp/places";
 import { priceTrends, searchHotels, type HotelStars } from "@/lib/mcp/trivago";
 import type { Profile } from "@/lib/profile/schema";
@@ -193,18 +193,43 @@ export class AgentContext {
     const promise = (async () => {
       this.step("flights", "start", city);
       try {
-        const search = await searchFlights(
-          {
-            from: this.origin,
-            to: city,
-            depart_date: this.intent.depart_date,
-            return_date: this.intent.return_date,
-            adults: this.intent.adults,
-            children: this.intent.children,
-            locale: this.jury || this.lang === "en" ? "en" : "fr",
-          },
-          this.log,
+        const locale = this.jury || this.lang === "en" ? "en" : "fr";
+        const base: FlightSearchParams = {
+          from: this.origin,
+          to: city,
+          depart_date: this.intent.depart_date,
+          return_date: this.intent.return_date,
+          adults: this.intent.adults,
+          children: this.intent.children,
+          locale,
+        };
+        const variants: { label: string; max_sector_stopovers: number; sort: "price" | "quality" }[] = [
+          { label: "direct, price", max_sector_stopovers: 0, sort: "price" },
+          { label: "one stop, quality", max_sector_stopovers: 1, sort: "quality" },
+          { label: "one stop, price", max_sector_stopovers: 1, sort: "price" },
+        ];
+        const settled = await Promise.all(
+          variants.map(async (variant) => {
+            try {
+              return await searchFlights(
+                { ...base, max_sector_stopovers: variant.max_sector_stopovers, sort: variant.sort },
+                this.log,
+              );
+            } catch (error) {
+              this.log.add({
+                step: "flights",
+                model: "code",
+                latency_ms: 0,
+                status: "error",
+                note: `${variant.label} search failed (${errorCode(error)}); keeping the other results`,
+              });
+              return null;
+            }
+          }),
         );
+        const found = settled.flatMap((search) => (search ? [search] : []));
+        if (!found.length) throw new Error("All three flight searches failed.");
+        const search = mergeFlightSearches(found);
         const offers = this.store.addFlights(search, city, new Date().toISOString());
         this.publish(offers);
         const top = [...offers].sort((a, b) => a.price - b.price).slice(0, 3);

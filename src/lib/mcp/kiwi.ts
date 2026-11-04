@@ -165,7 +165,28 @@ export type FlightSearchParams = {
   adults: number;
   children: number;
   locale: "en" | "fr";
+  /** Connections allowed on each sector. Direct searches pass 0. */
+  max_sector_stopovers?: number;
+  sort?: "price" | "duration" | "quality" | "date" | "popularity";
 };
+
+/** One list for the price store: the same Kiwi.com itinerary id is kept once. */
+export function mergeFlightSearches(searches: KiwiSearch[]): KiwiSearch {
+  const first = searches[0];
+  const seen = new Set<string>();
+  const itineraries: KiwiItinerary[] = [];
+  for (const search of searches) {
+    for (const itinerary of search.itineraries) {
+      const id = itinerary.kiwi_id;
+      if (id) {
+        if (seen.has(id)) continue;
+        seen.add(id);
+      }
+      itineraries.push(itinerary);
+    }
+  }
+  return { ...first, itineraries };
+}
 
 /** YYYY-MM-DD to the dd/mm/yyyy format the tool expects. */
 function kiwiDate(iso: string): string {
@@ -206,8 +227,11 @@ export async function searchFlights(params: FlightSearchParams, log: RunLog): Pr
     children: params.children,
     currency: "EUR",
     locale: params.locale,
-    sort: "price",
-    max_sector_stopovers: 1,
+    sort: params.sort ?? "price",
+    max_sector_stopovers: params.max_sector_stopovers ?? 1,
+    allow_self_transfer: false,
+    allow_diff_airport_connection: false,
+    allow_overnight_stopovers: false,
   };
   if (params.return_date) args.returnDate = kiwiDate(params.return_date);
 
