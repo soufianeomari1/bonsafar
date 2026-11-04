@@ -89,7 +89,9 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
   const notes = peekGoodToKnow(run, lang);
   const notesState: "loading" | "ready" | "error" = notes ? "ready" : failed ? "error" : "loading";
   const input = goodToKnowInput(run, profile, lang);
-  const inputKey = input ? `${input.runId}|${input.month}|${input.script}|${input.lang}` : "";
+  const inputKey = input
+    ? `${input.runId}|${input.originIata}|${input.destinationIata}|${input.departDate}|${input.script}|${input.lang}`
+    : "";
 
   useEffect(() => {
     if (!runId || !result) return;

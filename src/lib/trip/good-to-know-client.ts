@@ -16,7 +16,7 @@ export type GoodToKnowNotes = {
   weather: GoodToKnowLine;
 };
 
-const CACHE = "bonsafar.good-to-know";
+const CACHE = "bonsafar.good-to-know.v2";
 
 type Payload = { ok: true; notes: GoodToKnowNotes; events: RunEvent[] } | { ok: false; events?: RunEvent[] };
 
@@ -58,6 +58,9 @@ export type GoodToKnowInput = {
   city: string;
   country: string;
   origin: string;
+  originIata: string;
+  destinationIata: string;
+  departDate: string;
   month: string;
   script: "latn" | "arab";
   lang: Lang;
@@ -85,6 +88,9 @@ export function loadGoodToKnow(input: GoodToKnowInput): Promise<GoodToKnowNotes 
           city: input.city,
           country: input.country,
           origin: input.origin,
+          origin_iata: input.originIata,
+          destination_iata: input.destinationIata,
+          depart_date: input.departDate,
           month: input.month,
           script: input.script,
           lang: input.lang,
@@ -138,12 +144,17 @@ export function goodToKnowInput(run: AgentRunSnapshot, profile: Profile, lang: L
   const flight = option ? asFlight(run.offers[option.flight_id]) : null;
   const hotel = option ? asHotel(run.offers[option.hotel_id]) : null;
   const depart = hotel?.attrs.arrival ?? flight?.attrs.outbound.departure.slice(0, 10) ?? "";
-  if (!depart) return null;
+  const originIata = (flight?.attrs.outbound.from ?? "").toUpperCase();
+  const destinationIata = (flight?.attrs.outbound.to || result.destination.iata).toUpperCase();
+  if (!depart || !/^[A-Z]{3}$/.test(originIata) || !/^[A-Z]{3}$/.test(destinationIata)) return null;
   return {
     runId,
     city: result.destination.city,
     country: result.destination.country,
-    origin: airportCity(flight?.attrs.outbound.from ?? "") ?? "Casablanca",
+    origin: airportCity(originIata) ?? originIata,
+    originIata,
+    destinationIata,
+    departDate: depart,
     month: monthLabel(depart),
     script: scriptForLang(lang, profile.darija_script),
     lang,
@@ -156,7 +167,9 @@ export function goodToKnowInput(run: AgentRunSnapshot, profile: Profile, lang: L
  */
 export function usePrefetchGoodToKnow(run: AgentRunSnapshot, profile: Profile, lang: Lang) {
   const input = goodToKnowInput(run, profile, lang);
-  const key = input ? `${input.runId}|${input.city}|${input.month}|${input.script}|${input.lang}` : "";
+  const key = input
+    ? `${input.runId}|${input.originIata}|${input.destinationIata}|${input.departDate}|${input.script}|${input.lang}`
+    : "";
   useEffect(() => {
     if (!input) return;
     void loadGoodToKnow(input);

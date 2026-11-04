@@ -6,7 +6,7 @@
 import type { Lang } from "@/lib/i18n";
 import coords from "./geo/airports.json";
 
-export type AirportPoint = { iata: string; city: string; lat: number; lng: number };
+export type AirportPoint = { iata: string; city: string; lat: number; lng: number; tz: string | null };
 
 /** English names already used on the map. Other codes use the partner's city, then the code. */
 const CITIES: Record<string, string> = {
@@ -126,10 +126,124 @@ const CITIES: Record<string, string> = {
   BEY: "Beirut",
 };
 
+/** IANA zone of each named city. Moroccan airports share Africa/Casablanca. */
+const CITY_ZONE: Record<string, string> = {
+  Casablanca: "Africa/Casablanca",
+  Marrakech: "Africa/Casablanca",
+  Rabat: "Africa/Casablanca",
+  Tangier: "Africa/Casablanca",
+  Fes: "Africa/Casablanca",
+  Agadir: "Africa/Casablanca",
+  Oujda: "Africa/Casablanca",
+  Nador: "Africa/Casablanca",
+  Tetouan: "Africa/Casablanca",
+  Essaouira: "Africa/Casablanca",
+  Ouarzazate: "Africa/Casablanca",
+  "Al Hoceima": "Africa/Casablanca",
+  Dakhla: "Africa/Casablanca",
+  Laayoune: "Africa/Casablanca",
+  Istanbul: "Europe/Istanbul",
+  Ankara: "Europe/Istanbul",
+  Antalya: "Europe/Istanbul",
+  Izmir: "Europe/Istanbul",
+  Paris: "Europe/Paris",
+  Marseille: "Europe/Paris",
+  Nice: "Europe/Paris",
+  Lyon: "Europe/Paris",
+  Toulouse: "Europe/Paris",
+  Bordeaux: "Europe/Paris",
+  Nantes: "Europe/Paris",
+  Montpellier: "Europe/Paris",
+  Lille: "Europe/Paris",
+  Strasbourg: "Europe/Paris",
+  Madrid: "Europe/Madrid",
+  Barcelona: "Europe/Madrid",
+  Malaga: "Europe/Madrid",
+  Seville: "Europe/Madrid",
+  Valencia: "Europe/Madrid",
+  Alicante: "Europe/Madrid",
+  Palma: "Europe/Madrid",
+  Granada: "Europe/Madrid",
+  Lisbon: "Europe/Lisbon",
+  Porto: "Europe/Lisbon",
+  Faro: "Europe/Lisbon",
+  Rome: "Europe/Rome",
+  Milan: "Europe/Rome",
+  Bologna: "Europe/Rome",
+  Venice: "Europe/Rome",
+  Naples: "Europe/Rome",
+  Pisa: "Europe/Rome",
+  Turin: "Europe/Rome",
+  Catania: "Europe/Rome",
+  Palermo: "Europe/Rome",
+  Amsterdam: "Europe/Amsterdam",
+  Eindhoven: "Europe/Amsterdam",
+  Brussels: "Europe/Brussels",
+  London: "Europe/London",
+  Manchester: "Europe/London",
+  Dublin: "Europe/Dublin",
+  Frankfurt: "Europe/Berlin",
+  Munich: "Europe/Berlin",
+  Berlin: "Europe/Berlin",
+  Dusseldorf: "Europe/Berlin",
+  Cologne: "Europe/Berlin",
+  Hamburg: "Europe/Berlin",
+  Stuttgart: "Europe/Berlin",
+  Zurich: "Europe/Zurich",
+  Geneva: "Europe/Zurich",
+  Basel: "Europe/Zurich",
+  Vienna: "Europe/Vienna",
+  Prague: "Europe/Prague",
+  Budapest: "Europe/Budapest",
+  Warsaw: "Europe/Warsaw",
+  Krakow: "Europe/Warsaw",
+  Copenhagen: "Europe/Copenhagen",
+  Stockholm: "Europe/Stockholm",
+  Oslo: "Europe/Oslo",
+  Helsinki: "Europe/Helsinki",
+  Athens: "Europe/Athens",
+  Sofia: "Europe/Sofia",
+  Bucharest: "Europe/Bucharest",
+  Belgrade: "Europe/Belgrade",
+  Tirana: "Europe/Tirane",
+  Skopje: "Europe/Skopje",
+  Malta: "Europe/Malta",
+  Larnaca: "Asia/Nicosia",
+  Cairo: "Africa/Cairo",
+  Hurghada: "Africa/Cairo",
+  "Sharm el-Sheikh": "Africa/Cairo",
+  Tunis: "Africa/Tunis",
+  Djerba: "Africa/Tunis",
+  Algiers: "Africa/Algiers",
+  Dakar: "Africa/Dakar",
+  Abidjan: "Africa/Abidjan",
+  Nouakchott: "Africa/Nouakchott",
+  Dubai: "Asia/Dubai",
+  Sharjah: "Asia/Dubai",
+  "Abu Dhabi": "Asia/Dubai",
+  Doha: "Asia/Qatar",
+  Kuwait: "Asia/Kuwait",
+  Bahrain: "Asia/Bahrain",
+  Muscat: "Asia/Muscat",
+  Jeddah: "Asia/Riyadh",
+  Medina: "Asia/Riyadh",
+  Riyadh: "Asia/Riyadh",
+  Amman: "Asia/Amman",
+  Beirut: "Asia/Beirut",
+};
+
 const COORDS = coords as unknown as Record<string, [number, number]>;
 
+const MISSING_ZONES = [...new Set(Object.values(CITIES))].filter((city) => !CITY_ZONE[city]);
+if (MISSING_ZONES.length) {
+  throw new Error(`Missing airport time zones: ${MISSING_ZONES.join(", ")}`);
+}
+
 export const AIRPORTS: Record<string, AirportPoint> = Object.fromEntries(
-  Object.entries(COORDS).map(([iata, [lat, lng]]) => [iata, { iata, city: CITIES[iata] ?? "", lat, lng }]),
+  Object.entries(COORDS).map(([iata, [lat, lng]]) => {
+    const city = CITIES[iata] ?? "";
+    return [iata, { iata, city, lat, lng, tz: city ? CITY_ZONE[city] : null }];
+  }),
 );
 
 export function airport(iata: string): AirportPoint | null {
@@ -138,6 +252,11 @@ export function airport(iata: string): AirportPoint | null {
 
 export function airportCity(iata: string): string | null {
   return airport(iata)?.city || null;
+}
+
+/** IANA time zone of a known airport, or null when the table has no zone for it. */
+export function airportTimeZone(iata: string): string | null {
+  return airport(iata)?.tz ?? null;
 }
 
 /** City names in Arabic script, for Arabic and Arabic-script darija screens. */

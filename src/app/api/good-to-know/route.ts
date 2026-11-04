@@ -5,6 +5,7 @@ import { recordUsage } from "@/lib/usage/guard";
 import { fetchGoodToKnow } from "@/lib/ai/good-to-know";
 import { wantsArabic } from "@/lib/agent/schema";
 import { LANGUAGES } from "@/lib/i18n";
+import { timeDifference } from "@/lib/time/offset";
 
 export const maxDuration = 30;
 
@@ -13,6 +14,9 @@ const Body = z.object({
   city: z.string().trim().min(1).max(80),
   country: z.string().trim().min(1).max(80),
   origin: z.string().trim().min(1).max(80),
+  origin_iata: z.string().regex(/^[A-Za-z]{3}$/),
+  destination_iata: z.string().regex(/^[A-Za-z]{3}$/),
+  depart_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   month: z.string().trim().min(1).max(40),
   script: z.enum(["latn", "arab"]).default("latn"),
   lang: z.enum(LANGUAGES).default("fr"),
@@ -38,6 +42,11 @@ export async function POST(request: Request) {
         country: body.data.country,
         origin: body.data.origin,
         month: body.data.month,
+        timeDifference: timeDifference(
+          body.data.origin_iata.toUpperCase(),
+          body.data.destination_iata.toUpperCase(),
+          body.data.depart_date,
+        ),
         script: body.data.script,
         arabic: wantsArabic(body.data.lang),
       },

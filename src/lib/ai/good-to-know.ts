@@ -4,6 +4,7 @@ import type { RunLog } from "@/lib/ai/events";
 import { callChat } from "@/lib/ai/call";
 import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { guardModelText, scrubMoney } from "@/lib/prices/guardrail";
+import { imposedTimeFact, type TimeDifference } from "@/lib/time/offset";
 
 const Line = z.object({
   darija: z.string().trim().min(1).max(180),
@@ -37,7 +38,7 @@ const JSON_SCHEMA_AR = jsonSchema(GoodToKnowSchemaAr);
 const SYSTEM = `You write four short practical notes for a Moroccan traveller about to fly. Each note is one sentence, in Moroccan darija, French and English. When the request asks for Arabic, also fill "ar" in Modern Standard Arabic (fusha, never darija). Each language is complete on its own, with no word of another language inside it. Write numbers with Latin digits.
 
 Fields, in order of usefulness:
-- timezone: the time difference between Morocco and the destination.
+- timezone: rewrite the imposed time difference from the user message. The number of hours is a fact computed by code. Do not calculate a timezone offset and do not change the number. If the fact says 0 hours, say the clocks match.
 - plugs: whether a Moroccan plug works there, and if an adapter is needed.
 - currency: the name of the local currency only.
 - weather: the typical weather during the travel month. A season word is enough.
@@ -55,6 +56,8 @@ export type GoodToKnowRequest = {
   script: "latn" | "arab";
   /** Adds the Modern Standard Arabic line. */
   arabic: boolean;
+  /** Code-computed clock gap. Null when an airport zone is unknown. */
+  timeDifference: TimeDifference | null;
   runId?: string;
 };
 
@@ -82,10 +85,15 @@ function cleaned(value: GoodToKnow): GoodToKnow {
 export async function fetchGoodToKnow(request: GoodToKnowRequest, log: RunLog): Promise<GoodToKnow> {
   const env = serverEnv();
   const script = request.script === "arab" ? "Arabic letters" : "Latin letters (Arabizi, digits 3, 7 and 9)";
+  const timeFact = request.timeDifference
+    ? imposedTimeFact(request.timeDifference)
+    : "Imposed fact: the time difference is unknown. Do not state a number of hours.";
+  const hourDigit = request.timeDifference ? String(request.timeDifference.hours) : null;
   const user = [
     `Destination: ${request.city}, ${request.country}.`,
-    `Traveller leaves from: ${request.origin}, Morocco.`,
+    `Traveller leaves from: ${request.origin}.`,
     `Travel month: ${request.month}.`,
+    timeFact,
     `Darija script: ${script}.`,
     request.arabic ? `Also write every note in Modern Standard Arabic ("ar").` : `Leave "ar" out.`,
   ].join("\n");
@@ -132,7 +140,24 @@ export async function fetchGoodToKnow(request: GoodToKnowRequest, log: RunLog): 
       continue;
     }
     const verdict = guardModelText(parsed, log, "good_to_know");
-    if (verdict.passed) return parsed;
+    const timezoneLines = [
+      parsed.timezone.darija,
+      parsed.timezone.fr,
+      parsed.timezone.en,
+      ...(parsed.timezone.ar ? [parsed.timezone.ar] : []),
+    ];
+    const statesHours = (text: string) =>
+      hourDigit != null && new RegExp(`(?<!\\d)${hourDigit}(?!\\d)`).test(text);
+    const keptTheFact = hourDigit == null || timezoneLines.every(statesHours);
+    if (verdict.passed && keptTheFact) return parsed;
+    if (attempt === 0 && !keptTheFact) {
+      messages.push({ role: "assistant", content });
+      messages.push({
+        role: "user",
+        content: `The timezone note must state exactly ${hourDigit} hour(s), with the Latin digit ${hourDigit}, in darija, French and English. Rewrite all four notes. Do not recalculate the difference.`,
+      });
+      continue;
+    }
     if (attempt === 0) {
       messages.push({ role: "assistant", content });
       messages.push({
