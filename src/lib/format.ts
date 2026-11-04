@@ -82,3 +82,100 @@ export function formatUsd(value: number): string {
   if (value < 0.01) return `$${value.toFixed(5)}`;
   return `$${value.toFixed(4)}`;
 }
+
+/** Whole dirhams, grouped with a non-breaking space: "14 015 DH". */
+export function formatMad(amount: number): string {
+  return `${formatGrouped(Math.round(amount))}\u00A0DH`;
+}
+
+/** The same number without the currency, for a split-flap that sits beside "DH". */
+export function formatMadNumber(amount: number): string {
+  return formatGrouped(Math.round(amount));
+}
+
+/** Euros as the provider gave them. A whole number stays whole. */
+export function formatEur(amount: number): string {
+  const negative = amount < 0;
+  const abs = Math.abs(amount);
+  const digits = Number.isInteger(round2eur(abs)) ? 0 : 2;
+  const body = new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+    numberingSystem: "latn",
+  })
+    .format(abs)
+    .replace(/[\u202f ]/g, "\u00A0");
+  return `${negative ? "\u2212" : ""}${body}\u00A0\u20AC`;
+}
+
+function round2eur(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function formatGrouped(amount: number): string {
+  const negative = amount < 0;
+  const body = String(Math.abs(amount)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
+  return `${negative ? "\u2212" : ""}${body}`;
+}
+
+/** "8 h 55", "3 h 10", "45 min". Minutes come from the offer, already whole. */
+export function formatDuration(minutes: number): string {
+  const negative = minutes < 0;
+  const abs = Math.abs(Math.round(minutes));
+  const hours = Math.floor(abs / 60);
+  const mins = abs % 60;
+  const body = hours === 0 ? `${mins} min` : `${hours} h ${String(mins).padStart(2, "0")}`;
+  return negative ? `\u2212${body}` : body;
+}
+
+/** Clock time already on the offer ("09:15"), Latin digits, no timezone shift. */
+export function formatTime(value: string): string {
+  const match = /(\d{2}):(\d{2})/.exec(value);
+  return match ? `${match[1]}:${match[2]}` : value;
+}
+
+/** "Tue 15 Dec" style, Latin digits, the calendar date of an ISO day. */
+export function formatTripDate(iso: string, lang: Lang): string {
+  return new Intl.DateTimeFormat(localeFor(lang), {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+    numberingSystem: "latn",
+  }).format(utcDate(iso));
+}
+
+/** "Dec" from "2026-12". */
+export function formatMonth(yearMonth: string, lang: Lang): string {
+  const [year, month] = yearMonth.split("-").map(Number);
+  if (!year || !month) return yearMonth;
+  return new Intl.DateTimeFormat(localeFor(lang), {
+    month: "short",
+    timeZone: "UTC",
+    numberingSystem: "latn",
+  }).format(new Date(Date.UTC(year, month - 1, 1)));
+}
+
+/** When a price was captured, with the time. Latin digits. */
+export function formatWhen(iso: string, lang: Lang): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat(localeFor(lang), {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    numberingSystem: "latn",
+  }).format(date);
+}
+
+/** Whole days from today in Morocco until an ISO departure date. */
+export function daysUntil(iso: string): number {
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Casablanca",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  return Math.round((utcDate(iso).getTime() - utcDate(today).getTime()) / 86_400_000);
+}

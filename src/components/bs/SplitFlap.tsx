@@ -28,6 +28,8 @@ export type SplitFlapProps = {
   value: string;
   className?: string;
   cellClassName?: string;
+  /** The flight plan ticks on each landing. Counters that move often stay silent. */
+  haptic?: boolean;
 };
 
 /**
@@ -40,7 +42,7 @@ export function SplitFlap(props: SplitFlapProps) {
   return <Flap key={props.value} {...props} />;
 }
 
-function Flap({ value, className, cellClassName }: SplitFlapProps) {
+function Flap({ value, className, cellClassName, haptic: vibrate = true }: SplitFlapProps) {
   const reduced = useReducedMotion();
   const target = useMemo(() => Array.from(value), [value]);
   // Starts on the final value: the prerender must not call Math.random().
@@ -53,7 +55,7 @@ function Flap({ value, className, cellClassName }: SplitFlapProps) {
       timers.push(
         setTimeout(() => {
           setDisplay(target);
-          haptic("tick");
+          if (vibrate) haptic("tick");
         }, 0)
       );
       return () => timers.forEach(clearTimeout);
@@ -85,10 +87,10 @@ function Flap({ value, className, cellClassName }: SplitFlapProps) {
 
     const settledAt =
       (target.length - 1) * CELL_OFFSET_MS + FLIPS * FLIP_MS + FLIP_MS;
-    timers.push(setTimeout(() => haptic("tick"), settledAt));
+    if (vibrate) timers.push(setTimeout(() => haptic("tick"), settledAt));
 
     return () => timers.forEach(clearTimeout);
-  }, [target, reduced]);
+  }, [target, reduced, vibrate]);
 
   return (
     <span

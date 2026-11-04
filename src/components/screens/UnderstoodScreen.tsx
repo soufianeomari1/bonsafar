@@ -24,6 +24,7 @@ import { useLanguage } from "@/lib/i18n/provider";
 import { PRESS_SCALE, PRESS_TRANSITION } from "@/lib/motion";
 import type { Airport } from "@/lib/profile/schema";
 import { useProfile } from "@/lib/profile/useProfile";
+import { scenarioFor, startAgentRun, replayFromLocation, withTripSearch } from "@/lib/agent-client/store";
 import { answerTrip, retryTrip } from "@/lib/trip/store";
 import { useTrip } from "@/lib/trip/useTrip";
 import { cn } from "@/lib/utils";
@@ -279,7 +280,20 @@ export function UnderstoodScreen() {
 
       <div className="flex flex-col gap-2.5 px-5 pb-[22px] pt-2">
         <p className="text-center text-[13px] text-muted">{t("understood.tapHint")}</p>
-        <Button full disabled={!canSearch} onClick={() => router.push("/trip/search")} className="font-bold">
+        <Button
+          full
+          disabled={!canSearch}
+          onClick={() => {
+            const replay = replayFromLocation();
+            if (replay) startAgentRun({ replay: true, scenario: replay }, replay);
+            else if (intent) {
+              const scenario = scenarioFor(intent);
+              startAgentRun({ intent, profile, lang, jury, scenario }, scenario);
+            }
+            router.push(withTripSearch("/trip/plan"));
+          }}
+          className="font-bold"
+        >
           <MagnifyingGlass size={18} weight="bold" aria-hidden />
           {t("understood.go")}
         </Button>
