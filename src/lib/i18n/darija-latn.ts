@@ -148,6 +148,13 @@ export const darijaLatn: Dictionary = {
   "home.writeLabel": "Kteb talab dyalek",
   "home.writePlaceholder": "wla kteb hna…",
   "home.send": "Sifet",
+  "home.example.istanbul": "Istanbul m3a rajli f décembre, chi semaine",
+  "home.example.marrakech": "Weekend f Marrakech, otel b piscine",
+  "home.example.visa": "Fin nmchi bla visa had l'été ?",
+  "home.example.family": "Bghit nsafer m3a l'wlad f les vacances",
+  "home.chip.istanbul": "Istanbul f décembre",
+  "home.chip.visa": "Bla visa had l'été",
+  "home.chip.marrakech": "Weekend f Marrakech",
   "home.micDenied":
     "Micro msdoud. 7ellou f réglages dyal navigateur, wla kteb talab dyalek lta7t.",
   "home.micUnsupported": "Had navigateur ma kaysjjelch. Kteb talab dyalek lta7t.",

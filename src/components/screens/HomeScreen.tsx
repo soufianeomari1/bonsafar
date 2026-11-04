@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { Microphone, PaperPlaneRight, User, WarningCircle } from "@phosphor-icons/react";
+import { Microphone, User, WarningCircle } from "@phosphor-icons/react";
 import { JuryPill, SafarMark } from "@/components/bs/Brand";
+import { Composer, ComposerDock } from "@/components/bs/Composer";
 import { Clouds } from "@/components/bs/Clouds";
 import { Safar, type SafarState } from "@/components/bs/Safar";
 import { PulseRings } from "@/components/bs/VoiceRadar";
@@ -79,7 +80,7 @@ export function HomeScreen() {
           { top: 270, width: 60, opacity: 0.8, duration: 58, delay: -24 },
         ]}
       />
-      <div className="relative flex min-h-0 flex-1 flex-col scroll-quiet overflow-y-auto pb-[22px]">
+      <div className="relative flex min-h-0 flex-1 flex-col scroll-quiet overflow-y-auto pb-40">
         <header className="flex items-center justify-between gap-2 px-5 pt-[18px]">
           <div className="flex min-w-0 items-center gap-2" dir="ltr">
             <SafarMark />
@@ -169,8 +170,6 @@ export function HomeScreen() {
           </div>
         </section>
 
-        <div className="min-h-4 flex-1" />
-
         <AnimatePresence>
           {error && (
             <motion.p
@@ -186,40 +185,33 @@ export function HomeScreen() {
           )}
         </AnimatePresence>
 
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            submitText(text);
-          }}
-          className="mx-5 mt-3 flex h-[52px] items-center gap-2.5 rounded-button border border-line bg-card pe-2 ps-4"
-        >
-          <label htmlFor="home-request" className="sr-only">
-            {t("home.writeLabel")}
-          </label>
-          <input
-            id="home-request"
-            ref={input}
-            type="text"
-            dir="auto"
-            value={text}
-            enterKeyHint="send"
-            onChange={(event) => {
-              setText(event.target.value);
-              if (error) setError(null);
-            }}
-            placeholder={t("home.writePlaceholder")}
-            className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-muted"
-          />
-          <button
-            type="submit"
-            aria-label={t("home.send")}
-            disabled={!text.trim()}
-            className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-fill text-ink disabled:opacity-40"
-          >
-            <PaperPlaneRight size={16} weight="bold" className="rtl:-scale-x-100" />
-          </button>
-        </form>
       </div>
+
+      <ComposerDock>
+        <Composer
+          id="home-request"
+          inputRef={input}
+          value={text}
+          onValueChange={(value) => {
+            setText(value);
+            if (error) setError(null);
+          }}
+          onSubmit={submitText}
+          examples={[
+            t("home.example.istanbul"),
+            t("home.example.marrakech"),
+            t("home.example.visa"),
+            t("home.example.family"),
+          ]}
+          chips={[
+            { label: t("home.chip.istanbul") },
+            { label: t("home.chip.visa") },
+            { label: t("home.chip.marrakech") },
+          ]}
+          label={t("home.writeLabel")}
+          sendLabel={t("home.send")}
+        />
+      </ComposerDock>
 
       <AnimatePresence>
         {capture.status === "recording" && (

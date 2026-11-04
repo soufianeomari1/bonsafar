@@ -154,6 +154,13 @@ export const en = {
   "home.writeLabel": "Write your request",
   "home.writePlaceholder": "or write here…",
   "home.send": "Send",
+  "home.example.istanbul": "Istanbul with my husband in December, about a week",
+  "home.example.marrakech": "A weekend in Marrakech, a hotel with a pool",
+  "home.example.visa": "Where can I go with no visa this summer?",
+  "home.example.family": "I want to travel with the kids over the holidays",
+  "home.chip.istanbul": "Istanbul in December",
+  "home.chip.visa": "No visa this summer",
+  "home.chip.marrakech": "A weekend in Marrakech",
   "home.micDenied":
     "The microphone is blocked. Allow it in your browser settings, or write your request below.",
   "home.micUnsupported":

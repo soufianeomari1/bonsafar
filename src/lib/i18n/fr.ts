@@ -148,6 +148,13 @@ export const fr: Dictionary = {
   "home.writeLabel": "Écris ta demande",
   "home.writePlaceholder": "ou écris ici…",
   "home.send": "Envoyer",
+  "home.example.istanbul": "Istanbul m3a rajli f décembre, chi semaine",
+  "home.example.marrakech": "Weekend f Marrakech, otel b piscine",
+  "home.example.visa": "Fin nmchi bla visa had l'été ?",
+  "home.example.family": "Bghit nsafer m3a l'wlad f les vacances",
+  "home.chip.istanbul": "Istanbul en décembre",
+  "home.chip.visa": "Sans visa cet été",
+  "home.chip.marrakech": "Weekend à Marrakech",
   "home.micDenied":
     "Le micro est bloqué. Autorise-le dans les réglages du navigateur, ou écris ta demande ci-dessous.",
   "home.micUnsupported":
