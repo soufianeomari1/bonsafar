@@ -23,7 +23,8 @@ import { hasIndispensableInfo } from "@/lib/intent/edits";
 import type { Intent } from "@/lib/intent/schema";
 import { useLanguage } from "@/lib/i18n/provider";
 import { PRESS_SCALE, PRESS_TRANSITION } from "@/lib/motion";
-import { profileForLang, type Airport } from "@/lib/profile/schema";
+import { AIRPORTS, profileForLang, type Airport } from "@/lib/profile/schema";
+import { placeName } from "@/lib/airports";
 import { useProfile } from "@/lib/profile/useProfile";
 import { scenarioFor, startAgentRun, replayFromLocation, withTripSearch } from "@/lib/agent-client/store";
 import { answerTrip, retryTrip } from "@/lib/trip/store";
@@ -106,7 +107,7 @@ export function UnderstoodScreen() {
           onClick={() => router.push("/home")}
           className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-card text-ink"
         >
-          <CaretLeft size={18} weight="bold" className="rtl:-scale-x-100" />
+          <CaretLeft size={18} weight="light" className="rtl:-scale-x-100" />
         </button>
         <h1 className="min-w-0 flex-1 text-xl font-extrabold tracking-[-0.02em]">
           {t("understood.title")}
@@ -228,7 +229,7 @@ export function UnderstoodScreen() {
                         className="flex h-11 items-center gap-2 rounded-pill border border-line bg-card pe-3.5 ps-2 text-[15px] font-bold text-ink"
                       >
                         <span className={cn("flex size-[30px] items-center justify-center rounded-pill", chip.tone)}>
-                          <chip.icon size={16} weight="fill" aria-hidden />
+                          <chip.icon size={16} weight="light" aria-hidden />
                         </span>
                         <bdi>{chip.label}</bdi>
                       </motion.button>
@@ -240,11 +241,11 @@ export function UnderstoodScreen() {
               {showChips && fromProfile && home && job.phase === "ready" && (
                 <div className="flex items-center gap-2.5 rounded-[18px] bg-green-soft px-3.5 py-3">
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-green-bright text-card">
-                    <Check size={12} weight="bold" aria-hidden />
+                    <Check size={12} weight="light" aria-hidden />
                   </span>
                   <span className="text-sm leading-snug">
                     <strong className="font-bold">
-                      {t("understood.originLead", { city: t(`airport.${home}`) })} (<bdi dir="ltr">{home}</bdi>)
+                      {t("understood.originLead", { city: (AIRPORTS as readonly string[]).includes(home) ? t(`airport.${home as (typeof AIRPORTS)[number]}`) : placeName(home, lang) })} (<bdi dir="ltr">{home}</bdi>)
                     </strong>
                     {t("understood.originTail")}
                     {!intent?.question && <> {t("understood.noQuestion")}</>}
@@ -295,7 +296,7 @@ export function UnderstoodScreen() {
           }}
           className="font-bold"
         >
-          <MagnifyingGlass size={18} weight="bold" aria-hidden />
+          <MagnifyingGlass size={18} weight="light" aria-hidden />
           <JuryLabel k="understood.go" />
         </Button>
       </div>

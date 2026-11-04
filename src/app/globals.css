@@ -43,6 +43,20 @@
   --color-land: #eef1e6;
   --color-sky: #dcebff;
 
+  /* Natural Earth route map, postfetch-compte-v2.html */
+  --color-map-sea-top: #d8e8ff;
+  --color-map-sea-bottom: #e9f2ff;
+  --color-map-land: #f7f4ec;
+  --color-map-edge: #e2dccb;
+  --color-map-halo: #f4f7fb;
+  --color-map-credit: #8a8a95;
+
+  /* Post-fetch screens v2 */
+  --color-tip-top: #f3f8ff;
+  --color-tip-line: #dce9ff;
+  --color-body: #44444c;
+  --color-track: #dcdce3;
+
   /* Travel file stamp, and nothing else */
   --color-stamp-red: #c1272d;
   --color-stamp-green: #006233;
@@ -217,11 +231,55 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Safar along the route map, once, then he lands near the arrival. */
+.bs-fly {
+  animation: bs-fly 4s var(--ease-bs) 0.2s both;
+}
+
+@keyframes bs-fly {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 90%;
+  }
+}
+
+.bs-fade-in {
+  animation: bs-fade-in 0.4s ease-out both;
+}
+
+/* Skeleton lines while a model answer is on its way. Opacity only. */
+.bs-pulse {
+  animation: bs-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes bs-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes bs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Opt-in marker for CSS keyframe animations we author, so one rule can stop
    them all when the user asks for reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   .bs-motion,
-  .shimmer {
+  .shimmer,
+  .bs-fade-in,
+  .bs-pulse {
     animation: none !important;
   }
 }

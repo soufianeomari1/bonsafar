@@ -89,12 +89,12 @@ export function AuthPanel({ next = "/dev/kit" }: { next?: string }) {
 
       {user ? (
         <Button variant="secondary" full onClick={signOut}>
-          <SignOut size={20} weight="bold" />
+          <SignOut size={20} weight="light" />
           {t("common.signOut")}
         </Button>
       ) : (
         <Button variant="secondary" full onClick={signIn} disabled={!supabase}>
-          <GoogleLogo size={20} weight="bold" />
+          <GoogleLogo size={20} weight="light" />
           {t("common.signIn")}
         </Button>
       )}

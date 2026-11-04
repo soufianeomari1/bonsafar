@@ -38,7 +38,7 @@ export function ProfileScreen() {
           onClick={() => router.push("/home")}
           className="flex size-11 items-center justify-center text-ink"
         >
-          <CaretLeft size={20} weight="bold" className="rtl:-scale-x-100" />
+          <CaretLeft size={20} weight="light" className="rtl:-scale-x-100" />
         </button>
         <h1 className="text-[17px] font-bold">{t("profile.title")}</h1>
       </header>

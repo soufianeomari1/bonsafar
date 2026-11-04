@@ -121,7 +121,7 @@ export function Composer({
                   }}
                   className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-pill border border-line bg-card px-3 text-[13px] font-medium text-ink shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
                 >
-                  <Sparkle size={14} weight="fill" className="text-blue" aria-hidden />
+                  <Sparkle size={14} weight="light" className="text-blue" aria-hidden />
                   <bdi>{chip.label}</bdi>
                 </button>
               ))}
@@ -188,7 +188,7 @@ export function Composer({
               filled ? "bg-ink text-card" : "bg-fill text-ink/75"
             )}
           >
-            <ArrowUp size={22} weight="bold" />
+            <ArrowUp size={22} weight="light" />
           </motion.button>
         </div>
       </div>

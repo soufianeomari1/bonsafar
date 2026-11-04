@@ -64,6 +64,12 @@ export type HotelAttrs = {
   rooms: number;
   /** Per-night amount from the same deal, in the offer currency. */
   price_per_night: number | null;
+  /** Optional so runs saved before these fields still load. */
+  main_image?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  /** "Istanbul, Turquie", as trivago wrote it. */
+  city?: string | null;
 };
 
 export type TrendAttrs = {
@@ -174,6 +180,10 @@ export class PriceStore {
           children: stay.children,
           rooms: Math.max(1, Math.ceil(stay.adults / 2)),
           price_per_night: hotel.deal.price_per_night,
+          main_image: hotel.main_image,
+          latitude: hotel.latitude,
+          longitude: hotel.longitude,
+          city: hotel.city,
         },
       };
       this.offers.set(offer.id, offer);

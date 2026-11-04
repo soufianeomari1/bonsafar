@@ -119,7 +119,8 @@ function formatGrouped(amount: number): string {
 }
 
 /** "8 h 55", "3 h 10", "45 min". Minutes come from the offer, already whole. */
-export function formatDuration(minutes: number): string {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function formatDuration(minutes: number, lang?: Lang): string {
   const negative = minutes < 0;
   const abs = Math.abs(Math.round(minutes));
   const hours = Math.floor(abs / 60);

@@ -144,7 +144,7 @@ export function VocalScreen({
       <div className="flex flex-col gap-3 px-5 pb-[22px]">
         {capture.locked ? (
           <div className="flex items-center justify-center gap-1.5 text-[13px] text-muted">
-            <LockSimple size={14} weight="fill" aria-hidden />
+            <LockSimple size={14} weight="light" aria-hidden />
             {t("voice.locked")}
           </div>
         ) : (
@@ -152,8 +152,8 @@ export function VocalScreen({
             className="flex items-center justify-center gap-1.5 text-[13px] font-semibold text-muted"
             style={{ y: capture.dragY * 0.35 }}
           >
-            <CaretUp size={14} weight="bold" aria-hidden />
-            <LockSimple size={14} weight="fill" aria-hidden />
+            <CaretUp size={14} weight="light" aria-hidden />
+            <LockSimple size={14} weight="light" aria-hidden />
             {t("voice.slideLock")}
           </motion.div>
         )}
@@ -167,7 +167,7 @@ export function VocalScreen({
                 onClick={onCancel}
                 className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-red-soft text-red"
               >
-                <Trash size={20} weight="bold" />
+                <Trash size={20} weight="light" />
               </button>
               <div className="flex min-w-0 flex-1 items-center gap-2 ps-1">
                 <span
@@ -189,7 +189,7 @@ export function VocalScreen({
                 }}
                 className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-fill text-ink"
               >
-                {capture.paused ? <Play size={16} weight="fill" /> : <Pause size={16} weight="fill" />}
+                {capture.paused ? <Play size={16} weight="light" /> : <Pause size={16} weight="light" />}
               </button>
               <button
                 type="button"
@@ -200,7 +200,7 @@ export function VocalScreen({
                 }}
                 className="flex size-[52px] shrink-0 items-center justify-center rounded-pill bg-ink text-card"
               >
-                <PaperPlaneRight size={20} weight="bold" className="rtl:-scale-x-100" />
+                <PaperPlaneRight size={20} weight="light" className="rtl:-scale-x-100" />
               </button>
             </>
           ) : (
@@ -209,14 +209,14 @@ export function VocalScreen({
                 className="flex min-w-0 flex-1 items-center gap-1.5 ps-3 text-[15px] font-semibold text-muted"
                 style={{ x: capture.dragX * 0.6 * (rtl ? -1 : 1), opacity: 1 + capture.dragX / 160 }}
               >
-                <CaretLeft size={16} weight="bold" aria-hidden className="rtl:-scale-x-100" />
+                <CaretLeft size={16} weight="light" aria-hidden className="rtl:-scale-x-100" />
                 {t("voice.slideCancel")}
               </motion.span>
               <span
                 style={micHoldStyle}
                 className="bs-mic-hold flex size-[52px] shrink-0 items-center justify-center rounded-pill bg-blue text-card"
               >
-                <Microphone size={22} weight="fill" aria-hidden />
+                <Microphone size={22} weight="light" aria-hidden />
               </span>
             </>
           )}

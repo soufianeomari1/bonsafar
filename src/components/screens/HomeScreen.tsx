@@ -9,6 +9,7 @@ import { JuryPill, Wordmark } from "@/components/bs/Brand";
 import { Composer, ComposerDock } from "@/components/bs/Composer";
 import { Clouds } from "@/components/bs/Clouds";
 import { Safar, type SafarState } from "@/components/bs/Safar";
+import { Avatar } from "@/components/profile/GoogleAvatar";
 import { TrustSheet } from "@/components/screens/TrustSheet";
 import { VocalScreen } from "@/components/screens/VocalScreen";
 import { micHoldStyle, useVoiceCapture, type CaptureError } from "@/components/voice/useVoiceCapture";
@@ -33,7 +34,7 @@ const ERROR_KEYS: Record<CaptureError, TranslationKey> = {
 export function HomeScreen() {
   const { t, lang, jury } = useLanguage();
   const router = useRouter();
-  const { ready, profile } = useProfile();
+  const { ready, profile, user } = useProfile();
   const juryArabic = profile.darija_script === "arab";
   const [trustSeen, setTrustSeen] = useLocalFlag(TRUST_KEY);
   const [text, setText] = useState("");
@@ -87,11 +88,15 @@ export function HomeScreen() {
           <div className="flex shrink-0 items-center gap-2">
             <JuryPill dot label={t("common.juryMode")} className="h-9 border border-line px-3.5 text-[13px]" />
             <Link
-              href="/profile"
-              aria-label={t("profile.open")}
-              className="flex size-10 items-center justify-center rounded-pill border border-line bg-card text-[15px] font-bold text-ink"
+              href="/account"
+              aria-label={t("account.open")}
+              className="flex size-10 items-center justify-center overflow-hidden rounded-pill border border-line bg-card text-[15px] font-bold text-ink"
             >
-              {initial || <UserCircle size={22} weight="bold" aria-hidden />}
+              {user?.avatar ? (
+                <Avatar size={40} />
+              ) : (
+                initial || <UserCircle size={22} weight="light" aria-hidden />
+              )}
             </Link>
           </div>
         </header>
@@ -147,7 +152,7 @@ export function HomeScreen() {
               style={micHoldStyle}
               className="bs-mic-hold relative flex size-full items-center justify-center rounded-pill bg-mic text-card transition-transform duration-100 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue active:scale-[0.96]"
             >
-              <Microphone size={34} weight="fill" aria-hidden />
+              <Microphone size={34} weight="light" aria-hidden />
             </button>
           </div>
         </section>
@@ -196,7 +201,7 @@ export function HomeScreen() {
               exit={{ opacity: 0 }}
               className="mb-2.5 flex items-start gap-2 rounded-button bg-red-soft px-3.5 py-3 text-sm leading-[1.45] text-ink"
             >
-              <WarningCircle size={20} weight="fill" className="shrink-0 text-red" aria-hidden />
+              <WarningCircle size={20} weight="light" className="shrink-0 text-red" aria-hidden />
               {t(ERROR_KEYS[error])}
             </motion.p>
           )}

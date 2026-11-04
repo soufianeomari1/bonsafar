@@ -93,6 +93,6 @@ export const config = {
     /*
      * Everything except static assets, images and audio: those never need a session.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?|wav|mp3)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?|wav|mp3)$).*)",
   ],
 };

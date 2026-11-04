@@ -28,6 +28,10 @@ export type FrozenPackage = {
   ready_ok: number;
 };
 
+export type BookingStatus = "booked" | "to_confirm" | "issue";
+export type Partner = "kiwi.com" | "trivago";
+export type BookingIssue = "price_changed" | "sold_out" | "payment" | "site_error" | "other";
+
 export type FrozenTrip = {
   id: string;
   run_id: string;
@@ -38,7 +42,23 @@ export type FrozenTrip = {
   status: "ready";
   poster_url: string | null;
   synced_id: string | null;
+  /** What the traveller told us after coming back from a partner. */
+  booking_status?: BookingStatus | null;
+  booking_partner?: Partner | null;
+  booking_issue?: BookingIssue | null;
+  booking_updated_at?: string | null;
+  /** Price alert for this trip (a `price_alerts` row once signed in). */
+  alert?: boolean;
 };
+
+function bookingColumns(trip: FrozenTrip) {
+  return {
+    booking_status: trip.booking_status ?? null,
+    booking_partner: trip.booking_partner ?? null,
+    booking_issue: trip.booking_issue ?? null,
+    booking_updated_at: trip.booking_updated_at ?? null,
+  };
+}
 
 type SaveState = {
   trips: FrozenTrip[];
@@ -102,16 +122,66 @@ async function pushOne(trip: FrozenTrip) {
     .from("trips")
     .insert({
       user_id: user.id,
+      run_id: trip.run_id,
       transcript: trip.transcript,
       intent: trip.intent,
       package: trip.package,
       status: trip.status,
       poster_url: trip.poster_url,
+      ...bookingColumns(trip),
     })
     .select("id")
     .single();
   if (error || !row?.id) return;
-  replace(trip.run_id, { synced_id: String(row.id) });
+  const synced = String(row.id);
+  replace(trip.run_id, { synced_id: synced });
+  if (trip.alert) await pushAlert(synced, true);
+}
+
+async function pushAlert(tripId: string, active: boolean) {
+  const client = db();
+  if (!client) return;
+  const { data } = await client.auth.getUser();
+  if (!data.user) return;
+  await client
+    .from("price_alerts")
+    .upsert({ user_id: data.user.id, trip_id: tripId, active }, { onConflict: "user_id,trip_id" });
+}
+
+/** Booking answer after a partner visit. Phone first, then the account row. */
+export async function setBooking(
+  runId: string,
+  patch: { booking_status: BookingStatus; booking_partner?: Partner | null; booking_issue?: BookingIssue | null },
+): Promise<void> {
+  const trip = state.trips.find((item) => item.run_id === runId);
+  if (!trip) return;
+  const next: Partial<FrozenTrip> = {
+    booking_status: patch.booking_status,
+    booking_partner: patch.booking_partner ?? trip.booking_partner ?? null,
+    booking_issue: patch.booking_status === "issue" ? (patch.booking_issue ?? "other") : null,
+    booking_updated_at: new Date().toISOString(),
+  };
+  replace(runId, next);
+  const client = db();
+  if (client && trip.synced_id) {
+    await client.from("trips").update(bookingColumns({ ...trip, ...next })).eq("id", trip.synced_id);
+  } else {
+    await pushOne({ ...trip, ...next });
+  }
+}
+
+/** Turns the price alert of a trip on or off. */
+export async function setAlert(runId: string, on: boolean): Promise<void> {
+  const trip = state.trips.find((item) => item.run_id === runId);
+  if (!trip) return;
+  replace(runId, { alert: on });
+  if (trip.synced_id) await pushAlert(trip.synced_id, on);
+}
+
+/** Everything of this phone's trips goes; used by "Delete everything". */
+export function forgetTrips(): void {
+  writeLocal([]);
+  emit({ trips: [], ready: true });
 }
 
 /** Copies phone-only trips into the account, then keeps the account list. */
@@ -124,11 +194,29 @@ export async function syncTrips() {
   for (const trip of pending) await pushOne(trip);
   const { data: rows } = await client
     .from("trips")
-    .select("id, transcript, intent, package, status, poster_url, created_at")
+    .select(
+      "id, run_id, transcript, intent, package, status, poster_url, created_at, booking_status, booking_partner, booking_issue, booking_updated_at",
+    )
     .order("created_at", { ascending: false })
     .limit(20);
   if (!rows?.length) return;
-  const known = new Set(state.trips.map((trip) => trip.synced_id).filter(Boolean));
+  const { data: alerts } = await client.from("price_alerts").select("trip_id, active");
+  const alertOn = new Map((alerts ?? []).map((row) => [String(row.trip_id), !!row.active]));
+  const byId = new Map(rows.map((row) => [String(row.id), row]));
+  // Account values win for trips already on the phone.
+  let trips = state.trips.map((trip) => {
+    const row = trip.synced_id ? byId.get(trip.synced_id) : undefined;
+    if (!row) return trip;
+    return {
+      ...trip,
+      booking_status: row.booking_status ?? trip.booking_status ?? null,
+      booking_partner: row.booking_partner ?? trip.booking_partner ?? null,
+      booking_issue: row.booking_issue ?? trip.booking_issue ?? null,
+      booking_updated_at: row.booking_updated_at ?? trip.booking_updated_at ?? null,
+      alert: alertOn.get(trip.synced_id!) ?? trip.alert ?? false,
+    };
+  });
+  const known = new Set(trips.map((trip) => trip.synced_id).filter(Boolean));
   const extra: FrozenTrip[] = [];
   for (const row of rows) {
     if (known.has(row.id)) continue;
@@ -136,7 +224,7 @@ export async function syncTrips() {
     if (!pack?.totals || !pack.flight || !pack.hotel) continue;
     extra.push({
       id: row.id,
-      run_id: `account-${row.id}`,
+      run_id: row.run_id ?? `account-${row.id}`,
       created_at: row.created_at,
       transcript: row.transcript,
       intent: row.intent,
@@ -144,10 +232,14 @@ export async function syncTrips() {
       status: "ready",
       poster_url: row.poster_url,
       synced_id: row.id,
+      booking_status: row.booking_status ?? null,
+      booking_partner: row.booking_partner ?? null,
+      booking_issue: row.booking_issue ?? null,
+      booking_updated_at: row.booking_updated_at ?? null,
+      alert: alertOn.get(String(row.id)) ?? false,
     });
   }
-  if (!extra.length) return;
-  const trips = [...extra, ...state.trips];
+  trips = [...extra, ...trips];
   writeLocal(trips);
   emit({ trips, ready: true });
 }

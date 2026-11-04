@@ -2,32 +2,62 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, CloudSun, CurrencyCircleDollar, Plug, type Icon } from "@phosphor-icons/react";
-import { CaretLeft } from "@phosphor-icons/react";
+import {
+  ArrowLeft,
+  CalendarBlank,
+  Check,
+  Clock,
+  CloudSun,
+  CurrencyCircleDollar,
+  IdentificationCard,
+  Info,
+  Plug,
+  ShieldCheck,
+  SuitcaseRolling,
+  Wallet,
+  type Icon,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/bs/Button";
 import { ModelText } from "@/components/bs/ModelText";
-import { Safar } from "@/components/bs/Safar";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
-import type { GoodToKnowNotes } from "@/lib/trip/good-to-know-client";
-import { airportCity } from "@/lib/airports";
-import { formatDay } from "@/lib/format";
+import { airportCity, placeName } from "@/lib/airports";
+import { addDays, dateRangeParts, formatDay, localeFor } from "@/lib/format";
+import { haptic } from "@/lib/haptics";
+import type { Lang, TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { ensurePoster } from "@/lib/poster/client";
 import { scriptForLang } from "@/lib/profile/schema";
 import { useProfile } from "@/lib/profile/useProfile";
-import { buildChecklist, todoCount } from "@/lib/trip/checklist";
-import { loadGoodToKnow } from "@/lib/trip/good-to-know-client";
+import { buildChecklist, todoCount, type ChecklistTile } from "@/lib/trip/checklist";
+import { loadGoodToKnow, type GoodToKnowNotes } from "@/lib/trip/good-to-know-client";
 import { asFlight, asHotel, pickOption } from "@/lib/trip/selection";
-import { ChecklistBoard, boardLandedDelay } from "./ChecklistTiles";
+import { cn } from "@/lib/utils";
 import { JuryLabel, JuryLine } from "./JuryLine";
+import { Eyebrow, Pill, SectionTitle } from "./TripBits";
 
-const TOPICS: { id: keyof GoodToKnowNotes; icon: Icon }[] = [
-  { id: "timezone", icon: Clock },
-  { id: "plugs", icon: Plug },
-  { id: "currency", icon: CurrencyCircleDollar },
-  { id: "weather", icon: CloudSun },
+const TOPICS: { id: keyof GoodToKnowNotes; icon: Icon; key: TranslationKey }[] = [
+  { id: "timezone", icon: Clock, key: "ready.topic.timezone" },
+  { id: "plugs", icon: Plug, key: "ready.topic.plugs" },
+  { id: "currency", icon: CurrencyCircleDollar, key: "ready.topic.currency" },
+  { id: "weather", icon: CloudSun, key: "ready.topic.weather" },
 ];
+
+const ROW_ICON: Record<ChecklistTile["id"], Icon> = {
+  visa: IdentificationCard,
+  passport: CalendarBlank,
+  baggage: SuitcaseRolling,
+  money: Wallet,
+};
+
+const VISA_KEY: Record<string, TranslationKey> = {
+  none: "visaKind.none",
+  schengen: "visaKind.schengen",
+  evisa: "visaKind.evisa",
+  on_arrival: "visaKind.on_arrival",
+  consular: "visaKind.consular",
+  unknown: "visaKind.unknown",
+};
 
 function monthLabel(iso: string): string {
   const [year, month, day] = iso.split("-").map(Number);
@@ -39,13 +69,23 @@ function monthLabel(iso: string): string {
   }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
-/** Screen 08. Tiles land, then Safar jumps once. The poster starts here. */
+function longDate(iso: string, lang: Lang): string {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Intl.DateTimeFormat(localeFor(lang), {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+    numberingSystem: "latn",
+  }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
+/** Screen 08, "08 Prêt à partir v2" of postfetch-compte-v2.html. The poster starts here. */
 export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
   const run = useAgentRun();
   const { t, lang } = useLanguage();
   const { profile } = useProfile();
   const router = useRouter();
-  const [celebrate, setCelebrate] = useState(false);
   const [notes, setNotes] = useState<GoodToKnowNotes | null>(null);
   const [notesState, setNotesState] = useState<"loading" | "ready" | "error">("loading");
 
@@ -56,12 +96,8 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
   const runId = run.run?.run_id ?? null;
   const city = result?.destination.city ?? "";
   const depart = hotel?.attrs.arrival ?? flight?.attrs.outbound.departure.slice(0, 10) ?? "";
+  const ret = hotel?.attrs.departure ?? flight?.attrs.inbound?.departure.slice(0, 10) ?? "";
   const script = scriptForLang(lang, profile.darija_script);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setCelebrate(true), boardLandedDelay(4));
-    return () => clearTimeout(timer);
-  }, [runId]);
 
   useEffect(() => {
     if (!runId || !result || !depart) return;
@@ -92,9 +128,15 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
     };
   }, [runId, city, depart, result, flight?.attrs.outbound.from, script, lang, run.scenario]);
 
+  useEffect(() => {
+    if (!runId) return;
+    const timer = setTimeout(() => haptic("success"), 600);
+    return () => clearTimeout(timer);
+  }, [runId]);
+
   if (!result || !option) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gradient-to-b from-green-soft to-bg px-8 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-bg px-8 text-center">
         <p className="text-[17px] text-muted">{t("ready.missing")}</p>
         <button type="button" className="min-h-11 font-semibold underline" onClick={() => router.push(withTripSearch("/trip/plan"))}>
           {t("result.backToPlan")}
@@ -110,8 +152,8 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
     dotationMad,
   });
   const todo = todoCount(tiles);
-  const kicker =
-    todo === 0 ? t("ready.kickerNone") : todo === 1 ? t("ready.kickerOne") : t("ready.kickerMany", { count: todo });
+  const done = tiles.length - todo;
+  const range = depart && ret ? dateRangeParts(depart, ret, lang) : null;
   const sources = result.entry?.sources ?? [];
   const sourceDate = (result.entry?.checked_at ?? sources[0]?.date ?? "").slice(0, 10);
   const sourceLine =
@@ -122,75 +164,215 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
         : sourceDate
           ? t("ready.sourcesNone", { date: formatDay(sourceDate, lang) })
           : "";
+  const lead = todo === 0 ? t("ready.leftNone") : todo === 1 ? t("ready.leftOne") : t("ready.leftMany", { count: todo });
+  const arrival = flight?.attrs.outbound.arrival.slice(0, 10) ?? depart;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-green-soft to-bg">
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="flex items-center gap-3 px-5 pt-4">
-          <button
-            type="button"
-            aria-label={t("common.back")}
-            onClick={() => router.push(withTripSearch("/trip/package"))}
-            className="flex size-11 items-center justify-center rounded-pill bg-card"
-          >
-            <CaretLeft size={18} weight="bold" className="rtl:-scale-x-100" aria-hidden />
-          </button>
-          <span className="inline-flex items-center gap-2 text-sm font-bold">
-            <span className="size-2.5 rounded-pill bg-green-bright" />
-            {kicker}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3 px-4 pt-3">
-          <Safar state={celebrate ? "found" : "idle"} size={110} tilt={-10} />
-          <div>
-            <h1 className="text-[30px] font-extrabold leading-tight tracking-tight">{t("ready.heading")}</h1>
-            <JuryLine k="ready.heading" />
-            <p className="mt-1.5 text-[15px] leading-snug text-muted">{t("ready.lead", { city })}</p>
-          </div>
-        </div>
-
+    <div className="relative flex min-h-0 flex-1 flex-col bg-bg">
+      <div className="min-h-0 flex-1 overflow-y-auto scroll-quiet bg-[linear-gradient(180deg,var(--color-sky)_0,var(--color-blue-soft)_220px,var(--color-bg)_380px)] pb-28">
         <div className="px-5 pt-4">
-          <ChecklistBoard tiles={tiles} />
-        </div>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              aria-label={t("common.back")}
+              onClick={() => router.push(withTripSearch("/trip/package"))}
+              className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-card shadow-soft"
+            >
+              <ArrowLeft size={20} weight="light" className="rtl:-scale-x-100" aria-hidden />
+            </button>
+            <Eyebrow className="truncate">
+              {placeName(result.destination.iata, lang, city)}
+              {range ? (
+                <>
+                  {" · "}
+                  <bdi>
+                    {range.from} → {range.to}
+                  </bdi>
+                </>
+              ) : null}
+            </Eyebrow>
+            <span className="size-11 shrink-0" />
+          </div>
 
-        <section className="mx-5 mt-3.5 rounded-card bg-card px-4 py-3.5">
-          <p className="mb-2 font-mono text-[11px] font-semibold tracking-[0.08em] text-muted">{t("ready.know")}</p>
-          {notesState === "loading" && <p className="text-sm text-muted">{t("ready.knowLoading")}</p>}
-          {notesState === "error" && <p className="text-sm text-muted">{t("ready.knowError")}</p>}
-          {notes && (
-            <ul className="flex flex-col gap-2">
-              {TOPICS.map(({ id, icon: Icon }) => (
-                <li key={id} className="flex items-start gap-2.5 text-sm leading-snug">
-                  <Icon size={18} weight="fill" className="mt-0.5 shrink-0 text-blue" aria-hidden />
-                  <span className="min-w-0 flex-1">
-                    <ModelText line={notes[id]} runId={runId} gloss />
-                  </span>
+          <div className="mt-5 flex items-center gap-4">
+            <ProgressRing done={done} total={tiles.length} />
+            <div className="min-w-0">
+              <h1 className="text-[27px] font-extrabold leading-[1.05] tracking-[-0.03em] rtl:leading-tight rtl:tracking-normal">
+                {todo === 0 ? t("ready.done") : t("ready.almost")}
+              </h1>
+              <JuryLine k={todo === 0 ? "ready.done" : "ready.almost"} />
+              <p className="mt-1.5 text-sm text-muted">{lead}</p>
+            </div>
+          </div>
+
+          <ul className="mt-[22px] rounded-card bg-card px-4 py-0.5 shadow-soft">
+            {tiles.map((tile, index) => (
+              <CheckRow key={tile.id} tile={tile} first={index === 0} entry={result.entry} arrival={arrival} />
+            ))}
+          </ul>
+
+          <SectionTitle className="mt-7">{t("ready.knowTitle")}</SectionTitle>
+          {notesState === "error" ? (
+            <p className="mt-3 text-sm text-muted">{t("ready.knowError")}</p>
+          ) : (
+            <ul className="mt-3 grid grid-cols-2 gap-2.5" aria-busy={notesState === "loading"}>
+              {TOPICS.map(({ id, icon: TopicIcon, key }) => (
+                <li key={id} className="rounded-card bg-card p-3.5 shadow-soft">
+                  <TopicIcon size={24} weight="light" className="text-ink" aria-hidden />
+                  <p className="mt-2.5 text-[15px] font-bold">{t(key)}</p>
+                  {notes ? (
+                    <div className="mt-0.5 text-[12.5px] leading-snug text-muted">
+                      <ModelText line={notes[id]} runId={runId} gloss />
+                    </div>
+                  ) : (
+                    <span aria-hidden className="mt-1.5 block space-y-1.5">
+                      <span className="bs-pulse block h-2.5 w-full rounded-pill bg-fill" />
+                      <span className="bs-pulse block h-2.5 w-2/3 rounded-pill bg-fill" />
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
           )}
-        </section>
+          {notesState === "loading" && <p className="mt-2 text-xs text-muted">{t("ready.knowLoading")}</p>}
 
-        {sourceLine && <p className="mx-5 mt-2.5 text-xs text-muted">{sourceLine}</p>}
-        {sources.length > 0 && (
-          <ul className="mx-5 mt-1 flex flex-col">
-            {sources.map((source) => (
-              <li key={source.url}>
-                <a href={source.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-xs font-semibold text-blue underline">
-                  {source.title}
-                  {source.date ? ` · ${formatDay(source.date.slice(0, 10), lang)}` : ""}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
+          {sourceLine && (
+            <p className="mt-4 flex items-center gap-2 text-[12.5px] text-muted">
+              <ShieldCheck size={16} weight="light" className="shrink-0" aria-hidden />
+              {sourceLine}
+            </p>
+          )}
+          {sources.length > 0 && (
+            <ul className="mt-0.5 flex flex-col">
+              {sources.map((source) => (
+                <li key={source.url}>
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-9 items-center text-xs font-semibold text-blue underline underline-offset-2"
+                  >
+                    {source.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-      <div className="px-5 pb-5 pt-3">
+      <div className="absolute inset-x-0 bottom-0 border-t border-line bg-card px-5 pb-[22px] pt-3.5">
         <Button full onClick={() => router.push(withTripSearch("/trip/check"))}>
           <JuryLabel k="ready.continue" />
         </Button>
       </div>
     </div>
   );
+}
+
+function ProgressRing({ done, total }: { done: number; total: number }) {
+  const r = 33;
+  const length = 2 * Math.PI * r;
+  const share = total > 0 ? done / total : 0;
+  return (
+    <div className="relative size-[78px] shrink-0">
+      <svg width={78} height={78} viewBox="0 0 78 78" aria-hidden>
+        <circle cx={39} cy={39} r={r} className="fill-none stroke-card" strokeWidth={8} />
+        <circle
+          cx={39}
+          cy={39}
+          r={r}
+          className="fill-none stroke-green"
+          strokeWidth={8}
+          strokeLinecap="round"
+          strokeDasharray={length.toFixed(1)}
+          strokeDashoffset={(length * (1 - share)).toFixed(1)}
+          transform="rotate(-90 39 39)"
+        />
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center text-[19px] font-extrabold tabular-nums" dir="ltr">
+        {done}/{total}
+      </span>
+    </div>
+  );
+}
+
+function CheckRow({
+  tile,
+  first,
+  entry,
+  arrival,
+}: {
+  tile: ChecklistTile;
+  first: boolean;
+  entry: { visa_needed: boolean; visa_kind: string; max_stay_days: number | null; passport_validity_days: number | null } | null;
+  arrival: string;
+}) {
+  const { t, lang } = useLanguage();
+  const [how, setHow] = useState(false);
+  const attention = tile.warn || !tile.ok;
+  const RowIcon = ROW_ICON[tile.id];
+  const line = rowText(tile, entry, arrival, lang, t);
+
+  return (
+    <li className={cn("flex items-start gap-3.5 py-[15px]", !first && "border-t border-line")}>
+      <span
+        aria-hidden
+        className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl", attention ? "bg-orange-soft" : "bg-green-soft")}
+      >
+        <RowIcon size={22} weight="light" className={attention ? "text-orange" : "text-green"} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[15px] font-bold">{t(tile.labelKey)}</p>
+          {attention ? (
+            <Pill tone="todo" className="h-6 px-[9px] text-[11.5px]" icon={<Info size={13} weight="light" aria-hidden />}>
+              {t("ready.todo")}
+            </Pill>
+          ) : (
+            <Pill tone="good" className="h-6 px-[9px] text-[11.5px]" icon={<Check size={13} weight="light" aria-hidden />}>
+              {t("ready.ok")}
+            </Pill>
+          )}
+        </div>
+        <p className="mt-[3px] text-[13.5px] leading-[1.45] text-body">{line}</p>
+        {tile.id === "baggage" && tile.warn && (
+          <>
+            <button type="button" aria-expanded={how} onClick={() => setHow((open) => !open)} className="mt-1 min-h-9 text-[13px] font-semibold text-blue">
+              {t("ready.bagHow")}
+            </button>
+            {how && <p className="text-[13px] leading-[1.45] text-muted">{t("ready.bagHowText")}</p>}
+          </>
+        )}
+        {tile.source && (
+          <a href={tile.source.url} target="_blank" rel="noreferrer" className="mt-1 inline-flex min-h-9 items-center text-xs font-semibold text-blue underline">
+            {tile.source.title}
+          </a>
+        )}
+      </div>
+    </li>
+  );
+}
+
+function rowText(
+  tile: ChecklistTile,
+  entry: { visa_needed: boolean; visa_kind: string; max_stay_days: number | null; passport_validity_days: number | null } | null,
+  arrival: string,
+  lang: Lang,
+  t: ReturnType<typeof useLanguage>["t"],
+): string {
+  switch (tile.id) {
+    case "visa":
+      if (!entry) return t("ready.visaUnknownLine");
+      if (entry.visa_needed) return t("ready.visaNeededLine", { kind: t(VISA_KEY[entry.visa_kind] ?? "visaKind.unknown") });
+      return entry.max_stay_days ? t("ready.visaOkLine", { days: entry.max_stay_days }) : t("ready.visaOkNoDays");
+    case "passport": {
+      const days = entry?.passport_validity_days ?? null;
+      if (days == null || !arrival) return t("ready.passportCheckLine");
+      return t("ready.passportLine", { date: longDate(addDays(arrival, days), lang), days });
+    }
+    case "baggage":
+      return tile.ok ? t("ready.bagOkLine") : t("ready.bagLine");
+    case "money":
+      return t("ready.moneyLine", { percent: tile.statusValues?.percent ?? 0 });
+  }
 }

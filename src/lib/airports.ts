@@ -1,66 +1,294 @@
-/** Static airport positions for the stylised map. The arc uses these, never a tile server. */
+/** Static airport positions for the route map. Never a tile server or a geocoding call. */
+
+import type { Lang } from "@/lib/i18n";
 
 export type AirportPoint = { iata: string; city: string; lat: number; lng: number };
 
-export const AIRPORTS: Record<string, AirportPoint> = {
-  CMN: { iata: "CMN", city: "Casablanca", lat: 33.37, lng: -7.59 },
-  RAK: { iata: "RAK", city: "Marrakech", lat: 31.61, lng: -8.04 },
-  RBA: { iata: "RBA", city: "Rabat", lat: 34.05, lng: -6.75 },
-  TNG: { iata: "TNG", city: "Tangier", lat: 35.73, lng: -5.92 },
-  FEZ: { iata: "FEZ", city: "Fes", lat: 33.93, lng: -4.98 },
-  AGA: { iata: "AGA", city: "Agadir", lat: 30.33, lng: -9.41 },
-  OUD: { iata: "OUD", city: "Oujda", lat: 34.79, lng: -1.92 },
-  IST: { iata: "IST", city: "Istanbul", lat: 41.28, lng: 28.75 },
-  SAW: { iata: "SAW", city: "Istanbul", lat: 40.9, lng: 29.31 },
-  ESB: { iata: "ESB", city: "Ankara", lat: 40.13, lng: 32.99 },
-  AYT: { iata: "AYT", city: "Antalya", lat: 36.9, lng: 30.8 },
-  CDG: { iata: "CDG", city: "Paris", lat: 49.01, lng: 2.55 },
-  ORY: { iata: "ORY", city: "Paris", lat: 48.72, lng: 2.38 },
-  BVA: { iata: "BVA", city: "Paris", lat: 49.45, lng: 2.11 },
-  MAD: { iata: "MAD", city: "Madrid", lat: 40.47, lng: -3.56 },
-  BCN: { iata: "BCN", city: "Barcelona", lat: 41.3, lng: 2.08 },
-  FCO: { iata: "FCO", city: "Rome", lat: 41.8, lng: 12.25 },
-  AMS: { iata: "AMS", city: "Amsterdam", lat: 52.31, lng: 4.76 },
-  LHR: { iata: "LHR", city: "London", lat: 51.47, lng: -0.45 },
-  LIS: { iata: "LIS", city: "Lisbon", lat: 38.77, lng: -9.13 },
-  BRU: { iata: "BRU", city: "Brussels", lat: 50.9, lng: 4.48 },
-  FRA: { iata: "FRA", city: "Frankfurt", lat: 50.04, lng: 8.56 },
-  CAI: { iata: "CAI", city: "Cairo", lat: 30.11, lng: 31.4 },
-  TUN: { iata: "TUN", city: "Tunis", lat: 36.85, lng: 10.23 },
-  ALG: { iata: "ALG", city: "Algiers", lat: 36.69, lng: 3.22 },
-  DXB: { iata: "DXB", city: "Dubai", lat: 25.25, lng: 55.36 },
-  DOH: { iata: "DOH", city: "Doha", lat: 25.27, lng: 51.61 },
-};
+const LIST: [iata: string, city: string, lat: number, lng: number][] = [
+  // Morocco
+  ["CMN", "Casablanca", 33.37, -7.59],
+  ["RAK", "Marrakech", 31.61, -8.04],
+  ["RBA", "Rabat", 34.05, -6.75],
+  ["TNG", "Tangier", 35.73, -5.92],
+  ["FEZ", "Fes", 33.93, -4.98],
+  ["AGA", "Agadir", 30.33, -9.41],
+  ["OUD", "Oujda", 34.79, -1.92],
+  ["NDR", "Nador", 34.99, -3.03],
+  ["TTU", "Tetouan", 35.59, -5.32],
+  ["ESU", "Essaouira", 31.4, -9.68],
+  ["OZZ", "Ouarzazate", 30.94, -6.91],
+  ["AHU", "Al Hoceima", 35.18, -3.84],
+  ["VIL", "Dakhla", 23.72, -15.93],
+  ["EUN", "Laayoune", 27.15, -13.22],
+  // Turkey
+  ["IST", "Istanbul", 41.28, 28.75],
+  ["SAW", "Istanbul", 40.9, 29.31],
+  ["ESB", "Ankara", 40.13, 32.99],
+  ["AYT", "Antalya", 36.9, 30.8],
+  ["ADB", "Izmir", 38.29, 27.16],
+  // France
+  ["CDG", "Paris", 49.01, 2.55],
+  ["ORY", "Paris", 48.72, 2.38],
+  ["BVA", "Paris", 49.45, 2.11],
+  ["XCR", "Paris", 48.78, 4.18],
+  ["MRS", "Marseille", 43.44, 5.22],
+  ["NCE", "Nice", 43.66, 7.21],
+  ["LYS", "Lyon", 45.73, 5.08],
+  ["TLS", "Toulouse", 43.63, 1.37],
+  ["BOD", "Bordeaux", 44.83, -0.72],
+  ["NTE", "Nantes", 47.15, -1.61],
+  ["MPL", "Montpellier", 43.58, 3.96],
+  ["LIL", "Lille", 50.56, 3.09],
+  ["SXB", "Strasbourg", 48.54, 7.63],
+  // Iberia
+  ["MAD", "Madrid", 40.47, -3.56],
+  ["BCN", "Barcelona", 41.3, 2.08],
+  ["AGP", "Malaga", 36.67, -4.5],
+  ["SVQ", "Seville", 37.42, -5.9],
+  ["VLC", "Valencia", 39.49, -0.48],
+  ["ALC", "Alicante", 38.28, -0.56],
+  ["PMI", "Palma", 39.55, 2.74],
+  ["GRX", "Granada", 37.19, -3.78],
+  ["LIS", "Lisbon", 38.77, -9.13],
+  ["OPO", "Porto", 41.24, -8.68],
+  ["FAO", "Faro", 37.01, -7.97],
+  // Italy
+  ["FCO", "Rome", 41.8, 12.25],
+  ["CIA", "Rome", 41.8, 12.59],
+  ["MXP", "Milan", 45.63, 8.72],
+  ["LIN", "Milan", 45.45, 9.28],
+  ["BGY", "Milan", 45.67, 9.7],
+  ["BLQ", "Bologna", 44.53, 11.29],
+  ["VCE", "Venice", 45.51, 12.35],
+  ["TSF", "Venice", 45.65, 12.19],
+  ["NAP", "Naples", 40.88, 14.29],
+  ["PSA", "Pisa", 43.68, 10.39],
+  ["TRN", "Turin", 45.2, 7.65],
+  ["CTA", "Catania", 37.47, 15.07],
+  ["PMO", "Palermo", 38.18, 13.1],
+  // Rest of Europe
+  ["AMS", "Amsterdam", 52.31, 4.76],
+  ["EIN", "Eindhoven", 51.45, 5.37],
+  ["BRU", "Brussels", 50.9, 4.48],
+  ["CRL", "Brussels", 50.46, 4.45],
+  ["LHR", "London", 51.47, -0.45],
+  ["LGW", "London", 51.15, -0.19],
+  ["STN", "London", 51.89, 0.24],
+  ["LTN", "London", 51.87, -0.37],
+  ["MAN", "Manchester", 53.35, -2.27],
+  ["DUB", "Dublin", 53.42, -6.27],
+  ["FRA", "Frankfurt", 50.04, 8.56],
+  ["MUC", "Munich", 48.35, 11.79],
+  ["BER", "Berlin", 52.36, 13.5],
+  ["DUS", "Dusseldorf", 51.29, 6.77],
+  ["CGN", "Cologne", 50.87, 7.14],
+  ["HAM", "Hamburg", 53.63, 9.99],
+  ["STR", "Stuttgart", 48.69, 9.22],
+  ["ZRH", "Zurich", 47.46, 8.55],
+  ["GVA", "Geneva", 46.24, 6.11],
+  ["BSL", "Basel", 47.6, 7.53],
+  ["VIE", "Vienna", 48.11, 16.57],
+  ["PRG", "Prague", 50.1, 14.26],
+  ["BUD", "Budapest", 47.44, 19.26],
+  ["WAW", "Warsaw", 52.17, 20.97],
+  ["KRK", "Krakow", 50.08, 19.78],
+  ["CPH", "Copenhagen", 55.62, 12.66],
+  ["ARN", "Stockholm", 59.65, 17.92],
+  ["OSL", "Oslo", 60.19, 11.1],
+  ["HEL", "Helsinki", 60.32, 24.96],
+  ["ATH", "Athens", 37.94, 23.94],
+  ["SOF", "Sofia", 42.7, 23.41],
+  ["OTP", "Bucharest", 44.57, 26.09],
+  ["BEG", "Belgrade", 44.82, 20.31],
+  ["TIA", "Tirana", 41.41, 19.72],
+  ["SKP", "Skopje", 41.96, 21.62],
+  ["MLA", "Malta", 35.86, 14.48],
+  ["LCA", "Larnaca", 34.88, 33.62],
+  // Middle East and Africa
+  ["CAI", "Cairo", 30.11, 31.4],
+  ["HRG", "Hurghada", 27.18, 33.8],
+  ["SSH", "Sharm el-Sheikh", 27.98, 34.39],
+  ["TUN", "Tunis", 36.85, 10.23],
+  ["DJE", "Djerba", 33.88, 10.78],
+  ["ALG", "Algiers", 36.69, 3.22],
+  ["DSS", "Dakar", 14.67, -17.07],
+  ["ABJ", "Abidjan", 5.26, -3.93],
+  ["NKC", "Nouakchott", 18.31, -15.97],
+  ["DXB", "Dubai", 25.25, 55.36],
+  ["SHJ", "Sharjah", 25.33, 55.52],
+  ["AUH", "Abu Dhabi", 24.43, 54.65],
+  ["DOH", "Doha", 25.27, 51.61],
+  ["KWI", "Kuwait", 29.24, 47.97],
+  ["BAH", "Bahrain", 26.27, 50.63],
+  ["MCT", "Muscat", 23.59, 58.28],
+  ["JED", "Jeddah", 21.68, 39.16],
+  ["MED", "Medina", 24.55, 39.7],
+  ["RUH", "Riyadh", 24.96, 46.7],
+  ["AMM", "Amman", 31.72, 35.99],
+  ["BEY", "Beirut", 33.82, 35.49],
+];
 
-const BOX = { minLng: -16, maxLng: 58, minLat: 18, maxLat: 56 };
+export const AIRPORTS: Record<string, AirportPoint> = Object.fromEntries(
+  LIST.map(([iata, city, lat, lng]) => [iata, { iata, city, lat, lng }]),
+);
 
-export type MapPoint = { x: number; y: number; city: string; known: boolean };
-
-/** Projects an IATA code into a map viewBox. Unknown codes sit on a neutral midpoint. */
-export function projectAirport(iata: string, width: number, height: number, pad = 36): MapPoint {
-  const known = AIRPORTS[iata.toUpperCase()];
-  const lat = known?.lat ?? 36;
-  const lng = known?.lng ?? 8;
-  const x = pad + ((lng - BOX.minLng) / (BOX.maxLng - BOX.minLng)) * (width - pad * 2);
-  const y = pad + ((BOX.maxLat - lat) / (BOX.maxLat - BOX.minLat)) * (height - pad * 2);
-  return {
-    x: clamp(x, pad, width - pad),
-    y: clamp(y, pad, height - pad),
-    city: known?.city ?? iata,
-    known: !!known,
-  };
-}
-
-export function arcPath(from: MapPoint, to: MapPoint): string {
-  const cx = (from.x + to.x) / 2;
-  const cy = Math.min(from.y, to.y) - 78;
-  return `M${from.x.toFixed(1)},${from.y.toFixed(1)} Q${cx.toFixed(1)},${Math.max(12, cy).toFixed(1)} ${to.x.toFixed(1)},${to.y.toFixed(1)}`;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
+export function airport(iata: string): AirportPoint | null {
+  return AIRPORTS[iata.toUpperCase()] ?? null;
 }
 
 export function airportCity(iata: string): string | null {
-  return AIRPORTS[iata.toUpperCase()]?.city ?? null;
+  return airport(iata)?.city ?? null;
+}
+
+/** City names in Arabic script, for Arabic and Arabic-script darija screens. */
+const ARABIC_CITY: Record<string, string> = {
+  Casablanca: "الدار البيضاء",
+  Marrakech: "مراكش",
+  Rabat: "الرباط",
+  Tangier: "طنجة",
+  Fes: "فاس",
+  Agadir: "أكادير",
+  Oujda: "وجدة",
+  Nador: "الناظور",
+  Tetouan: "تطوان",
+  Essaouira: "الصويرة",
+  Ouarzazate: "ورزازات",
+  "Al Hoceima": "الحسيمة",
+  Dakhla: "الداخلة",
+  Laayoune: "العيون",
+  Istanbul: "إسطنبول",
+  Ankara: "أنقرة",
+  Antalya: "أنطاليا",
+  Izmir: "إزمير",
+  Paris: "باريس",
+  Marseille: "مرسيليا",
+  Nice: "نيس",
+  Lyon: "ليون",
+  Toulouse: "تولوز",
+  Bordeaux: "بوردو",
+  Nantes: "نانت",
+  Montpellier: "مونبلييه",
+  Lille: "ليل",
+  Strasbourg: "ستراسبورغ",
+  Madrid: "مدريد",
+  Barcelona: "برشلونة",
+  Malaga: "مالقة",
+  Seville: "إشبيلية",
+  Valencia: "بلنسية",
+  Alicante: "أليكانتي",
+  Palma: "بالما",
+  Granada: "غرناطة",
+  Lisbon: "لشبونة",
+  Porto: "بورتو",
+  Faro: "فارو",
+  Rome: "روما",
+  Milan: "ميلانو",
+  Bologna: "بولونيا",
+  Venice: "البندقية",
+  Naples: "نابولي",
+  Pisa: "بيزا",
+  Turin: "تورينو",
+  Catania: "كاتانيا",
+  Palermo: "باليرمو",
+  Amsterdam: "أمستردام",
+  Eindhoven: "أيندهوفن",
+  Brussels: "بروكسل",
+  London: "لندن",
+  Manchester: "مانشستر",
+  Dublin: "دبلن",
+  Frankfurt: "فرانكفورت",
+  Munich: "ميونخ",
+  Berlin: "برلين",
+  Dusseldorf: "دوسلدورف",
+  Cologne: "كولونيا",
+  Hamburg: "هامبورغ",
+  Stuttgart: "شتوتغارت",
+  Zurich: "زيورخ",
+  Geneva: "جنيف",
+  Basel: "بازل",
+  Vienna: "فيينا",
+  Prague: "براغ",
+  Budapest: "بودابست",
+  Warsaw: "وارسو",
+  Krakow: "كراكوف",
+  Copenhagen: "كوبنهاغن",
+  Stockholm: "ستوكهولم",
+  Oslo: "أوسلو",
+  Helsinki: "هلسنكي",
+  Athens: "أثينا",
+  Sofia: "صوفيا",
+  Bucharest: "بوخارست",
+  Belgrade: "بلغراد",
+  Tirana: "تيرانا",
+  Skopje: "سكوبيي",
+  Malta: "مالطا",
+  Larnaca: "لارنكا",
+  Cairo: "القاهرة",
+  Hurghada: "الغردقة",
+  "Sharm el-Sheikh": "شرم الشيخ",
+  Tunis: "تونس",
+  Djerba: "جربة",
+  Algiers: "الجزائر",
+  Dakar: "داكار",
+  Abidjan: "أبيدجان",
+  Nouakchott: "نواكشوط",
+  Dubai: "دبي",
+  Sharjah: "الشارقة",
+  "Abu Dhabi": "أبوظبي",
+  Doha: "الدوحة",
+  Kuwait: "الكويت",
+  Bahrain: "البحرين",
+  Muscat: "مسقط",
+  Jeddah: "جدة",
+  Medina: "المدينة المنورة",
+  Riyadh: "الرياض",
+  Amman: "عمّان",
+  Beirut: "بيروت",
+};
+
+const SAME_CITY: Record<string, string> = {
+  Milano: "Milan",
+  Tanger: "Tangier",
+  Fès: "Fes",
+  Lisbonne: "Lisbon",
+  Londres: "London",
+  Bruxelles: "Brussels",
+  Séville: "Seville",
+  Barcelone: "Barcelona",
+  Venise: "Venice",
+  Genève: "Geneva",
+  Vienne: "Vienna",
+  Francfort: "Frankfurt",
+  Athènes: "Athens",
+  "Le Caire": "Cairo",
+  Alger: "Algiers",
+  Doubaï: "Dubai",
+  Dubaï: "Dubai",
+  Djeddah: "Jeddah",
+  Médine: "Medina",
+  Riyad: "Riyadh",
+  Beyrouth: "Beirut",
+  Varsovie: "Warsaw",
+  Cracovie: "Krakow",
+  Copenhague: "Copenhagen",
+  Bucarest: "Bucharest",
+  Bologne: "Bologna",
+};
+
+/**
+ * The name to show for a stop. Arabic screens get the Arabic name when it is
+ * known; Latin screens keep the partner's own city name (Kiwi.com answers in
+ * the interface language), then the table, then the code.
+ */
+export function placeName(
+  iata: string,
+  lang: Lang,
+  partnerName?: string | null,
+): string {
+  const table = airport(iata)?.city ?? null;
+  if (lang === "ar" || lang === "darija-arab") {
+    const english = table ?? (partnerName ? (SAME_CITY[partnerName] ?? partnerName) : null);
+    return (english && ARABIC_CITY[english]) || partnerName || table || iata;
+  }
+  return partnerName || table || iata;
 }

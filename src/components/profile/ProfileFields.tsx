@@ -181,7 +181,7 @@ export function PapersFields({ profile, update }: FieldsProps) {
 
       {needsSchengen && !profile.has_schengen && (
         <div className="flex items-start gap-2.5 rounded-button bg-blue-soft px-3.5 py-3 text-sm leading-[1.45]">
-          <Info size={20} weight="fill" className="shrink-0 text-blue" aria-hidden />
+          <Info size={20} weight="light" className="shrink-0 text-blue" aria-hidden />
           <span>{t("onboarding.papers.note")}</span>
         </div>
       )}
@@ -267,7 +267,7 @@ export function Stepper({
           onClick={() => step(-1)}
           className="flex size-11 items-center justify-center rounded-pill bg-fill text-ink disabled:opacity-40"
         >
-          <Minus size={18} weight="bold" />
+          <Minus size={20} weight="light" />
         </button>
         <span className="tabular w-6 text-center text-lg font-bold" aria-live="polite">
           {value}
@@ -279,7 +279,7 @@ export function Stepper({
           onClick={() => step(1)}
           className="flex size-11 items-center justify-center rounded-pill bg-fill text-ink disabled:opacity-40"
         >
-          <Plus size={18} weight="bold" />
+          <Plus size={20} weight="light" />
         </button>
       </div>
     </div>

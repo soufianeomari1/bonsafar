@@ -259,7 +259,7 @@ export function FlightPlanScreen() {
         )}
 
         <div className="mt-auto flex items-center gap-2.5 rounded-button bg-bg px-3.5 py-3 mb-5">
-          <ShieldCheck size={18} weight="fill" className="shrink-0 text-blue" aria-hidden />
+          <ShieldCheck size={18} weight="light" className="shrink-0 text-blue" aria-hidden />
           <p className="text-[13px] leading-snug text-muted">
             <RichText text={t("plan.pricesNote")} />
           </p>

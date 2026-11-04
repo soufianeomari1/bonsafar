@@ -1,120 +1,244 @@
 "use client";
 
-import { useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
-import { Safar } from "@/components/bs/Safar";
-import { arcPath, projectAirport } from "@/lib/airports";
-import { EASE_DEFAULT } from "@/lib/motion";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useReducedMotion } from "motion/react";
+import { geoBounds, geoInterpolate, geoMercator, geoPath } from "d3-geo";
+import type { Feature, FeatureCollection, MultiLineString, MultiPolygon, Polygon, Position } from "geojson";
+import type { GeometryCollection, Topology } from "topojson-specification";
+import { SafarLogo } from "@/components/bs/Brand";
+import { airport } from "@/lib/airports";
+import { useT } from "@/lib/i18n/provider";
+import type { MapStop } from "@/lib/trip/describe";
 import { cn } from "@/lib/utils";
 
-const W = 390;
-const H = 260;
+type Atlas = { land: FeatureCollection<MultiPolygon>; borders: MultiLineString };
 
-export type RouteMapProps = {
-  from: string;
-  to: string;
-  toLabel: string;
-  /** Safar flies the arc. One per screen: hide him when he has moved to the tip. */
-  showSafar?: boolean;
-  /** Screen 06 zooms onto the destination once he arrives. */
-  zoom?: boolean;
-  /** Seconds. Screen 07's reference is 5s, screen 06's A5 is 1.6s. */
-  duration?: number;
-  className?: string;
-  back?: React.ReactNode;
-  onArrived?: () => void;
-};
+let atlasJob: Promise<Atlas> | null = null;
 
-function pointAt(from: { x: number; y: number }, to: { x: number; y: number }, t: number) {
-  const cx = (from.x + to.x) / 2;
-  const cy = Math.max(16, Math.min(from.y, to.y) - 78);
-  const u = 1 - t;
-  return {
-    x: u * u * from.x + 2 * u * t * cx + t * t * to.x,
-    y: u * u * from.y + 2 * u * t * cy + t * t * to.y,
-  };
+/** Antarctica and any shape wider than 200° of longitude would fill the whole map. */
+function keepPolygon(feature: Feature, rings: Position[][]): boolean {
+  if (feature.id === "010") return false;
+  const [[west], [east]] = geoBounds({ type: "Polygon", coordinates: rings });
+  const span = east >= west ? east - west : east - west + 360;
+  return span <= 200;
 }
 
-/** Stylised sea-and-land band. Same drawing as the package reference, arc from real coordinates. */
-export function RouteMap({
-  from,
-  to,
-  toLabel,
-  showSafar = true,
-  zoom = false,
-  duration = 1.6,
-  className,
-  back,
-  onArrived,
-}: RouteMapProps) {
-  const reduced = useReducedMotion();
-  const [arrived, setArrived] = useState(!!reduced);
-  const origin = projectAirport(from || "CMN", W, H);
-  const dest = projectAirport(to || "IST", W, H);
-  const d = arcPath(origin, dest);
-  const samples = [0, 0.35, 0.7, 1].map((t) => pointAt(origin, dest, reduced ? 1 : t));
-  const seconds = reduced ? 0 : duration;
+/** Natural Earth (world-atlas, public domain), loaded only by the screens that draw a map. */
+function loadAtlas(): Promise<Atlas> {
+  atlasJob ??= Promise.all([import("world-atlas/countries-50m.json"), import("topojson-client")]).then(
+    ([atlas, topojson]) => {
+      const world = (atlas.default ?? atlas) as unknown as Topology<{ countries: GeometryCollection }>;
+      const countries = topojson.feature(world, world.objects.countries) as FeatureCollection<Polygon | MultiPolygon>;
+      const land: Feature<MultiPolygon>[] = countries.features.flatMap((feature) => {
+        const polygons = feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates;
+        const kept = polygons.filter((rings) => keepPolygon(feature, rings));
+        return kept.length
+          ? [{ type: "Feature", id: feature.id, properties: {}, geometry: { type: "MultiPolygon", coordinates: kept } }]
+          : [];
+      });
+      return {
+        land: { type: "FeatureCollection", features: land },
+        borders: topojson.mesh(world, world.objects.countries, (a, b) => a !== b),
+      };
+    },
+  );
+  return atlasJob;
+}
+
+const round = (n: number) => Math.round(n * 10) / 10;
+const ARABIC = /[\u0600-\u06FF]/;
+
+export type RouteMapProps = {
+  stops: MapStop[];
+  height?: number;
+  /** Space the sheet covers at the bottom, so labels and the credit stay visible. */
+  overlap?: number;
+  /** Safar flies the route once, then lands near the arrival. */
+  showSafar?: boolean;
+  onArrived?: () => void;
+  /** Round buttons laid over the map (back, share). */
+  children?: ReactNode;
+  className?: string;
+};
+
+type Point = { x: number; y: number; stop: MapStop };
+
+/** The real route on a real map: Mercator fitted on the trip's airports, SVG only, no tiles. */
+export function RouteMap({ stops, height = 250, overlap = 22, showSafar = true, onArrived, children, className }: RouteMapProps) {
+  const t = useT();
+  const box = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  const [atlas, setAtlas] = useState<Atlas | null>(null);
+  const reduced = !!useReducedMotion();
+  // Screens rebuild `stops` on every render: the map is drawn again only when the route changes.
+  const routeKey = JSON.stringify(stops);
+
+  useLayoutEffect(() => {
+    const element = box.current;
+    if (!element) return;
+    setWidth(Math.round(element.getBoundingClientRect().width));
+    const observer = new ResizeObserver(([entry]) => setWidth(Math.round(entry.contentRect.width)));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    void loadAtlas().then((value) => alive && setAtlas(value));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const known = useMemo(
+    () =>
+      (JSON.parse(routeKey) as MapStop[]).flatMap((stop) => {
+        const point = airport(stop.iata);
+        return point ? [{ stop, coord: [point.lng, point.lat] as [number, number] }] : [];
+      }),
+    [routeKey],
+  );
+
+  const drawing = useMemo(() => {
+    if (!width || known.length < 2) return null;
+    const lngs = known.map((k) => k.coord[0]);
+    const lats = known.map((k) => k.coord[1]);
+    const midLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+    const midLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+    // A minimum span keeps a short hop from zooming onto a single street.
+    const frame: Position[] = [...known.map((k) => k.coord), [midLng - 5, midLat - 3], [midLng + 5, midLat + 3]];
+    const projection = geoMercator().fitExtent(
+      [
+        [44, 64],
+        [width - 44, height - overlap - 40],
+      ],
+      { type: "MultiPoint", coordinates: frame },
+    );
+    projection.clipExtent([
+      [-8, -8],
+      [width + 8, height + 8],
+    ]);
+    const path = geoPath(projection).digits(1);
+
+    const points: Point[] = known.map(({ stop, coord }) => {
+      const [x, y] = projection(coord) ?? [0, 0];
+      return { x: round(x), y: round(y), stop };
+    });
+    const route: string[] = [];
+    known.forEach((k, index) => {
+      if (index === 0) return;
+      const step = geoInterpolate(known[index - 1].coord, k.coord);
+      for (let i = index === 1 ? 0 : 1; i <= 16; i += 1) {
+        const [x, y] = projection(step(i / 16)) ?? [0, 0];
+        route.push(`${route.length ? "L" : "M"}${round(x)},${round(y)}`);
+      }
+    });
+
+    return {
+      points,
+      route: route.join(""),
+      land: atlas ? (path(atlas.land) ?? "") : "",
+      borders: atlas ? (path(atlas.borders) ?? "") : "",
+    };
+  }, [width, height, overlap, known, atlas]);
+
+  useEffect(() => {
+    if (reduced && drawing && showSafar) onArrived?.();
+  }, [reduced, drawing, showSafar, onArrived]);
 
   return (
-    <div className={cn("relative h-[260px] w-full overflow-hidden bg-sea", className)}>
-    <motion.div
-      className="absolute inset-0"
-      animate={zoom && arrived && !reduced ? { scale: 1.18 } : { scale: 1 }}
-      transition={{ duration: 0.8, ease: EASE_DEFAULT }}
-      style={{ transformOrigin: `${((origin.x + dest.x) / 2 / W) * 100}% ${((origin.y + dest.y) / 2 / H) * 100}%` }}
+    <div
+      ref={box}
+      dir="ltr"
+      className={cn("relative w-full shrink-0 overflow-hidden bg-gradient-to-b from-map-sea-top to-map-sea-bottom", className)}
+      style={{ height }}
     >
-      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden>
-        <path d="M0,150 C40,140 70,170 110,200 C130,215 120,260 120,260 L0,260 Z" className="fill-land" />
-        <path d="M240,40 C280,20 340,30 390,40 L390,150 C350,140 320,120 290,110 C260,100 236,70 240,40 Z" className="fill-land" />
-        <path d="M150,0 C190,10 220,30 230,60 C200,62 170,40 150,0 Z" className="fill-land" />
-        <motion.path
-          d={d}
-          className="fill-none stroke-blue"
-          strokeWidth={4}
-          strokeLinecap="round"
-          initial={{ pathLength: reduced ? 1 : 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: seconds, ease: [0.45, 0, 0.2, 1] }}
-        />
-        <circle cx={origin.x} cy={origin.y} r={7} className="fill-card stroke-ink" strokeWidth={3} />
-        <circle cx={dest.x} cy={dest.y} r={7} className="fill-blue stroke-ink" strokeWidth={3} />
-      </svg>
-
-      <span
-        className="absolute rounded-md bg-card px-1.5 py-0.5 font-mono text-[11px] font-semibold"
-        style={{ left: `${(origin.x / W) * 100}%`, top: `${(origin.y / H) * 100}%`, transform: "translate(4px, 8px)" }}
-      >
-        <bdi>{from}</bdi>
-      </span>
-      <span
-        className="absolute rounded-pill bg-ink px-2 py-1 font-mono text-[11px] font-bold text-card"
-        style={{ left: `${(dest.x / W) * 100}%`, top: `${(dest.y / H) * 100}%`, transform: "translate(-110%, -130%)" }}
-      >
-        <bdi>
-          {to} {toLabel}
-        </bdi>
-      </span>
-
-      {showSafar && (
-        <motion.div
-          className="absolute z-10"
-          initial={{ left: `${(samples[0].x / W) * 100}%`, top: `${(samples[0].y / H) * 100}%` }}
-          animate={{
-            left: samples.map((point) => `${(point.x / W) * 100}%`),
-            top: samples.map((point) => `${(point.y / H) * 100}%`),
-          }}
-          transition={{ duration: seconds, ease: [0.45, 0, 0.2, 1], times: [0, 0.35, 0.7, 1] }}
-          onAnimationComplete={() => {
-            setArrived(true);
-            onArrived?.();
-          }}
-          style={{ translate: "-50% -50%" }}
-        >
-          <Safar state="idle" size={54} tilt={-14} />
-        </motion.div>
+      {drawing && (
+        <svg aria-hidden width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="absolute inset-0 block">
+          {drawing.land && (
+            <path d={drawing.land} className="bs-fade-in fill-map-land stroke-map-edge" strokeWidth={0.7} />
+          )}
+          {drawing.borders && <path d={drawing.borders} className="fill-none stroke-map-edge" strokeWidth={0.6} />}
+          <path d={drawing.route} className="fill-none stroke-blue" strokeWidth={2.6} strokeLinecap="round" opacity={0.18} />
+          <path
+            d={drawing.route}
+            className="fill-none stroke-blue"
+            strokeWidth={2.6}
+            strokeLinecap="round"
+            strokeDasharray="1 7"
+          />
+          {drawing.points.map((point, index) => (
+            <Marker
+              key={`${point.stop.iata}-${index}`}
+              point={point}
+              width={width}
+              bottom={height - overlap}
+              stopover={index > 0 && index < drawing.points.length - 1}
+            />
+          ))}
+        </svg>
       )}
-    </motion.div>
-      {back}
+
+      {drawing && showSafar && (
+        <div
+          className={cn("pointer-events-none absolute left-0 top-0 size-11", !reduced && "bs-fly")}
+          style={
+            {
+              offsetPath: `path("${drawing.route}")`,
+              offsetRotate: "0deg",
+              offsetAnchor: "50% 70%",
+              offsetDistance: reduced ? "90%" : undefined,
+            } as CSSProperties
+          }
+          onAnimationEnd={() => onArrived?.()}
+        >
+          <SafarLogo size={44} className="-rotate-[8deg]" />
+        </div>
+      )}
+
+      <span
+        className="pointer-events-none absolute right-3.5 font-mono text-[9px] font-semibold tracking-[0.04em] text-map-credit"
+        style={{ bottom: overlap + 8 }}
+      >
+        {t("map.credit")}
+      </span>
+      {children}
     </div>
+  );
+}
+
+function Marker({ point, width, bottom, stopover }: { point: Point; width: number; bottom: number; stopover: boolean }) {
+  const end = point.x > width * 0.62;
+  const dx = end ? -12 : 12;
+  let dy = stopover ? -4 : 18;
+  if (point.y + dy + 16 > bottom) dy = -30;
+  const arabic = ARABIC.test(point.stop.name);
+  const arabicSub = ARABIC.test(point.stop.sub);
+  const halo = { paintOrder: "stroke", stroke: "var(--color-map-halo)", strokeWidth: 4, strokeLinejoin: "round" } as const;
+  return (
+    <g transform={`translate(${point.x},${point.y})`}>
+      <circle r={7} className="fill-card stroke-ink" strokeWidth={2.5} />
+      <circle r={2.6} className="fill-ink" />
+      <g transform={`translate(${dx},${dy})`}>
+        <text
+          textAnchor={end ? "end" : "start"}
+          className={cn("fill-ink font-bold", arabic ? "font-arabic" : "font-sans")}
+          fontSize={arabic ? 13 : 12.5}
+          style={halo}
+        >
+          {point.stop.name}
+        </text>
+        <text
+          y={13}
+          textAnchor={end ? "end" : "start"}
+          className={cn("fill-muted font-semibold", arabicSub ? "font-arabic" : "font-mono")}
+          fontSize={arabicSub ? 10.5 : 9.5}
+          style={halo}
+          direction={arabicSub ? "rtl" : "ltr"}
+        >
+          {point.stop.sub}
+        </text>
+      </g>
+    </g>
   );
 }

@@ -23,7 +23,13 @@ import {
 
 export const PROFILE_STORAGE_KEY = "bonsafar.profile";
 
-export type ProfileUser = { id: string; email: string | null };
+export type ProfileUser = {
+  id: string;
+  email: string | null;
+  /** Google profile photo, as Google sent it at sign-in. No extra scope. */
+  avatar: string | null;
+  created_at: string | null;
+};
 
 export type ProfileState = {
   status: "loading" | "ready";
@@ -95,7 +101,14 @@ async function syncWithAccount() {
     return;
   }
 
-  const user: ProfileUser = { id: authUser.id, email: authUser.email ?? null };
+  const meta = authUser.user_metadata ?? {};
+  const avatar = (meta.avatar_url as string | undefined) ?? (meta.picture as string | undefined) ?? null;
+  const user: ProfileUser = {
+    id: authUser.id,
+    email: authUser.email ?? null,
+    avatar: avatar && /^https:\/\//.test(avatar) ? avatar : null,
+    created_at: authUser.created_at ?? null,
+  };
   const { data: row } = await supabase
     .from("profiles")
     .select("*")
@@ -205,4 +218,62 @@ export async function signInWithGoogle(next: string): Promise<string | null> {
 
 export async function signOut(): Promise<void> {
   await supabase?.auth.signOut();
+}
+
+/** Every BonSafar key on this phone, for the export and for "Delete everything". */
+export function localKeys(): string[] {
+  try {
+    return Object.keys(window.localStorage).filter((key) => key.startsWith("bonsafar."));
+  } catch {
+    return [];
+  }
+}
+
+/** All the traveller's data: the account rows when signed in, and what this phone keeps. */
+export async function exportData(): Promise<Record<string, unknown>> {
+  const local: Record<string, unknown> = {};
+  for (const key of localKeys()) {
+    const raw = window.localStorage.getItem(key);
+    try {
+      local[key] = raw ? JSON.parse(raw) : raw;
+    } catch {
+      local[key] = raw;
+    }
+  }
+  const out: Record<string, unknown> = { exported_at: new Date().toISOString(), on_this_phone: local };
+  if (supabase && state.user) {
+    const [profile, trips, alerts] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", state.user.id).maybeSingle(),
+      supabase.from("trips").select("*").order("created_at", { ascending: false }),
+      supabase.from("price_alerts").select("*"),
+    ]);
+    out.account = {
+      email: state.user.email,
+      created_at: state.user.created_at,
+      profile: profile.data,
+      trips: trips.data ?? [],
+      price_alerts: alerts.data ?? [],
+    };
+  }
+  return out;
+}
+
+/**
+ * Deletes the account (server route, cascade on profile, trips and alerts)
+ * when signed in, then every BonSafar key on this phone.
+ */
+export async function deleteEverything(): Promise<boolean> {
+  if (state.user) {
+    const response = await fetch("/api/account/delete", { method: "POST" });
+    if (!response.ok) return false;
+    await supabase?.auth.signOut();
+  }
+  for (const key of localKeys()) window.localStorage.removeItem(key);
+  try {
+    window.sessionStorage.clear();
+  } catch {
+    // Nothing more to clear.
+  }
+  setState({ status: "ready", profile: { ...DEFAULT_PROFILE, ui_lang: readLang() }, user: null });
+  return true;
 }

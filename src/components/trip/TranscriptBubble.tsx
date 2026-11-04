@@ -68,7 +68,7 @@ export function TranscriptBubble({
             }}
             className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-card/20 text-card"
           >
-            {playing ? <Pause size={13} weight="fill" /> : <Play size={13} weight="fill" />}
+            {playing ? <Pause size={13} weight="light" /> : <Play size={13} weight="light" />}
           </button>
           <span aria-hidden className="flex h-[22px] min-w-0 flex-1 items-center gap-[3px] overflow-hidden" dir="ltr">
             {waveform.length

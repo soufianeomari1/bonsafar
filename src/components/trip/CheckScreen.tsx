@@ -9,7 +9,12 @@ import { Safar } from "@/components/bs/Safar";
 import { Sheet } from "@/components/bs/Sheet";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
-import { airportCity } from "@/lib/airports";
+import { placeName } from "@/lib/airports";
+import { legSentence } from "@/lib/trip/describe";
+import { freezeRun } from "@/lib/trip/freeze";
+import { recordDeparture } from "@/lib/trip/partner";
+import { rememberTrip, type Partner } from "@/lib/trip/saved";
+import { HotelPhoto } from "./TripBits";
 import { dateRangeParts, formatEur, formatMad, formatWhen } from "@/lib/format";
 import { useLanguage } from "@/lib/i18n/provider";
 import type { FxRate } from "@/lib/prices/money";
@@ -18,7 +23,7 @@ import { asFlight, asHotel, pickOption } from "@/lib/trip/selection";
 import { JuryLine } from "./JuryLine";
 
 /** Screen 09. The photo is Kiwi.com's, untouched. Links are the stored deeplinks. */
-export function CheckScreen() {
+export function CheckScreen({ dotationMad }: { dotationMad: number }) {
   const run = useAgentRun();
   const { t, lang } = useLanguage();
   const router = useRouter();
@@ -45,8 +50,11 @@ export function CheckScreen() {
   const from = hotel.attrs.arrival;
   const to = hotel.attrs.departure;
   const range = dateRangeParts(from, to, lang);
-  const origin = airportCity(flight.attrs.outbound.from) ?? flight.attrs.outbound.from;
+  const origin = placeName(flight.attrs.outbound.from, lang, flight.attrs.outbound.segments?.[0]?.from_city);
+  const city = placeName(result.destination.iata, lang, result.destination.city);
   const nights = hotel.attrs.nights || totals.hotel.nights;
+  const outSentence = legSentence(flight.attrs.outbound, lang, t);
+  const flightsLine = [outSentence.carriers, outSentence.detail].filter(Boolean).join(" · ");
   const adults = flight.attrs.passengers.adults;
   const children = flight.attrs.passengers.children + flight.attrs.passengers.infants;
   const travellers =
@@ -56,6 +64,14 @@ export function CheckScreen() {
         ? t("check.adultsOne", { city: origin })
         : t("check.adults", { count: adults, city: origin });
   const edit = () => router.push(withTripSearch("/trip/understood"));
+
+  /** The trip is saved before the traveller leaves, so the return question has a trip to update. */
+  function leaveFor(partner: Partner) {
+    const frozen = freezeRun(run, dotationMad, null);
+    if (!frozen) return;
+    recordDeparture(partner, frozen.run_id);
+    void rememberTrip(frozen);
+  }
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-gradient-to-b from-sky to-bg">
@@ -68,7 +84,7 @@ export function CheckScreen() {
             onClick={() => router.push(withTripSearch("/trip/ready"))}
             className="flex size-11 items-center justify-center rounded-pill bg-fill"
           >
-            <X size={16} weight="bold" aria-hidden />
+            <X size={20} weight="light" aria-hidden />
           </button>
         </div>
         <h1 className="mt-2 text-[30px] font-extrabold leading-tight tracking-tight">{t("check.title")}</h1>
@@ -77,11 +93,22 @@ export function CheckScreen() {
 
         <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
           <article className="rounded-card border border-line bg-card p-4 shadow-soft">
-            <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 border-b border-line pb-3.5">
-              <DestinationPhoto imageId={flight.attrs.image_id} onReady={setPhotoReady} />
+            <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 border-b border-line pb-3.5">
+              <div className="flex gap-1.5">
+                <HotelPhoto src={hotel.attrs.main_image} alt={hotel.attrs.name} className="size-16 rounded-[14px]">
+                  {(shown) =>
+                    shown ? (
+                      <span className="absolute inset-x-0 bottom-0.5 text-center text-[8.5px] font-semibold text-card [text-shadow:0_1px_3px_rgb(0_0_0/0.6)]">
+                        trivago
+                      </span>
+                    ) : null
+                  }
+                </HotelPhoto>
+                <DestinationPhoto imageId={flight.attrs.image_id} onReady={setPhotoReady} />
+              </div>
               <div className="flex min-w-0 flex-col justify-center">
                 <p className="text-lg font-extrabold">
-                  {nights === 1 ? t("check.nightsOne", { city: result.destination.city, count: nights }) : t("check.nights", { city: result.destination.city, count: nights })}
+                  {nights === 1 ? t("check.nightsOne", { city, count: nights }) : t("check.nights", { city, count: nights })}
                 </p>
                 <p className="mt-1 flex items-center gap-1 text-sm text-muted">
                   {hotel.attrs.review_rating != null && (
@@ -99,6 +126,7 @@ export function CheckScreen() {
               </div>
             </div>
 
+            <Row label={t("check.flights")} value={flightsLine} />
             <Row label={t("check.dates")} value={t("check.datesValue", { from: range.from, to: range.to })} action={t("check.edit")} onAction={edit} />
             <Row label={t("check.travellers")} value={travellers} action={t("check.edit")} onAction={edit} />
             <Row
@@ -140,8 +168,8 @@ export function CheckScreen() {
       <Sheet open={pay} onClose={() => setPay(false)} title={t("check.payTitle")}>
         <p className="mt-2 text-[15px] leading-snug text-muted">{t("check.payBody")}</p>
         <div className="mt-4 flex flex-col gap-2">
-          <PartnerLink href={flight.deeplink} label={t("check.openFlight")} />
-          <PartnerLink href={hotel.deeplink} label={t("check.openHotel")} />
+          <PartnerLink href={flight.deeplink} label={t("check.openFlight")} onOpen={() => leaveFor("kiwi.com")} />
+          <PartnerLink href={hotel.deeplink} label={t("check.openHotel")} onOpen={() => leaveFor("trivago")} />
         </div>
         <Button full className="mt-4" onClick={() => router.push(withTripSearch("/trip/file"))}>
           {t("check.booked")}
@@ -159,8 +187,8 @@ function Row({
 }: {
   label: string;
   value: string;
-  action: string;
-  onAction: () => void;
+  action?: string;
+  onAction?: () => void;
 }) {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-line py-3.5">
@@ -168,9 +196,11 @@ function Row({
         <span className="block font-bold">{label}</span>
         <span className="block text-[15px] text-muted">{value}</span>
       </span>
-      <button type="button" onClick={onAction} className="min-h-11 shrink-0 rounded-button-sm bg-fill px-3.5 text-sm font-semibold">
-        {action}
-      </button>
+      {action && onAction && (
+        <button type="button" onClick={onAction} className="min-h-11 shrink-0 rounded-button-sm bg-fill px-3.5 text-sm font-semibold">
+          {action}
+        </button>
+      )}
     </div>
   );
 }
@@ -205,7 +235,7 @@ function PriceLine({
   );
 }
 
-function PartnerLink({ href, label }: { href: string | null; label: string }) {
+function PartnerLink({ href, label, onOpen }: { href: string | null; label: string; onOpen: () => void }) {
   const { t } = useLanguage();
   if (!href) return <p className="min-h-11 text-sm text-muted">{t("check.linkMissing")}</p>;
   return (
@@ -213,6 +243,7 @@ function PartnerLink({ href, label }: { href: string | null; label: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={onOpen}
       className="flex min-h-11 items-center justify-center rounded-button bg-fill px-4 text-center text-[15px] font-semibold"
     >
       {label}
@@ -236,7 +267,7 @@ function DestinationPhoto({
   const { t } = useLanguage();
   const [failed, setFailed] = useState(false);
   if (!imageId || failed) {
-    return <div aria-hidden className="size-[72px] rounded-[14px] bg-gradient-to-b from-sky via-blue-soft to-orange-soft" />;
+    return <div aria-hidden className="size-16 rounded-[14px] bg-gradient-to-b from-sky via-blue-soft to-orange-soft" />;
   }
   return (
     // The URL is the one Kiwi.com documents. It must not be rewritten or drawn on.
@@ -244,9 +275,9 @@ function DestinationPhoto({
     <img
       src={`https://images.kiwi.com/photos/600x600/${imageId}.jpg`}
       alt={t("check.photo")}
-      width={72}
-      height={72}
-      className="size-[72px] rounded-[14px] object-cover"
+      width={64}
+      height={64}
+      className="size-16 rounded-[14px] object-cover"
       onLoad={() => onReady(true)}
       onError={() => {
         setFailed(true);

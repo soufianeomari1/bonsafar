@@ -87,7 +87,7 @@ export function QuestionCard({
             disabled={!text.trim()}
             className="flex size-9 items-center justify-center rounded-xl bg-ink text-card disabled:opacity-40"
           >
-            <ArrowRight size={16} weight="bold" className="rtl:-scale-x-100" />
+            <ArrowRight size={16} weight="light" className="rtl:-scale-x-100" />
           </button>
         </form>
       ) : (

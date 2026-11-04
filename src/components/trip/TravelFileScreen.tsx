@@ -8,24 +8,24 @@ import { AirplaneTilt, Export, GoogleLogo, Star } from "@phosphor-icons/react";
 import { Safar } from "@/components/bs/Safar";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
-import { airportCity } from "@/lib/airports";
-import { formatDay, formatFlightNumbers, formatMad, formatTime, formatTripDate } from "@/lib/format";
+import { placeName } from "@/lib/airports";
+import { formatDay, formatMad, formatTime, formatTripDate } from "@/lib/format";
+import type { Lang, TranslateValues, TranslationKey } from "@/lib/i18n";
+import { legCarriers, legSentence } from "@/lib/trip/describe";
 import { haptic } from "@/lib/haptics";
 import { useLanguage } from "@/lib/i18n/provider";
 import { readPoster, readServerPoster, subscribePoster } from "@/lib/poster/client";
 import { useProfile } from "@/lib/profile/useProfile";
-import { readTrip } from "@/lib/trip/store";
-import { buildChecklist, okCount } from "@/lib/trip/checklist";
+import { freezeRun } from "@/lib/trip/freeze";
 import {
   readSavedTrips,
   readServerSavedTrips,
   rememberTrip,
   subscribeSavedTrips,
   type FrozenPackage,
-  type FrozenTrip,
 } from "@/lib/trip/saved";
-import { asFlight, asHotel, pickOption } from "@/lib/trip/selection";
 import { EASE_DEFAULT } from "@/lib/motion";
+import { BookingPill } from "./BookingPill";
 import { JuryLine } from "./JuryLine";
 
 /** Screen 10. The pass prints, then the stamp lands once. */
@@ -41,41 +41,8 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
   const [stamp, setStamp] = useState(!!reduced);
 
   const live = useMemo(() => {
-    const result = run.result;
-    const option = pickOption(result, run.selectedId);
-    const flight = option ? asFlight(run.offers[option.flight_id]) : null;
-    const hotel = option ? asHotel(run.offers[option.hotel_id]) : null;
-    if (!result || !option || !flight || !hotel || !run.run) return null;
-    const tiles = buildChecklist({
-      entry: result.entry,
-      baggage: flight.attrs.baggage,
-      perPersonDisplayMad: option.totals.per_person_display_mad,
-      dotationMad,
-    });
-    const origin = airportCity(flight.attrs.outbound.from) ?? flight.attrs.outbound.from;
-    const request = run.request;
-    const intent = request && "intent" in request ? request.intent : null;
     const posterUrl = poster.fallback ? poster.url : poster.url?.startsWith("http") ? poster.url : null;
-    const frozen: Omit<FrozenTrip, "id" | "created_at" | "synced_id"> = {
-      run_id: run.run.run_id,
-      transcript: readTrip()?.transcript ?? null,
-      intent,
-      status: "ready",
-      poster_url: posterUrl,
-      package: {
-        destination: result.destination,
-        origin_iata: flight.attrs.outbound.from,
-        origin_city: origin,
-        flight,
-        hotel,
-        totals: option.totals,
-        fx: result.fx,
-        prices_captured_at: result.prices_captured_at,
-        entry: result.entry,
-        ready_ok: okCount(tiles),
-      },
-    };
-    return frozen;
+    return freezeRun(run, dotationMad, posterUrl);
   }, [run, dotationMad, poster.fallback, poster.url]);
 
   useEffect(() => {
@@ -106,7 +73,7 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
     );
   }
 
-  const view = describe(pack, lang);
+  const view = describe(pack, lang, t);
   const name = profile.first_name?.trim() ?? "";
 
   async function share() {
@@ -160,19 +127,23 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
               }
             >
               <div className="bg-green px-4 pb-3.5 pt-4 text-card">
-                <div className="flex items-center justify-between font-mono text-[11px] font-semibold tracking-wide opacity-90">
-                  <span>{t("file.demo")}</span>
-                  <span>
-                    <bdi>{view.flights}</bdi>
-                  </span>
+                <div className="flex items-center justify-between gap-2 font-mono text-[11px] font-semibold tracking-wide opacity-90">
+                  <span className="shrink-0 whitespace-nowrap">{t("file.demo")}</span>
+                  <span className="min-w-0 truncate font-sans normal-case tracking-normal">{view.carriers}</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-[44px] font-extrabold leading-none tracking-tight">
-                    <bdi>{view.from}</bdi>
+                <div className="mt-2 flex items-center justify-between" dir="ltr">
+                  <span className="flex flex-col">
+                    <span className="text-[44px] font-extrabold leading-none tracking-tight">{view.from}</span>
+                    <span className="mt-1 text-xs font-semibold opacity-90" dir="auto">
+                      {view.fromCity}
+                    </span>
                   </span>
-                  <AirplaneTilt size={28} weight="fill" aria-hidden />
-                  <span className="text-[44px] font-extrabold leading-none tracking-tight">
-                    <bdi>{view.to}</bdi>
+                  <AirplaneTilt size={28} weight="light" aria-hidden />
+                  <span className="flex flex-col items-end">
+                    <span className="text-[44px] font-extrabold leading-none tracking-tight">{view.to}</span>
+                    <span className="mt-1 text-xs font-semibold opacity-90" dir="auto">
+                      {view.toCity}
+                    </span>
                   </span>
                 </div>
               </div>
@@ -204,7 +175,7 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
                 animate={stamp ? { opacity: 1, scale: 1, rotate: -12 } : { opacity: 0, scale: 1.4, rotate: -20 }}
                 transition={reduced ? { duration: 0.2 } : { type: "spring", duration: 0.4, bounce: 0.4 }}
               >
-                <Star size={26} weight="bold" className="text-stamp-green" aria-hidden />
+                <Star size={26} weight="light" className="text-stamp-green" aria-hidden />
                 <span className="mt-0.5 font-mono text-[10px] font-bold tracking-[0.08em]">{t("file.stamp")}</span>
                 <span className="font-mono text-[9px] font-semibold">BONSAFAR</span>
               </motion.div>
@@ -228,6 +199,12 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
             <span className="font-semibold">{t("file.hotelRow")}</span>
             <span className="text-muted">{view.breakfast ? t("file.hotelBreakfast", { count: view.nights }) : t("file.hotelValue", { count: view.nights })}</span>
           </li>
+          {stored?.booking_status && (
+            <li className="flex items-center justify-between gap-3 border-b border-line py-2.5 text-[15px]">
+              <span className="font-semibold">{t("file.booking")}</span>
+              <BookingPill status={stored.booking_status} />
+            </li>
+          )}
           <li className="flex items-center justify-between gap-3 py-2.5 text-[15px]">
             <span className="font-semibold">{t("file.readyRow")}</span>
             <span className={view.readyOk < 4 ? "font-semibold text-orange" : "font-semibold text-green"}>
@@ -248,7 +225,7 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
             onClick={() => void signInWithGoogle(withTripSearch("/trip/file"))}
             className="mb-2.5 flex h-14 w-full items-center justify-center gap-2 rounded-button bg-card text-base font-bold shadow-soft"
           >
-            <GoogleLogo size={18} weight="bold" aria-hidden />
+            <GoogleLogo size={18} weight="light" aria-hidden />
             {t("file.saveGoogle")}
           </button>
         )}
@@ -265,7 +242,7 @@ export function TravelFileScreen({ dotationMad }: { dotationMad: number }) {
             onClick={() => void share()}
             className="flex h-14 items-center justify-center gap-2 rounded-button bg-blue text-base font-bold text-card"
           >
-            <Export size={18} weight="bold" aria-hidden />
+            <Export size={18} weight="light" aria-hidden />
             {t("file.share")}
           </button>
         </div>
@@ -295,27 +272,33 @@ function DemoQr() {
   );
 }
 
-function describe(pack: FrozenPackage, lang: Parameters<typeof formatTripDate>[1]) {
+function describe(
+  pack: FrozenPackage,
+  lang: Lang,
+  t: (key: TranslationKey, values?: TranslateValues) => string,
+) {
   const out = pack.flight.attrs.outbound;
   const back = pack.flight.attrs.inbound;
   const date = formatDay(out.departure.slice(0, 10), lang);
   const backDate = back ? formatTripDate(back.departure.slice(0, 10), lang) : "";
-  const backFlight = back?.flights[0] ?? "";
+  const backLine = back ? legSentence(back, lang, t) : null;
   const rangeFrom = formatDay(pack.hotel.attrs.arrival, lang);
   const rangeTo = formatDay(pack.hotel.attrs.departure, lang);
   return {
     from: out.from,
     to: out.to,
-    flights: formatFlightNumbers(out.flights),
+    fromCity: placeName(out.from, lang, out.segments?.[0]?.from_city),
+    toCity: placeName(out.to, lang, out.segments?.at(-1)?.to_city),
+    carriers: legCarriers(out, t),
     date: date.toLocaleUpperCase(lang === "en" ? "en-GB" : "fr-FR"),
     time: formatTime(out.departure),
     passengers: pack.totals.passengers,
     hotel: pack.hotel.attrs.name,
     nights: pack.hotel.attrs.nights || pack.totals.hotel.nights,
     breakfast: pack.hotel.attrs.breakfast,
-    returnLabel: [backDate, backFlight].filter(Boolean).join(" · "),
+    returnLabel: [backDate, backLine?.carriers, backLine?.detail].filter(Boolean).join(" · "),
     readyOk: pack.ready_ok,
-    city: pack.destination.city,
+    city: placeName(pack.destination.iata, lang, pack.destination.city),
     dates: `${rangeFrom} – ${rangeTo}`,
     total: formatMad(pack.totals.total_display_mad),
   };

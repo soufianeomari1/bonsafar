@@ -27,7 +27,7 @@ export function IconCircle({
   icon: IconComponent,
   tone = "blue",
   size = 40,
-  weight = "fill",
+  weight = "light",
   className,
 }: IconCircleProps) {
   return (
