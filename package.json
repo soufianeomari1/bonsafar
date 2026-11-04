@@ -9,7 +9,8 @@
     "lint": "eslint",
     "mcp:tools": "node scripts/mcp-list-tools.mjs",
     "agent:check": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/agent-check.mjs",
-    "poster:fallback": "node scripts/poster-fallback.mjs"
+    "poster:fallback": "node scripts/poster-fallback.mjs",
+    "i18n:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/i18n-review.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
