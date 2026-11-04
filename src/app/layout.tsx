@@ -42,7 +42,7 @@ export const viewport: Viewport = {
 /** Impact's crawler reads `value`, not the usual `content` attribute. */
 const impactSiteVerification = {
   name: "impact-site-verification",
-  value: "74d5ceba-669e-4c4b-bab5-06bba0d99842",
+  value: "5bae12fb-1556-4355-85ca-7df3f691132b",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
