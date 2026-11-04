@@ -1,4 +1,4 @@
-import { knownIdeaVisaFree, visaFreeHomeIds, type Idea } from "../ideas";
+import { knownIdeaVisaFree, schengenFree, visaFreeHomeIds, type Idea } from "../ideas";
 import type { Intent } from "../intent/schema";
 import { findPlace } from "../mcp/places";
 import type { Profile } from "../profile/schema";
@@ -69,6 +69,51 @@ export function schengenBlocked(destination: DestinationLike | null, profile: Pr
   if (!destination) return false;
   const code = resolvedCountry(destination);
   return isSchengenCode(code) && !knownIdeaVisaFree("paris", profile);
+}
+
+/**
+ * Statuses checked for a Moroccan passport. They win over the model's
+ * visa_needed / visa_kind. Spark still supplies passport validity, notes
+ * and sources. Idea cards use the same Schengen rule (`schengenFree`).
+ * `max_stay_days` is set only when the stay limit itself is verified.
+ */
+export type VerifiedVisaStatus = {
+  visa_needed: boolean;
+  visa_kind: "none" | "schengen";
+  max_stay_days?: number;
+};
+
+const MOROCCAN_PASSPORT = new Set<Profile["passport_country"]>(["ma", "both"]);
+
+export function verifiedMoroccanVisa(
+  countryCode: string | null | undefined,
+  profile: Profile,
+): VerifiedVisaStatus | null {
+  if (!profile.passport_country || !MOROCCAN_PASSPORT.has(profile.passport_country)) return null;
+  const code = countryCode?.trim().toUpperCase() || null;
+  if (!code) return null;
+  if (code === "TR") return { visa_needed: false, visa_kind: "none", max_stay_days: 90 };
+  if (isSchengenCode(code)) {
+    const free = schengenFree(profile);
+    return { visa_needed: !free, visa_kind: free ? "none" : "schengen" };
+  }
+  return null;
+}
+
+/** Locks a verified row onto a model entry. Other countries are returned as-is. */
+export function applyVerifiedVisa<T extends { visa_needed: boolean; visa_kind: string; max_stay_days: number | null }>(
+  entry: T,
+  countryCode: string | null | undefined,
+  profile: Profile,
+): T {
+  const verified = verifiedMoroccanVisa(countryCode, profile);
+  if (!verified) return entry;
+  return {
+    ...entry,
+    visa_needed: verified.visa_needed,
+    visa_kind: verified.visa_kind,
+    max_stay_days: verified.max_stay_days ?? entry.max_stay_days,
+  };
 }
 
 export type VisaWarning = { city: string; countryCode: string };

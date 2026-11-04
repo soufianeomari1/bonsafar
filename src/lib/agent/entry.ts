@@ -6,6 +6,7 @@ import { callResponses } from "@/lib/ai/responses";
 import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { guardModelText, scrubMoney } from "@/lib/prices/guardrail";
 import type { Profile } from "@/lib/profile/schema";
+import { applyVerifiedVisa } from "@/lib/visa/policy";
 import { SCHENGEN_CODES } from "@/lib/visa/schengen";
 import { EntryModelSchema, EntryModelSchemaAr, type EntryRequirements } from "./schema";
 
@@ -350,8 +351,9 @@ export async function checkEntryRequirements({
     };
   }
 
+  const locked = applyVerifiedVisa(result, code, profile);
   return {
-    ...result,
+    ...locked,
     country,
     country_code: countryCode,
     passport: profile.passport_country ?? "unknown",

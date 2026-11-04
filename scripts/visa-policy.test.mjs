@@ -4,7 +4,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { FATIMA, SCENARIOS } from "../src/lib/agent/scenarios.ts";
-import { applyVisaPolicy, askedVisaFree, assessVisa } from "../src/lib/visa/policy.ts";
+import { knownIdeaVisaFree } from "../src/lib/ideas.ts";
+import { applyVerifiedVisa, applyVisaPolicy, askedVisaFree, assessVisa } from "../src/lib/visa/policy.ts";
 import { countryCodeOf } from "../src/lib/visa/schengen.ts";
 
 const NO_VISA = "Where can I go with no visa this summer?";
@@ -165,6 +166,47 @@ test("the three jury scenarios are unchanged when nobody asked for no visa", () 
   assert.deepEqual(view.wishes, sea.wishes);
   assert.equal(view.ideaIds, null);
   assert.deepEqual(view.wishes.map((wish) => wish.label), ["Sea"]);
+});
+
+test("Turkey stays visa-free for a Moroccan passport even when the model says otherwise", () => {
+  const model = {
+    visa_needed: true,
+    visa_kind: "consular",
+    max_stay_days: 30,
+    passport_validity_days: 150,
+    notes: { darija: "Khass visa", fr: "Visa consulaire", en: "Consular visa" },
+  };
+  const locked = applyVerifiedVisa(model, "tr", FATIMA);
+  assert.equal(locked.visa_needed, false);
+  assert.equal(locked.visa_kind, "none");
+  assert.equal(locked.max_stay_days, 90);
+  assert.equal(locked.passport_validity_days, 150);
+  assert.equal(locked.notes.en, "Consular visa");
+  assert.equal(knownIdeaVisaFree("istanbul", FATIMA), !locked.visa_needed);
+
+  const schengen = applyVerifiedVisa(
+    { visa_needed: false, visa_kind: "none", max_stay_days: 90, passport_validity_days: 90 },
+    "FR",
+    FATIMA,
+  );
+  assert.equal(schengen.visa_needed, true);
+  assert.equal(schengen.visa_kind, "schengen");
+  assert.equal(schengen.passport_validity_days, 90);
+  assert.equal(knownIdeaVisaFree("paris", FATIMA), false);
+
+  const holder = { ...FATIMA, has_schengen: true };
+  const covered = applyVerifiedVisa(
+    { visa_needed: true, visa_kind: "consular", max_stay_days: 15, passport_validity_days: 180 },
+    "ES",
+    holder,
+  );
+  assert.equal(covered.visa_needed, false);
+  assert.equal(covered.visa_kind, "none");
+  assert.equal(covered.max_stay_days, 15);
+  assert.equal(knownIdeaVisaFree("barcelona", holder), true);
+
+  const egypt = { visa_needed: true, visa_kind: "evisa", max_stay_days: 30, passport_validity_days: null };
+  assert.equal(applyVerifiedVisa(egypt, "EG", FATIMA), egypt);
 });
 
 test("visa wording is detected only as a no-visa request", () => {
