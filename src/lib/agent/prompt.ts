@@ -1,3 +1,4 @@
+import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import type { Intent } from "@/lib/intent/schema";
 import type { Profile } from "@/lib/profile/schema";
 
@@ -16,7 +17,9 @@ Choosing:
 - why: exactly 3 short reasons for the recommended package (at most 140 characters each), each in Moroccan darija (in the requested script), French and English. When the context asks for Arabic, also fill "ar" in Modern Standard Arabic (fusha, never darija), with Latin digits. Each language is complete on its own: no word of another language inside it, except city, airline and hotel names. Speak about time saved, stops, airline, hotel rating, location, breakfast, season.
 - rejected: up to 6 offer ids you looked at and dropped, each with a reason code.
 
-Hard rule: never write a price, an amount of money, a currency or a price index in any text. Code computes and shows every amount. Refer to offers only by their ids in the id fields.`;
+Hard rule: never write a price, an amount of money, a currency or a price index in any text. Code computes and shows every amount. Refer to offers only by their ids in the id fields.
+
+${SCRIPT_RULES}`;
 
 const PASSPORTS: Record<NonNullable<Profile["passport_country"]>, string> = {
   ma: "Moroccan",

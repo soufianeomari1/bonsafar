@@ -1,8 +1,12 @@
 "use client";
 
-import { appendRunEvents } from "@/lib/agent-client/store";
+import { useEffect } from "react";
+import { appendRunEvents, rememberGoodToKnow, type AgentRunSnapshot } from "@/lib/agent-client/store";
 import type { RunEvent } from "@/lib/ai/events";
+import { airportCity } from "@/lib/airports";
 import type { Lang } from "@/lib/i18n";
+import { scriptForLang, type Profile } from "@/lib/profile/schema";
+import { asFlight, asHotel, pickOption } from "./selection";
 
 export type GoodToKnowLine = { darija: string; fr: string; en: string; ar?: string };
 export type GoodToKnowNotes = {
@@ -19,7 +23,7 @@ type Payload = { ok: true; notes: GoodToKnowNotes; events: RunEvent[] } | { ok: 
 const inflight = new Map<string, Promise<GoodToKnowNotes | null>>();
 
 /** Arabic notes are a separate call: the other languages share one. */
-function cacheKey(runId: string, lang: Lang): string {
+export function cacheKey(runId: string, lang: Lang): string {
   return lang === "ar" ? `${CACHE}.${runId}.ar` : `${CACHE}.${runId}`;
 }
 
@@ -65,6 +69,7 @@ export function loadGoodToKnow(input: GoodToKnowInput): Promise<GoodToKnowNotes 
   const cached = readCache(key);
   if (cached) {
     if (cached.events?.length) appendRunEvents(cached.events);
+    rememberGoodToKnow(key, cached.notes);
     return Promise.resolve(cached.notes);
   }
   const pending = inflight.get(key);
@@ -93,6 +98,7 @@ export function loadGoodToKnow(input: GoodToKnowInput): Promise<GoodToKnowNotes 
       } catch {
         // The note still shows for this view.
       }
+      rememberGoodToKnow(key, payload.notes);
       return payload.notes;
     } catch {
       return null;
@@ -103,4 +109,58 @@ export function loadGoodToKnow(input: GoodToKnowInput): Promise<GoodToKnowNotes 
 
   inflight.set(key, job);
   return job;
+}
+
+/** Notes already in the run state or the session: screen 08 shows them on its first frame. */
+export function peekGoodToKnow(run: AgentRunSnapshot, lang: Lang): GoodToKnowNotes | null {
+  const runId = run.run?.run_id;
+  if (!runId) return null;
+  const key = cacheKey(runId, lang);
+  const inRun = run.goodToKnow?.[key] as GoodToKnowNotes | undefined;
+  if (inRun?.timezone) return inRun;
+  return typeof window === "undefined" ? null : (readCache(key)?.notes ?? null);
+}
+
+function monthLabel(iso: string): string {
+  const [year, month, day] = iso.split("-").map(Number);
+  if (!year || !month || !day) return iso;
+  return new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(
+    new Date(Date.UTC(year, month - 1, day)),
+  );
+}
+
+/** What /api/good-to-know needs for the chosen package of this run. */
+export function goodToKnowInput(run: AgentRunSnapshot, profile: Profile, lang: Lang): GoodToKnowInput | null {
+  const result = run.result;
+  const runId = run.run?.run_id;
+  if (!result || !runId) return null;
+  const option = pickOption(result, run.selectedId);
+  const flight = option ? asFlight(run.offers[option.flight_id]) : null;
+  const hotel = option ? asHotel(run.offers[option.hotel_id]) : null;
+  const depart = hotel?.attrs.arrival ?? flight?.attrs.outbound.departure.slice(0, 10) ?? "";
+  if (!depart) return null;
+  return {
+    runId,
+    city: result.destination.city,
+    country: result.destination.country,
+    origin: airportCity(flight?.attrs.outbound.from ?? "") ?? "Casablanca",
+    month: monthLabel(depart),
+    script: scriptForLang(lang, profile.darija_script),
+    lang,
+  };
+}
+
+/**
+ * Starts "good to know" in the background as soon as the package is in
+ * (screens 06 and 07), so screen 08 does not wait 11 to 15 seconds.
+ */
+export function usePrefetchGoodToKnow(run: AgentRunSnapshot, profile: Profile, lang: Lang) {
+  const input = goodToKnowInput(run, profile, lang);
+  const key = input ? `${input.runId}|${input.city}|${input.month}|${input.script}|${input.lang}` : "";
+  useEffect(() => {
+    if (!input) return;
+    void loadGoodToKnow(input);
+    // The key holds every field of the input.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
 }

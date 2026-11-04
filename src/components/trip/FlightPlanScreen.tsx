@@ -28,9 +28,10 @@ import { haptic } from "@/lib/haptics";
 import { translate, type TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { useProfile } from "@/lib/profile/useProfile";
+import { usePrefetchGoodToKnow } from "@/lib/trip/good-to-know-client";
 import { useTrip } from "@/lib/trip/useTrip";
 import { cn } from "@/lib/utils";
-import { AirlineMarks } from "./AirlineMark";
+import { legCarriers } from "@/lib/trip/describe";
 import { PriceFact } from "./PriceFact";
 
 const COPY: Record<AgentStep, { title: TranslationKey; hint: TranslationKey }> = {
@@ -71,6 +72,9 @@ export function FlightPlanScreen() {
   const run = useAgentRun();
   const trip = useTrip();
   const { t, lang } = useLanguage();
+  const { profile } = useProfile();
+  // "Good to know" starts the moment the package event lands, not on screen 08.
+  usePrefetchGoodToKnow(run, profile, lang);
   const reduced = useReducedMotion();
   const router = useRouter();
   const [safarY, setSafarY] = useState(0);
@@ -339,18 +343,15 @@ function FlightRows({ data, lang }: { data: unknown; lang: Parameters<typeof Pri
             transition={{ delay: index * 0.12, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="flex items-center gap-2 rounded-xl bg-bg px-2.5 py-1"
           >
-            <AirlineMarks
-              flights={outbound?.flights ?? []}
-              carriers={outbound?.carriers ?? row.carriers}
-              className="shrink-0 flex-col items-start"
-            />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-bold tabular-nums text-green">
+              <span className="block truncate text-sm font-bold tabular-nums text-ink">
                 <bdi>
                   {formatTime(row.departure)} → {formatTime(row.arrival)}
                 </bdi>
               </span>
               <span className="block truncate text-xs text-muted">
+                {outbound ? legCarriers(outbound, t) : row.carriers.map((name) => `\u2068${name}\u2069`).join(", ")}
+                {" · "}
                 {row.stops <= 0 ? t("plan.direct") : row.stops === 1 ? t("plan.stops.one") : t("plan.stops.other", { count: row.stops })}
               </span>
             </span>

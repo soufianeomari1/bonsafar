@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { newRunId } from "@/lib/ai/events";
 import type { Lang } from "@/lib/i18n";
+import { numberWordsToDigits } from "@/lib/i18n/digits";
 import type { TranslateTarget } from "@/lib/intent/schema";
 import { fetchTranslate, VoiceApiError } from "@/lib/voice/client";
 import { appendRunEvents } from "./store";
@@ -121,6 +122,11 @@ export type ModelTextState = {
  * darija line as recorded.
  */
 export function useModelText(line: ModelLine | null | undefined, lang: Lang, runId: string | null = null): ModelTextState {
+  const state = useModelTextRaw(line, lang, runId);
+  return state.text ? { ...state, text: numberWordsToDigits(state.text, lang) } : state;
+}
+
+function useModelTextRaw(line: ModelLine | null | undefined, lang: Lang, runId: string | null): ModelTextState {
   const target = line ? missingTarget(line, lang) : null;
   const source = target && line ? line.en : "";
   const key = target && source ? storageKey(target, source) : "";

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { serverEnv } from "@/lib/env";
 import type { RunLog } from "@/lib/ai/events";
 import { callChat } from "@/lib/ai/call";
+import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { guardModelText, scrubMoney } from "@/lib/prices/guardrail";
 
 const Line = z.object({
@@ -41,7 +42,9 @@ Fields, in order of usefulness:
 - currency: the name of the local currency only.
 - weather: the typical weather during the travel month. A season word is enough.
 
-Never write a price, a fee, a budget or any amount of money. No digits next to a currency, and no currency symbol. A clock offset such as "+2" is fine. Do not invent a precise temperature.`;
+Never write a price, a fee, a budget or any amount of money. No digits next to a currency, and no currency symbol. A clock offset such as "+2" is fine. Do not invent a precise temperature.
+
+${SCRIPT_RULES}`;
 
 export type GoodToKnowRequest = {
   city: string;

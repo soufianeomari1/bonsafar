@@ -234,7 +234,6 @@ function Marker({ point, width, bottom, stopover }: { point: Point; width: numbe
           className={cn("fill-muted font-semibold", arabicSub ? "font-arabic" : "font-mono")}
           fontSize={arabicSub ? 10.5 : 9.5}
           style={halo}
-          direction={arabicSub ? "rtl" : "ltr"}
         >
           {point.stop.sub}
         </text>

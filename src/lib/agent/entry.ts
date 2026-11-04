@@ -3,6 +3,7 @@ import type { Response } from "openai/resources/responses/responses";
 import { serverEnv } from "@/lib/env";
 import type { RunLog } from "@/lib/ai/events";
 import { callResponses } from "@/lib/ai/responses";
+import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { guardModelText, scrubMoney } from "@/lib/prices/guardrail";
 import type { Profile } from "@/lib/profile/schema";
 import { EntryModelSchema, EntryModelSchemaAr, type EntryRequirements } from "./schema";
@@ -31,7 +32,9 @@ Rules:
 - visa_kind: none, schengen, evisa, on_arrival, consular or unknown.
 - max_stay_days: the visa-free (or visa) tourist stay limit in days, null if unclear.
 - passport_validity_days: how many days the passport must remain valid counted from the arrival date (e.g. 150 when it must be valid 60 days beyond a 90-day stay; 90 for "3 months after the planned departure" from a short trip, rounded to the rule), null if unclear.
-- notes: one or two short sentences on what to prepare, in Moroccan darija (in the given script), French and English. When the request asks for Arabic, also fill "ar" in Modern Standard Arabic (fusha, never darija), with Latin digits. Each language is complete on its own, with no word of another language inside it. Never write a fee, a price or any amount of money: no digits next to a currency.`;
+- notes: one or two short sentences on what to prepare, in Moroccan darija (in the given script), French and English. When the request asks for Arabic, also fill "ar" in Modern Standard Arabic (fusha, never darija), with Latin digits. Each language is complete on its own, with no word of another language inside it. Never write a fee, a price or any amount of money: no digits next to a currency.
+
+${SCRIPT_RULES}`;
 
 function sourceDate(iso: string): string {
   return iso.slice(0, 10);

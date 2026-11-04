@@ -1,11 +1,16 @@
 import type { Lang } from "@/lib/i18n";
 
-/** fr-MA for travellers, en-GB for the judges and the English UI. */
+/**
+ * fr-MA for travellers, en-GB for the judges and the English UI. Darija in
+ * Arabic letters keeps the Moroccan months (دجنبر, ar-MA); Modern Standard
+ * Arabic takes the standard ones (ديسمبر, ar). Digits stay Latin everywhere.
+ */
 export function localeFor(lang: Lang): string {
   switch (lang) {
     case "en":
       return "en-GB";
     case "ar":
+      return "ar";
     case "darija-arab":
       return "ar-MA";
     default:
@@ -118,14 +123,25 @@ function formatGrouped(amount: number): string {
   return `${negative ? "\u2212" : ""}${body}`;
 }
 
-/** "8 h 55", "3 h 10", "45 min". Minutes come from the offer, already whole. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/**
+ * "8 h 55", "3 h 10", "45 min". Arabic script: "3 س 10 د", "45 د", Latin
+ * digits. Minutes come from the offer, already whole.
+ */
 export function formatDuration(minutes: number, lang?: Lang): string {
   const negative = minutes < 0;
   const abs = Math.abs(Math.round(minutes));
   const hours = Math.floor(abs / 60);
   const mins = abs % 60;
-  const body = hours === 0 ? `${mins} min` : `${hours} h ${String(mins).padStart(2, "0")}`;
+  const arabic = lang === "ar" || lang === "darija-arab";
+  const body = arabic
+    ? hours === 0
+      ? `${mins} د`
+      : mins === 0
+        ? `${hours} س`
+        : `${hours} س ${mins} د`
+    : hours === 0
+      ? `${mins} min`
+      : `${hours} h ${String(mins).padStart(2, "0")}`;
   return negative ? `\u2212${body}` : body;
 }
 
@@ -168,59 +184,6 @@ export function formatWhen(iso: string, lang: Lang): string {
     minute: "2-digit",
     numberingSystem: "latn",
   }).format(date);
-}
-
-/**
- * IATA designator taken from a flight number already stored on the offer.
- * Two letters or digits, then the numeric part: "AT972" → "AT", "W45018" → "W4", "3O457" → "3O".
- */
-const FLIGHT_NUMBER = /^([A-Z0-9]{2})\d+$/;
-
-export function airlineCodeFromFlight(flightNumber: string): string | null {
-  const compact = flightNumber.trim().toUpperCase().replace(/[\s-]+/g, "");
-  return FLIGHT_NUMBER.exec(compact)?.[1] ?? null;
-}
-
-export type AirlineMark = {
-  /** Null when the flight number does not yield a code: show `name` as text. */
-  code: string | null;
-  /** Carrier name when it lines up with the code; otherwise null. */
-  name: string | null;
-};
-
-/**
- * One mark per airline, in flight order. Names from `carriers` are attached
- * only when each unique code has exactly one name, so a replay never invents
- * initials from "Royal Air Maroc".
- */
-export function airlineMarks(flights: string[], carriers: string[]): AirlineMark[] {
-  const names = carriers.map((name) => name.trim()).filter(Boolean);
-  const codes: string[] = [];
-  const seen = new Set<string>();
-  let failed = 0;
-  for (const flight of flights) {
-    if (!flight.trim()) continue;
-    const code = airlineCodeFromFlight(flight);
-    if (!code) {
-      failed += 1;
-      continue;
-    }
-    if (seen.has(code)) continue;
-    seen.add(code);
-    codes.push(code);
-  }
-  if (codes.length === 0) return names.map((name) => ({ code: null, name }));
-  if (failed === 0 && codes.length === names.length) {
-    return codes.map((code, index) => ({ code, name: names[index] ?? null }));
-  }
-  const marks: AirlineMark[] = codes.map((code) => ({ code, name: null }));
-  if (failed > 0) marks.push(...names.map((name) => ({ code: null, name })));
-  return marks;
-}
-
-/** "AT972 + PC1102", the flight numbers as Kiwi.com returned them. */
-export function formatFlightNumbers(flights: string[]): string {
-  return flights.map((flight) => flight.trim()).filter(Boolean).join(" + ");
 }
 
 /** Whole days from today in Morocco until an ISO departure date. */

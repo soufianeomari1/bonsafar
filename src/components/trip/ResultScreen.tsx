@@ -12,6 +12,8 @@ import type { TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { legSentence, mapStops, nightsText } from "@/lib/trip/describe";
 import { asFlight, asHotel } from "@/lib/trip/selection";
+import { usePrefetchGoodToKnow } from "@/lib/trip/good-to-know-client";
+import { useProfile } from "@/lib/profile/useProfile";
 import { cn } from "@/lib/utils";
 import { PriceFact } from "./PriceFact";
 import { RouteMap } from "./RouteMap";
@@ -29,7 +31,9 @@ const TAG: Record<Row["label"], { key: TranslationKey; className: string }> = {
 export function ResultScreen() {
   const run = useAgentRun();
   const { t, lang } = useLanguage();
+  const { profile } = useProfile();
   const router = useRouter();
+  usePrefetchGoodToKnow(run, profile, lang);
   const result = run.result;
   const recommended = result ? asFlight(run.offers[result.recommended.flight_id]) : null;
   const out = recommended?.attrs.outbound ?? null;
@@ -53,7 +57,8 @@ export function ResultScreen() {
   const pack = result;
   const city = placeName(pack.destination.iata, lang, pack.destination.city);
   const landedMs = run.end?.recorded?.total_ms ?? run.end?.total_ms ?? pack.total_ms;
-  const landed = `${Math.max(1, Math.round(landedMs / 1000))} s`;
+  const seconds = Math.max(1, Math.round(landedMs / 1000));
+  const landed = lang === "ar" || lang === "darija-arab" ? `${seconds} ث` : `${seconds} s`;
 
   async function share() {
     const text = `${city} · ${formatMad(pack.recommended.totals.total_display_mad)}`;
@@ -139,8 +144,8 @@ function OptionCard({ row }: { row: Row }) {
         <HotelPhoto src={hotel?.attrs.main_image} alt={hotel?.attrs.name ?? ""} className="w-[92px] shrink-0 self-stretch" />
         <span className="flex min-w-0 flex-1 flex-col gap-1 px-3.5 py-3">
           <span className={cn("w-max rounded-pill px-2 py-0.5 text-[11.5px] font-semibold", tag.className)}>{t(tag.key)}</span>
-          <span className="truncate text-[15px] font-bold">
-            <bdi>{hotel?.attrs.name ?? ""}</bdi>
+          <span dir="auto" className="truncate text-start text-[15px] font-bold">
+            {hotel?.attrs.name ?? ""}
           </span>
           {sentence && (
             <span className="line-clamp-2 text-[12.5px] leading-snug text-muted">

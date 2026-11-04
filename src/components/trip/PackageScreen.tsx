@@ -45,7 +45,9 @@ import {
   travellersText,
   type AmenityId,
 } from "@/lib/trip/describe";
+import { usePrefetchGoodToKnow } from "@/lib/trip/good-to-know-client";
 import { asFlight, asHotel, pickOption } from "@/lib/trip/selection";
+import { useProfile } from "@/lib/profile/useProfile";
 import { cn } from "@/lib/utils";
 import { JuryLabel } from "./JuryLine";
 import { RouteMap } from "./RouteMap";
@@ -80,7 +82,9 @@ const ltr = (text: string) => `\u2066${text}\u2069`;
 export function PackageScreen() {
   const run = useAgentRun();
   const { t, lang } = useLanguage();
+  const { profile } = useProfile();
   const router = useRouter();
+  usePrefetchGoodToKnow(run, profile, lang);
   const result = run.result;
   const option = pickOption(result, run.selectedId);
   const flight = option ? asFlight(run.offers[option.flight_id]) : null;
@@ -424,7 +428,8 @@ function SmartTip({ result, offers }: { result: AgentPackage; offers: Record<str
   const values = {
     carrier: carrier ? ltr(carrier) : t("package.tipOther"),
     mad: ltr(formatMad(Math.abs(delta.extra_display_mad))),
-    duration: ltr(formatDuration(Math.abs(delta.saved_minutes), lang)),
+    // First-strong isolate: "3 h 10" stays left to right, "3 س 10 د" right to left.
+    duration: `\u2068${formatDuration(Math.abs(delta.saved_minutes), lang)}\u2069`,
   };
   const text = result.smart_tip.kind === "cheaper_flight" ? t("package.tipLess", values) : t("package.tipMore", values);
 

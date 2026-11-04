@@ -21,16 +21,15 @@ import { Button } from "@/components/bs/Button";
 import { ModelText } from "@/components/bs/ModelText";
 import { useAgentRun } from "@/lib/agent-client/context";
 import { withTripSearch } from "@/lib/agent-client/store";
-import { airportCity, placeName } from "@/lib/airports";
+import { placeName } from "@/lib/airports";
 import { addDays, dateRangeParts, formatDay, localeFor } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import type { Lang, TranslationKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/i18n/provider";
 import { ensurePoster } from "@/lib/poster/client";
-import { scriptForLang } from "@/lib/profile/schema";
 import { useProfile } from "@/lib/profile/useProfile";
 import { buildChecklist, todoCount, type ChecklistTile } from "@/lib/trip/checklist";
-import { loadGoodToKnow, type GoodToKnowNotes } from "@/lib/trip/good-to-know-client";
+import { goodToKnowInput, loadGoodToKnow, peekGoodToKnow, type GoodToKnowNotes } from "@/lib/trip/good-to-know-client";
 import { asFlight, asHotel, pickOption } from "@/lib/trip/selection";
 import { cn } from "@/lib/utils";
 import { JuryLabel, JuryLine } from "./JuryLine";
@@ -59,16 +58,6 @@ const VISA_KEY: Record<string, TranslationKey> = {
   unknown: "visaKind.unknown",
 };
 
-function monthLabel(iso: string): string {
-  const [year, month, day] = iso.split("-").map(Number);
-  if (!year || !month || !day) return iso;
-  return new Intl.DateTimeFormat("en-GB", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, day)));
-}
-
 function longDate(iso: string, lang: Lang): string {
   const [year, month, day] = iso.split("-").map(Number);
   return new Intl.DateTimeFormat(localeFor(lang), {
@@ -86,8 +75,7 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
   const { t, lang } = useLanguage();
   const { profile } = useProfile();
   const router = useRouter();
-  const [notes, setNotes] = useState<GoodToKnowNotes | null>(null);
-  const [notesState, setNotesState] = useState<"loading" | "ready" | "error">("loading");
+  const [failed, setFailed] = useState(false);
 
   const result = run.result;
   const option = pickOption(result, run.selectedId);
@@ -97,11 +85,14 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
   const city = result?.destination.city ?? "";
   const depart = hotel?.attrs.arrival ?? flight?.attrs.outbound.departure.slice(0, 10) ?? "";
   const ret = hotel?.attrs.departure ?? flight?.attrs.inbound?.departure.slice(0, 10) ?? "";
-  const script = scriptForLang(lang, profile.darija_script);
+  // Fetched in the background since screen 06: usually already here.
+  const notes = peekGoodToKnow(run, lang);
+  const notesState: "loading" | "ready" | "error" = notes ? "ready" : failed ? "error" : "loading";
+  const input = goodToKnowInput(run, profile, lang);
+  const inputKey = input ? `${input.runId}|${input.month}|${input.script}|${input.lang}` : "";
 
   useEffect(() => {
-    if (!runId || !result || !depart) return;
-    const origin = airportCity(flight?.attrs.outbound.from ?? "") ?? "Casablanca";
+    if (!runId || !result) return;
     const istanbul = city.toLowerCase().includes("istanbul") || run.scenario === "istanbul";
     ensurePoster({
       runId,
@@ -109,24 +100,20 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
       country: result.destination.country,
       istanbul,
     });
+  }, [runId, city, result, run.scenario]);
+
+  useEffect(() => {
+    if (!input) return;
     let alive = true;
-    void loadGoodToKnow({
-      runId,
-      city,
-      country: result.destination.country,
-      origin,
-      month: monthLabel(depart),
-      script,
-      lang,
-    }).then((value) => {
-      if (!alive) return;
-      setNotes(value);
-      setNotesState(value ? "ready" : "error");
+    void loadGoodToKnow(input).then((value) => {
+      if (alive && !value) setFailed(true);
     });
     return () => {
       alive = false;
     };
-  }, [runId, city, depart, result, flight?.attrs.outbound.from, script, lang, run.scenario]);
+    // The key holds every field of the input.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputKey]);
 
   useEffect(() => {
     if (!runId) return;

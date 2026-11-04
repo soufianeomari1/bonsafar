@@ -77,6 +77,8 @@ export type AgentRunSnapshot = {
   /** Jury gloss: darija under the English line. */
   showGloss: boolean;
   request: AgentRunRequest | null;
+  /** "Good to know" notes by run and language, fetched as soon as the package is in. */
+  goodToKnow: Record<string, unknown>;
 };
 
 function emptySteps(): Record<AgentStep, StepState> {
@@ -103,6 +105,7 @@ const EMPTY: AgentRunSnapshot = {
   scenario: null,
   showGloss: true,
   request: null,
+  goodToKnow: {},
 };
 
 let snapshot: AgentRunSnapshot = EMPTY;
@@ -331,6 +334,12 @@ function eventKey(event: RunEvent): string {
 export function skipAgentAnimation() {
   if (snapshot.skipped) return;
   commit({ ...snapshot, skipped: true });
+}
+
+/** Keeps the "good to know" notes with the run, so screen 08 never waits for them twice. */
+export function rememberGoodToKnow(key: string, notes: unknown) {
+  if (snapshot.goodToKnow?.[key] === notes) return;
+  commit({ ...snapshot, goodToKnow: { ...(snapshot.goodToKnow ?? {}), [key]: notes } });
 }
 
 export function selectPackage(id: string) {

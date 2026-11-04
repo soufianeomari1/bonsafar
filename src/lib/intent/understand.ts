@@ -5,6 +5,7 @@ import type { RunLog } from "@/lib/ai/events";
 import { collectStrings, containsMoney, scrubMoney } from "@/lib/prices/guardrail";
 import type { Lang } from "@/lib/i18n";
 import { airportCity } from "@/lib/airports";
+import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { profileTravellers, type Profile } from "@/lib/profile/schema";
 import { applyLocks } from "./edits";
 import {
@@ -108,7 +109,9 @@ Rules:
 6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). label: 1 to 3 words in the label language.
 7. keywords: EXACT substrings copied from the transcript (same spelling, accents and case) that carry each extracted fact, with the slot they fill. At most 2 per slot, most telling first.
 8. Do not translate the transcript and do not write an English gloss of it. Another call does that.
-9. question: null unless something indispensable is missing: the destination, or dates too vague to search. Then ask ONE short, friendly question about the most important gap, never about the departure city, travellers or papers. Set field to the gap you ask about: destination, dates, nights, travelers or budget. darija in the given script, plus French and English, and Modern Standard Arabic in "ar" (fusha, never darija) when the user message asks for it. Give 2 to 4 short answer options, each in the same languages. Each language is complete on its own, with no word of another language inside it. Latin digits only. No amounts of money anywhere.`;
+9. question: null unless something indispensable is missing: the destination, or dates too vague to search. Then ask ONE short, friendly question about the most important gap, never about the departure city, travellers or papers. Set field to the gap you ask about: destination, dates, nights, travelers or budget. darija in the given script, plus French and English, and Modern Standard Arabic in "ar" (fusha, never darija) when the user message asks for it. Give 2 to 4 short answer options, each in the same languages. Each language is complete on its own, with no word of another language inside it. Latin digits only. No amounts of money anywhere.
+
+${SCRIPT_RULES}`;
 
 function arabicQuestion(lang: Lang, jury: boolean): boolean {
   return lang === "ar" && !jury;

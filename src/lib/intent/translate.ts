@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { callChat } from "@/lib/ai/call";
 import type { RunLog } from "@/lib/ai/events";
+import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { serverEnv } from "@/lib/env";
 import { containsMoney, guardModelText, scrubMoney } from "@/lib/prices/guardrail";
 
@@ -41,7 +42,9 @@ Rules:
 - Faithful and short. Add nothing, explain nothing.
 - Keep city, airline, hotel and brand names as they are (Latin letters are fine for brands like BonSafar, Kiwi.com, trivago).
 - Write numbers with Latin digits (0-9).
-- Never write an amount of money, a currency word, or a price.`;
+- Never write an amount of money, a currency word, or a price.
+
+${SCRIPT_RULES}`;
 
 const SYSTEM_PROMPT_DARIJA_ARAB = `You rewrite one short line of a travel app in Moroccan darija written in Arabic letters, for a traveller who reads darija in Arabic script. The line is English. Return only the JSON object.
 
@@ -50,7 +53,9 @@ Rules:
 - Faithful and short. Add nothing, explain nothing.
 - Keep city, airline, hotel and brand names as they are (Latin letters are fine for brands like BonSafar, Kiwi.com, trivago).
 - Write numbers with Latin digits (0-9).
-- Never write an amount of money, a currency word, or a price.`;
+- Never write an amount of money, a currency word, or a price.
+
+${SCRIPT_RULES}`;
 
 type Target = {
   step: "translate" | "translate_ar" | "translate_darija_arab";
