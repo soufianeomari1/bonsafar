@@ -35,6 +35,11 @@ export type FlightAttrs = {
   /** Whole minutes, outbound plus inbound. */
   total_duration_min: number;
   baggage: { personal_item: number; cabin_bag: number; checked_bag: number };
+  /**
+   * Kiwi.com destination photo id. Optional so a run saved before this field
+   * still loads: the check screen then shows the gradient fallback.
+   */
+  image_id?: string | null;
   /** Passengers the price covers, as returned by Kiwi.com. */
   passengers: { adults: number; children: number; infants: number };
   query: string;
@@ -122,6 +127,7 @@ export class PriceStore {
           inbound: it.inbound,
           total_duration_min: it.total_duration_min,
           baggage: it.baggage,
+          image_id: it.image_id,
           passengers: search.passengers,
           query: search.query,
         },

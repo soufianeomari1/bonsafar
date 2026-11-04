@@ -36,6 +36,8 @@ const Itinerary = z.looseObject({
   price: z.number().nullish(),
   totalDurationSeconds: z.number().nullish(),
   bookingUrl: z.string().nullish(),
+  /** Destination photo id. URL: https://images.kiwi.com/photos/600x600/{imageId}.jpg */
+  imageId: z.string().nullish(),
   baggage: z
     .looseObject({
       personalItem: z.number().default(0),
@@ -79,6 +81,8 @@ export type KiwiItinerary = {
   /** Total for all passengers in `currency`, as returned by Kiwi.com. */
   price: number;
   booking_url: string | null;
+  /** Kiwi.com destination photo id, or null when the tool omitted it. */
+  image_id: string | null;
   /** Whole minutes, outbound plus inbound. */
   total_duration_min: number;
   baggage: { personal_item: number; cabin_bag: number; checked_bag: number };
@@ -173,6 +177,7 @@ export async function searchFlights(params: FlightSearchParams, log: RunLog): Pr
         kiwi_id: it.id ?? null,
         price: it.price,
         booking_url: it.bookingUrl ?? null,
+        image_id: it.imageId && /^[A-Za-z0-9_-]{1,80}$/.test(it.imageId) ? it.imageId : null,
         total_duration_min:
           it.totalDurationSeconds != null
             ? toMinutes(it.totalDurationSeconds)
