@@ -39,6 +39,12 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+/** Impact's crawler reads `value`, not the usual `content` attribute. */
+const impactSiteVerification = {
+  name: "impact-site-verification",
+  value: "74d5ceba-669e-4c4b-bab5-06bba0d99842",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -46,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       dir="ltr"
       className={`${geist.variable} ${geistMono.variable} ${ibmPlexSansArabic.variable} h-full antialiased`}
     >
+      <meta {...impactSiteVerification} />
       <body className="flex min-h-full flex-col">
         <LanguageProvider>
           {children}
