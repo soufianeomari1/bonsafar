@@ -5,7 +5,8 @@ A travel agency in your pocket, that understands Moroccan darija.
 Meta Global AI Developer Hackathon · Indie track · Theme: Build for Your World
 
 **Live demo:** https://bonsafar.com (no login needed)
-**Judges: use the private demo link given in the submission form.** It opens the 60-second judges' board with the live "Under the hood" panel.
+**Demo video:** https://www.youtube.com/watch?v=nkcmRybMJCI
+**Judges:** please use the private demo link provided in the submission form (desktop browser recommended for the judges' view with the live "Under the hood" panel).
 
 ## The problem
 
@@ -141,7 +142,7 @@ npm run record:jury   # records the three judges' scenarios live from public/jur
 
 ## Built during the event
 
-Built during the Meta Global AI Developer Hackathon. Everything in this repository was built from scratch during the event (Oct 27 to Nov 4, 2026).
+Everything in this repository was built from scratch during the hackathon (Oct 27 to Nov 4, 2026).
 
 ## Team
 
