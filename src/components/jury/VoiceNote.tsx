@@ -52,7 +52,7 @@ export const VoiceNote = forwardRef<VoiceNoteHandle, { src: string; available: b
             if (element.paused) void element.play().catch(() => setPlaying(false));
             else element.pause();
           }}
-          className="flex size-9 shrink-0 items-center justify-center rounded-pill bg-blue text-card transition-transform active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:opacity-40"
+          className="flex size-9 shrink-0 items-center justify-center rounded-pill bg-blue text-card transition-transform motion-safe:active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:opacity-40"
         >
           {playing ? <Pause size={16} weight="fill" aria-hidden /> : <Play size={16} weight="fill" aria-hidden />}
         </button>

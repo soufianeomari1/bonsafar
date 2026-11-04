@@ -58,9 +58,14 @@ function stageOf(phone: Phone, active: Active | null): number {
   return active?.kind === "live" ? 1 : 0;
 }
 
-function nextScenario(current: JuryScenario | null): JuryScenario {
-  if (!current) return JURY_SCENARIOS[0];
-  return JURY_SCENARIOS[current.number % JURY_SCENARIOS.length];
+/** The next scenario after this one that can run, live or as a replay. */
+function nextScenario(current: JuryScenario | null, runnable: (scenario: JuryScenario) => boolean): JuryScenario {
+  const start = current ? current.number : 0;
+  for (let step = 0; step < JURY_SCENARIOS.length; step += 1) {
+    const candidate = JURY_SCENARIOS[(start + step) % JURY_SCENARIOS.length];
+    if (candidate.id !== current?.id && runnable(candidate)) return candidate;
+  }
+  return current ?? JURY_SCENARIOS[0];
 }
 
 /** The phone keeps its real 390 x 844 layout and is scaled to fit the window height. */
@@ -175,7 +180,8 @@ export function JuryBoard({ silenceMs, videoUrl }: { silenceMs: number; videoUrl
   const events = useMemo(() => mergeEvents(phone.trip?.events, phone.run.events), [phone.trip?.events, phone.run.events]);
   const summary = useMemo(() => summarize(phone.run, phone.trip?.events ?? [], events), [phone.run, phone.trip?.events, events]);
   const live = status?.live ?? true;
-  const next = nextScenario(active?.scenario ?? null);
+  const canLive = (scenario: JuryScenario) => live && audio[scenario.id] === true;
+  const next = nextScenario(active?.scenario ?? null, (scenario) => canLive(scenario) || !!status?.replays[scenario.label]);
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-[linear-gradient(180deg,var(--color-sky)_0%,var(--color-bg)_520px)] text-ink">
@@ -304,7 +310,7 @@ export function JuryBoard({ silenceMs, videoUrl }: { silenceMs: number; videoUrl
                         summary={summary}
                         next={next}
                         videoUrl={videoUrl}
-                        onNext={() => (audio[next.id] && live ? runLive(next) : runReplay(next))}
+                        onNext={() => (canLive(next) ? runLive(next) : runReplay(next))}
                         onOwn={recordOwn}
                         onClose={() => setOverlay(null)}
                       />
@@ -364,7 +370,7 @@ function ExtraCard({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex flex-col items-start gap-1.5 rounded-card bg-card p-4 text-start shadow-soft transition-transform active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-45"
+      className="flex flex-col items-start gap-1.5 rounded-card bg-card p-4 text-start shadow-soft transition-transform motion-safe:active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-45"
     >
       <span className="flex size-10 items-center justify-center rounded-pill bg-blue-soft text-blue">{icon}</span>
       <span className="text-[15px] font-extrabold leading-tight">{title}</span>

@@ -45,7 +45,11 @@ export const ScenarioCard = forwardRef<VoiceNoteHandle, ScenarioCardProps>(funct
             <span className="sr-only">Scenario {scenario.number}: </span>
             {scenario.title}
           </h3>
-          <StatusBadge tone={scenario.status.tone} dot>
+          <StatusBadge
+            tone={scenario.status.tone}
+            dot
+            className={scenario.status.tone === "running" ? "text-blue-deep!" : undefined}
+          >
             {scenario.status.label}
           </StatusBadge>
         </div>
@@ -70,7 +74,7 @@ export const ScenarioCard = forwardRef<VoiceNoteHandle, ScenarioCardProps>(funct
           disabled={!canLive}
           onClick={onRunLive}
           title={audio === false ? JURY_COPY.audioSoonHint : !live ? JURY_COPY.livePaused : undefined}
-          className="flex h-11 items-center justify-center gap-2 rounded-button-sm bg-ink px-3 text-[15px] font-semibold text-card transition-transform active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-35"
+          className="flex h-11 items-center justify-center gap-2 rounded-button-sm bg-ink px-3 text-[15px] font-semibold text-card transition-transform motion-safe:active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-35"
         >
           <Lightning size={18} weight="light" aria-hidden />
           {active === "live" && busy ? JURY_COPY.running : JURY_COPY.runLive}
@@ -79,7 +83,7 @@ export const ScenarioCard = forwardRef<VoiceNoteHandle, ScenarioCardProps>(funct
           type="button"
           disabled={!canReplay}
           onClick={onReplay}
-          className="flex h-11 items-center justify-center gap-2 rounded-button-sm border border-line bg-card px-3 text-[15px] font-semibold text-ink transition-transform active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-11 items-center justify-center gap-2 rounded-button-sm border border-line bg-card px-3 text-[15px] font-semibold text-ink transition-transform motion-safe:active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowCounterClockwise size={18} weight="light" aria-hidden />
           {active === "replay" && busy ? JURY_COPY.running : JURY_COPY.watchReplay}
