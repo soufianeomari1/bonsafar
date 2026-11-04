@@ -1,4 +1,5 @@
 import {
+  AirplaneTakeoff,
   AirplaneTilt,
   Baby,
   Buildings,
@@ -15,12 +16,13 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import { dateRangeParts, formatAmount, formatDay } from "@/lib/format";
+import { placeName } from "@/lib/airports";
 import type { Lang, TranslateValues, TranslationKey } from "@/lib/i18n";
 import type { Intent, KeywordSlot, WishKind } from "@/lib/intent/schema";
 
 type Translate = (key: TranslationKey, values?: TranslateValues) => string;
 
-export type ChipKind = "destination" | "dates" | "travellers" | "budget" | "wish";
+export type ChipKind = "origin" | "destination" | "dates" | "travellers" | "budget" | "wish";
 
 export type IntentChipModel = {
   id: string;
@@ -31,6 +33,8 @@ export type IntentChipModel = {
   /** Tailwind classes of the round icon, mockup 04-Compris. */
   tone: string;
   wishIndex?: number;
+  /** Shown under the label when the departure airport comes from the profile. */
+  note?: string;
 };
 
 const WISH_ICONS: Record<WishKind, Icon> = {
@@ -45,8 +49,26 @@ const WISH_ICONS: Record<WishKind, Icon> = {
   other: Sparkle,
 };
 
-export function chipsFor(intent: Intent, lang: Lang, t: Translate): IntentChipModel[] {
+export function chipsFor(
+  intent: Intent,
+  lang: Lang,
+  t: Translate,
+  options?: { originFromProfile?: boolean },
+): IntentChipModel[] {
   const chips: IntentChipModel[] = [];
+  const origin = intent.origin_iata;
+
+  chips.push({
+    id: "origin",
+    kind: "origin",
+    slot: "origin",
+    label: origin
+      ? t("chip.origin", { city: placeName(origin, lang), code: origin })
+      : t("chip.noOrigin"),
+    icon: AirplaneTakeoff,
+    tone: "bg-green-soft text-green",
+    note: options?.originFromProfile ? t("chip.originProfile") : undefined,
+  });
 
   chips.push({
     id: "destination",

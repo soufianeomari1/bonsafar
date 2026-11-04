@@ -85,6 +85,8 @@ export type EntryRequirements = z.infer<typeof EntryModelSchema> & {
   /** From the url_citation annotations and the pages the model opened. */
   sources: { title: string; url: string; date: string }[];
   checked_at: string;
+  /** Destination country is the passport country: no web check, no sources. */
+  homecoming?: boolean;
 };
 
 export const ALTERNATIVE_LABELS = ["direct", "cheapest"] as const;

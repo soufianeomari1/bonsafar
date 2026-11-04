@@ -40,6 +40,7 @@ export type ChecklistInput = {
     max_stay_days: number | null;
     passport_validity_days: number | null;
     sources: { url: string; title: string; date?: string }[];
+    homecoming?: boolean;
   } | null;
   baggage: { personal_item: number; cabin_bag: number; checked_bag: number } | null;
   perPersonDisplayMad: number;
@@ -49,6 +50,7 @@ export type ChecklistInput = {
 export function buildChecklist(input: ChecklistInput): ChecklistTile[] {
   const { entry, baggage } = input;
   const visaNeeded = !!entry?.visa_needed;
+  const homecoming = !!entry?.homecoming;
   const days = entry?.passport_validity_days ?? null;
   const checked = baggage?.checked_bag ?? 0;
   const hasFlight = baggage != null;
@@ -63,9 +65,9 @@ export function buildChecklist(input: ChecklistInput): ChecklistTile[] {
       ok: !!entry && !visaNeeded,
       warn: false,
       labelKey: "package.visa",
-      statusKey: visaNeeded ? "package.visaNeeded" : "package.visaFree",
+      statusKey: homecoming ? "ready.visaHome" : visaNeeded ? "package.visaNeeded" : "package.visaFree",
       hintKey: visaNeeded ? (VISA_KEY[entry?.visa_kind ?? "unknown"] ?? "visaKind.unknown") : undefined,
-      detailKey: !visaNeeded && stay ? "ready.visaStay" : undefined,
+      detailKey: !homecoming && !visaNeeded && stay ? "ready.visaStay" : undefined,
       detailValues: stay ? { days: stay } : undefined,
       plain: false,
     },

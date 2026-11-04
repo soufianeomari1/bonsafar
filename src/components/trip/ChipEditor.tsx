@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import { Button } from "@/components/bs/Button";
 import { Sheet } from "@/components/bs/Sheet";
 import { Stepper } from "@/components/profile/ProfileFields";
+import { AIRPORTS, placeName } from "@/lib/airports";
 import { addDays } from "@/lib/format";
-import { useT } from "@/lib/i18n/provider";
+import { haptic } from "@/lib/haptics";
+import { useLanguage, useT } from "@/lib/i18n/provider";
 import type { Intent } from "@/lib/intent/schema";
 import { answerTrip, patchIntent } from "@/lib/trip/store";
 import type { IntentChipModel } from "./chips";
@@ -29,6 +32,7 @@ export function ChipEditor({
 }) {
   const t = useT();
   const titles = {
+    origin: t("edit.origin"),
     destination: t("edit.destination"),
     dates: t("edit.dates"),
     travellers: t("edit.travellers"),
@@ -64,6 +68,8 @@ function EditorBody({
 
   function save() {
     switch (chip.kind) {
+      case "origin":
+        return;
       case "destination":
         if (city.trim() && city.trim() !== intent.destination?.city) {
           // The city name needs an airport code: the model resolves it.
@@ -118,6 +124,8 @@ function EditorBody({
         save();
       }}
     >
+      {chip.kind === "origin" && <OriginSearch intent={intent} onClose={onClose} />}
+
       {chip.kind === "destination" && (
         <input
           aria-label={t("edit.cityPlaceholder")}
@@ -189,9 +197,69 @@ function EditorBody({
         />
       )}
 
-      <Button type="submit" full>
-        {t("common.save")}
-      </Button>
+      {chip.kind !== "origin" && (
+        <Button type="submit" full>
+          {t("common.save")}
+        </Button>
+      )}
     </form>
+  );
+}
+
+function OriginSearch({ intent, onClose }: { intent: Intent; onClose: () => void }) {
+  const { t, lang } = useLanguage();
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const results = q
+    ? Object.values(AIRPORTS)
+        .filter(
+          (airport) =>
+            airport.city &&
+            (airport.iata.toLowerCase().startsWith(q) ||
+              airport.city.toLowerCase().includes(q) ||
+              placeName(airport.iata, lang).toLowerCase().includes(q)),
+        )
+        .slice(0, 6)
+    : [];
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="flex h-12 items-center gap-2 rounded-[14px] border border-line bg-card px-3.5">
+        <MagnifyingGlass size={20} className="shrink-0 text-muted" aria-hidden />
+        <input
+          autoFocus
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={t("express.airport.search")}
+          aria-label={t("express.airport.search")}
+          className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
+        />
+      </label>
+      {intent.origin_iata && (
+        <p className="px-1 text-sm text-muted">
+          <bdi dir="ltr">
+            {placeName(intent.origin_iata, lang)} · {intent.origin_iata}
+          </bdi>
+        </p>
+      )}
+      {q && results.length === 0 && <p className="px-1 text-sm text-muted">{t("express.airport.none")}</p>}
+      {results.map((airport) => (
+        <button
+          key={airport.iata}
+          type="button"
+          onClick={() => {
+            haptic("select");
+            patchIntent({ origin_iata: airport.iata });
+            onClose();
+          }}
+          className="flex min-h-11 items-center justify-between rounded-[14px] bg-card px-3.5 text-start text-[15px]"
+        >
+          <span>{placeName(airport.iata, lang)}</span>
+          <bdi dir="ltr" className="font-mono text-[13px] text-muted">
+            {airport.iata}
+          </bdi>
+        </button>
+      ))}
+    </div>
   );
 }

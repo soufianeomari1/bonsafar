@@ -132,8 +132,10 @@ export function ReadyScreen({ dotationMad }: { dotationMad: number }) {
   const todo = todoCount(tiles);
   const done = tiles.length - todo;
   const range = depart && ret ? dateRangeParts(depart, ret, lang) : null;
-  const sources = result.entry?.sources ?? [];
-  const sourceDate = (result.entry?.checked_at ?? sources[0]?.date ?? "").slice(0, 10);
+  const sources = result.entry?.homecoming ? [] : (result.entry?.sources ?? []);
+  const sourceDate = result.entry?.homecoming
+    ? ""
+    : (result.entry?.checked_at ?? sources[0]?.date ?? "").slice(0, 10);
   const sourceLine =
     sources.length > 1
       ? t("ready.sources", { count: sources.length, date: sourceDate ? formatDay(sourceDate, lang) : "" })
@@ -282,7 +284,13 @@ function CheckRow({
 }: {
   tile: ChecklistTile;
   first: boolean;
-  entry: { visa_needed: boolean; visa_kind: string; max_stay_days: number | null; passport_validity_days: number | null } | null;
+  entry: {
+    visa_needed: boolean;
+    visa_kind: string;
+    max_stay_days: number | null;
+    passport_validity_days: number | null;
+    homecoming?: boolean;
+  } | null;
   arrival: string;
 }) {
   const { t, lang } = useLanguage();
@@ -333,7 +341,13 @@ function CheckRow({
 
 function rowText(
   tile: ChecklistTile,
-  entry: { visa_needed: boolean; visa_kind: string; max_stay_days: number | null; passport_validity_days: number | null } | null,
+  entry: {
+    visa_needed: boolean;
+    visa_kind: string;
+    max_stay_days: number | null;
+    passport_validity_days: number | null;
+    homecoming?: boolean;
+  } | null,
   arrival: string,
   lang: Lang,
   t: ReturnType<typeof useLanguage>["t"],
@@ -341,6 +355,7 @@ function rowText(
   switch (tile.id) {
     case "visa":
       if (!entry) return t("ready.visaUnknownLine");
+      if (entry.homecoming) return t("ready.visaHome");
       if (entry.visa_needed) return t("ready.visaNeededLine", { kind: t(VISA_KEY[entry.visa_kind] ?? "visaKind.unknown") });
       return entry.max_stay_days ? t("ready.visaOkLine", { days: entry.max_stay_days }) : t("ready.visaOkNoDays");
     case "passport": {

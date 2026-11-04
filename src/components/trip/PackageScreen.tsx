@@ -171,7 +171,7 @@ export function PackageScreen() {
           <div className="mt-3.5 flex flex-wrap gap-1.5">
             {visaFree && (
               <Pill tone="good" icon={<CheckCircle size={15} weight="light" />}>
-                {t("package.pillNoVisa")}
+                {t(result.entry?.homecoming ? "ready.visaHome" : "package.pillNoVisa")}
               </Pill>
             )}
             {hotel?.attrs.breakfast && (

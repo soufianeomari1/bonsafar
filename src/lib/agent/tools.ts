@@ -16,6 +16,7 @@ import {
 } from "@/lib/prices/store";
 import { totalStops } from "@/lib/prices/totals";
 import { checkEntryRequirements } from "./entry";
+import { isHomeCountry } from "./homecoming";
 import { wantsArabic, type AgentStep, type AgentStreamEvent, type EntryRequirements, type StepPhase } from "./schema";
 
 /**
@@ -355,22 +356,41 @@ export class AgentContext {
       const label = city ?? country;
       this.step("entry_requirements", "start", label);
       try {
-        const entry = await checkEntryRequirements({
-          country,
-          countryCode,
-          city,
-          departDate: this.intent.depart_date,
-          nights: this.intent.nights,
-          profile: this.profile,
-          arabic: wantsArabic(this.lang),
-          log: this.log,
-        });
+        const entry = isHomeCountry(this.profile.passport_country, country, countryCode)
+          ? {
+              visa_needed: false,
+              visa_kind: "none" as const,
+              max_stay_days: null,
+              passport_validity_days: null,
+              notes: {
+                darija: "Bla visa: rak raj3 l bladek.",
+                fr: "Pas besoin, tu rentres chez toi.",
+                en: "No need, you are going home.",
+              },
+              country,
+              country_code: countryCode,
+              passport: this.profile.passport_country ?? "unknown",
+              has_schengen: this.profile.has_schengen,
+              sources: [],
+              checked_at: "",
+              homecoming: true,
+            }
+          : await checkEntryRequirements({
+              country,
+              countryCode,
+              city,
+              departDate: this.intent.depart_date,
+              nights: this.intent.nights,
+              profile: this.profile,
+              arabic: wantsArabic(this.lang),
+              log: this.log,
+            });
         for (const k of keys) this.entryResults.set(k, entry);
         this.step("entry_requirements", "progress", label, { sources: entry.sources });
         this.step("entry_requirements", "done", label, {
           visa_needed: entry.visa_needed,
           visa_kind: entry.visa_kind,
-          code: entry.visa_needed ? "visa_needed" : "visa_free",
+          code: entry.homecoming ? "homecoming" : entry.visa_needed ? "visa_needed" : "visa_free",
         });
         return entry;
       } catch (error) {

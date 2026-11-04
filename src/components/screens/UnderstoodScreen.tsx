@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
-import { CaretLeft, Check, MagnifyingGlass } from "@phosphor-icons/react";
+import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react";
 import { Button } from "@/components/bs/Button";
 import { Safar, SafarBubble } from "@/components/bs/Safar";
 import { ChipEditor } from "@/components/trip/ChipEditor";
@@ -23,8 +23,7 @@ import { hasIndispensableInfo } from "@/lib/intent/edits";
 import type { Intent } from "@/lib/intent/schema";
 import { useLanguage } from "@/lib/i18n/provider";
 import { PRESS_SCALE, PRESS_TRANSITION } from "@/lib/motion";
-import { AIRPORTS, profileForLang, type Airport } from "@/lib/profile/schema";
-import { placeName } from "@/lib/airports";
+import { profileForLang, type Airport } from "@/lib/profile/schema";
 import { useProfile } from "@/lib/profile/useProfile";
 import { scenarioFor, startAgentRun, replayFromLocation, withTripSearch } from "@/lib/agent-client/store";
 import { answerTrip, retryTrip } from "@/lib/trip/store";
@@ -61,7 +60,8 @@ export function UnderstoodScreen() {
     return () => clearTimeout(timer);
   }, [intent, rev, landedRev]);
 
-  const chips = intent ? chipsFor(intent, lang, t) : [];
+  const fromProfile = !!intent && originFromProfile(intent, profile.home_airport);
+  const chips = intent ? chipsFor(intent, lang, t, { originFromProfile: fromProfile }) : [];
   const pairs = intent ? flightPairs(intent, chips) : null;
   const parts =
     intent && job?.transcript ? splitTranscript(job.transcript, intent.keywords) : null;
@@ -95,9 +95,6 @@ export function UnderstoodScreen() {
   const showChips = !!intent && landed && !failed;
   const asking = showChips && !!intent.question && !understanding && !transcribing;
   const showFound = showChips && !intent.question && !understanding && !transcribing;
-  const fromProfile = !!intent && originFromProfile(intent, profile.home_airport);
-  const home = profile.home_airport;
-
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-bg">
       <header className="flex items-center gap-3 px-5 pt-[18px]">
@@ -226,30 +223,20 @@ export function UnderstoodScreen() {
                           haptic("select");
                           setEditing(chip);
                         }}
-                        className="flex h-11 items-center gap-2 rounded-pill border border-line bg-card pe-3.5 ps-2 text-[15px] font-bold text-ink"
+                        className="flex min-h-11 items-center gap-2 rounded-pill border border-line bg-card pe-3.5 ps-2 text-[15px] font-bold text-ink"
                       >
                         <span className={cn("flex size-[30px] items-center justify-center rounded-pill", chip.tone)}>
                           <chip.icon size={16} weight="light" aria-hidden />
                         </span>
-                        <bdi>{chip.label}</bdi>
+                        <span className="flex flex-col items-start leading-tight">
+                          <bdi>{chip.label}</bdi>
+                          {chip.note && (
+                            <span className="text-[11px] font-medium text-muted">{chip.note}</span>
+                          )}
+                        </span>
                       </motion.button>
                     );
                   })}
-                </div>
-              )}
-
-              {showChips && fromProfile && home && job.phase === "ready" && (
-                <div className="flex items-center gap-2.5 rounded-[18px] bg-green-soft px-3.5 py-3">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-green-bright text-card">
-                    <Check size={12} weight="light" aria-hidden />
-                  </span>
-                  <span className="text-sm leading-snug">
-                    <strong className="font-bold">
-                      {t("understood.originLead", { city: (AIRPORTS as readonly string[]).includes(home) ? t(`airport.${home as (typeof AIRPORTS)[number]}`) : placeName(home, lang) })} (<bdi dir="ltr">{home}</bdi>)
-                    </strong>
-                    {t("understood.originTail")}
-                    {!intent?.question && <> {t("understood.noQuestion")}</>}
-                  </span>
                 </div>
               )}
 
