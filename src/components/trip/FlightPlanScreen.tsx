@@ -9,6 +9,7 @@ import { Clouds } from "@/components/bs/Clouds";
 import { RichText } from "@/components/bs/Brand";
 import { Safar, type SafarState } from "@/components/bs/Safar";
 import { SplitFlap } from "@/components/bs/SplitFlap";
+import { actionButtonClass, ActionRow } from "@/components/bs/ActionRow";
 import { Button } from "@/components/bs/Button";
 import { useAgentRun } from "@/lib/agent-client/context";
 import {
@@ -274,14 +275,16 @@ export function FlightPlanScreen() {
                   ? translate(JURY_LANG, "plan.error.replay_unavailable")
                   : t(run.error.code === "replay_unavailable" ? "plan.error.agent_failed" : (ERROR_KEY[run.error.code] ?? "plan.error.agent_failed"))}
               </p>
-              <div className="grid grid-cols-1 gap-2">
-                <Button onClick={() => retryAgentRun()}>{t("common.retry")}</Button>
+              <ActionRow>
+                <Button onClick={() => retryAgentRun()} className={actionButtonClass}>
+                  {t("common.retry")}
+                </Button>
                 {jury && (
-                  <Button variant="secondary" onClick={() => replayLastTrip()}>
+                  <Button variant="secondary" onClick={() => replayLastTrip()} className={actionButtonClass}>
                     {translate(JURY_LANG, "plan.replayLast")}
                   </Button>
                 )}
-              </div>
+              </ActionRow>
             </div>
           </div>
         )}

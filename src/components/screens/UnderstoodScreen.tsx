@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { CaretLeft, MagnifyingGlass, SealCheck } from "@phosphor-icons/react";
+import { actionButtonClass, ActionRow } from "@/components/bs/ActionRow";
 import { Button } from "@/components/bs/Button";
 import { Safar, SafarBubble } from "@/components/bs/Safar";
 import { ChipEditor } from "@/components/trip/ChipEditor";
@@ -173,20 +174,20 @@ export function UnderstoodScreen() {
                       ? t("understood.nothingHeard")
                       : t("understood.error")}
                 </span>
-                <div className="grid grid-cols-2 gap-2">
+                <ActionRow>
                   {!dead && (
-                    <Button variant="quiet" onClick={() => void retryTrip()} className="h-12">
+                    <Button variant="quiet" onClick={() => void retryTrip()} className={actionButtonClass}>
                       {t("common.retry")}
                     </Button>
                   )}
                   <Button
                     variant="secondary"
                     onClick={() => router.push("/home")}
-                    className={cn("h-12", dead && "col-span-2")}
+                    className={actionButtonClass}
                   >
                     {t("understood.backHome")}
                   </Button>
-                </div>
+                </ActionRow>
               </div>
             </div>
           ) : (
