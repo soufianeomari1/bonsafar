@@ -100,7 +100,8 @@ export type EntryRequirements = z.infer<typeof EntryModelSchema> & {
   homecoming?: boolean;
 };
 
-export const ALTERNATIVE_LABELS = ["direct", "cheapest"] as const;
+export const MODEL_ALTERNATIVE_LABELS = ["direct", "cheapest"] as const;
+export const ALTERNATIVE_LABELS = [...MODEL_ALTERNATIVE_LABELS, "cheaper_hotel", "better_hotel"] as const;
 export const SMART_TIP_KINDS = ["direct_upgrade", "cheaper_flight", "none"] as const;
 export const REJECT_REASONS = [
   "too_many_stops",
@@ -123,7 +124,7 @@ export const WonderOutputSchema = z.object({
   alternatives: z
     .array(
       z.object({
-        label: z.enum(ALTERNATIVE_LABELS),
+        label: z.enum(MODEL_ALTERNATIVE_LABELS),
         flight_id: OfferId("F"),
         hotel_id: OfferId("H"),
       }),

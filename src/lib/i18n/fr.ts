@@ -539,6 +539,8 @@ export const fr: Dictionary = {
   "result.tagRecommended": "Recommandé",
   "result.tagDirect": "Direct",
   "result.tagCheapest": "Le moins cher",
+  "result.tagCheaperHotel": "Hôtel moins cher",
+  "result.tagBetterHotel": "Hôtel mieux noté",
   "ready.almost": "Presque prêt",
   "ready.done": "Prêt à partir",
   "ready.leftNone": "Tout est en ordre.",

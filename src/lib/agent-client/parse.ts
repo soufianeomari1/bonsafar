@@ -52,7 +52,12 @@ const OptionSchema = z.looseObject({
 const PackageSchema = z.looseObject({
   destination: z.looseObject({ city: z.string(), country: z.string(), iata: z.string() }),
   recommended: OptionSchema,
-  alternatives: z.array(z.looseObject({ label: z.enum(["direct", "cheapest"]), ...OptionSchema.shape })),
+  alternatives: z.array(
+    z.looseObject({
+      label: z.enum(["direct", "cheapest", "cheaper_hotel", "better_hotel"]),
+      ...OptionSchema.shape,
+    }),
+  ),
   why: z.array(z.looseObject({ darija: z.string(), fr: z.string(), en: z.string() })),
   fx: FxSchema,
   prices_captured_at: z.string(),

@@ -531,6 +531,8 @@ export const darijaArab: Dictionary = {
   "result.tagRecommended": "منصوح بيه",
   "result.tagDirect": "ديريكت",
   "result.tagCheapest": "أرخص واحد",
+  "result.tagCheaperHotel": "أوطيل رخيص",
+  "result.tagBetterHotel": "أوطيل أحسن",
   "ready.almost": "قريب واجد",
   "ready.done": "واجد تسافر",
   "ready.leftNone": "كلشي مزيان.",

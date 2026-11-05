@@ -24,6 +24,7 @@ import {
   type EntryRequirements,
   type WonderOutput,
 } from "./schema";
+import { pickHotelAlternatives } from "./hotel-alternatives";
 import { AgentContext, WONDER_TOOLS } from "./tools";
 
 export { AgentError } from "./schema";
@@ -405,6 +406,51 @@ export async function runAgent({
   if (recHotel && recHotel.attrs.stars !== ctx.stars) notices.push("hotel_filters_relaxed");
   if (scrubbed) notices.push("guardrail_scrubbed");
 
+  const recommendedTotals = packageTotals(store, final.recommended.flight_id, final.recommended.hotel_id);
+  const modelAlternatives = final.alternatives.map((alt) => ({
+    label: alt.label,
+    flight_id: alt.flight_id,
+    hotel_id: alt.hotel_id,
+    totals: packageTotals(store, alt.flight_id, alt.hotel_id),
+  }));
+  const hotelSwaps = recHotel
+    ? pickHotelAlternatives({
+        flightId: final.recommended.flight_id,
+        hotelId: final.recommended.hotel_id,
+        city: recHotel.destination,
+        nights: recHotel.attrs.nights,
+        rating: recHotel.attrs.review_rating,
+        totalMad: recommendedTotals.total_mad,
+        payingTravellers: Math.max(
+          1,
+          (recFlight.attrs.passengers.adults ?? 0) + (recFlight.attrs.passengers.children ?? 0),
+        ),
+        taken: modelAlternatives.map((alt) => ({
+          flightId: alt.flight_id,
+          hotelId: alt.hotel_id,
+          label: alt.label,
+        })),
+        hotels: store.list().flatMap((offer) => {
+          if (offer.kind !== "hotel") return [];
+          try {
+            const totals = packageTotals(store, final.recommended.flight_id, offer.id);
+            return [
+              {
+                id: offer.id,
+                city: offer.destination,
+                nights: offer.attrs.nights,
+                rating: offer.attrs.review_rating,
+                reviews: offer.attrs.review_count,
+                totalMad: totals.total_mad,
+              },
+            ];
+          } catch {
+            return [];
+          }
+        }),
+      })
+    : [];
+
   const result: AgentPackage = {
     run_id: log.runId,
     status,
@@ -415,14 +461,17 @@ export async function runAgent({
     recommended: {
       flight_id: final.recommended.flight_id,
       hotel_id: final.recommended.hotel_id,
-      totals: packageTotals(store, final.recommended.flight_id, final.recommended.hotel_id),
+      totals: recommendedTotals,
     },
-    alternatives: final.alternatives.map((alt) => ({
-      label: alt.label,
-      flight_id: alt.flight_id,
-      hotel_id: alt.hotel_id,
-      totals: packageTotals(store, alt.flight_id, alt.hotel_id),
-    })),
+    alternatives: [
+      ...modelAlternatives,
+      ...hotelSwaps.map((swap) => ({
+        label: swap.label,
+        flight_id: final.recommended.flight_id,
+        hotel_id: swap.hotelId,
+        totals: packageTotals(store, final.recommended.flight_id, swap.hotelId),
+      })),
+    ],
     why: final.why,
     smart_tip: {
       ...final.smart_tip,

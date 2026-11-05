@@ -609,6 +609,8 @@ export const en = {
   "result.tagRecommended": "Recommended",
   "result.tagDirect": "Direct",
   "result.tagCheapest": "Cheapest",
+  "result.tagCheaperHotel": "Cheaper hotel",
+  "result.tagBetterHotel": "Top-rated hotel",
   "ready.almost": "Almost ready",
   "ready.done": "Ready to go",
   "ready.leftNone": "Everything is in order.",

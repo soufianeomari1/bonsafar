@@ -530,6 +530,8 @@ export const ar: Dictionary = {
   "result.tagRecommended": "موصى به",
   "result.tagDirect": "مباشر",
   "result.tagCheapest": "الأرخص",
+  "result.tagCheaperHotel": "فندق أرخص",
+  "result.tagBetterHotel": "فندق أعلى تقييماً",
   "ready.almost": "أوشكت على الاستعداد",
   "ready.done": "جاهز للسفر",
   "ready.leftNone": "كل شيء جاهز.",

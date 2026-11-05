@@ -532,6 +532,8 @@ export const darijaLatn: Dictionary = {
   "result.tagRecommended": "Mnsou7 bih",
   "result.tagDirect": "Direct",
   "result.tagCheapest": "Rkhes wa7ed",
+  "result.tagCheaperHotel": "Otel rkhes",
+  "result.tagBetterHotel": "Otel a7san",
   "ready.almost": "Qrib wajed",
   "ready.done": "Wajed tsafer",
   "ready.leftNone": "Kolchi mzyan.",

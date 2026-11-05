@@ -23,12 +23,16 @@ import { PriceFact } from "./PriceFact";
 import { RouteMap } from "./RouteMap";
 import { HotelPhoto } from "./TripBits";
 
-type Row = PackageOption & { label: "direct" | "cheapest" | "recommended" };
+type Row = PackageOption & {
+  label: "direct" | "cheapest" | "cheaper_hotel" | "better_hotel" | "recommended";
+};
 
 const TAG: Record<Row["label"], { key: TranslationKey; className: string }> = {
   recommended: { key: "result.tagRecommended", className: "bg-green-soft text-green" },
   direct: { key: "result.tagDirect", className: "bg-blue-soft text-blue" },
   cheapest: { key: "result.tagCheapest", className: "bg-orange-soft text-orange" },
+  cheaper_hotel: { key: "result.tagCheaperHotel", className: "bg-orange-soft text-orange" },
+  better_hotel: { key: "result.tagBetterHotel", className: "bg-blue-soft text-blue" },
 };
 
 /** Screen 06. The real route, then the options. Opening one shows the package. */
