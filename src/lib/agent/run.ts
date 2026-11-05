@@ -192,7 +192,7 @@ export async function runAgent({
   if (!destination || !intent.depart_date || !intent.return_date) {
     throw new AgentError("intent_incomplete", "The intent needs a destination and both dates.");
   }
-  const origin = intent.origin_iata ?? profile.home_airport;
+  const origin = intent.origin_city ?? intent.origin_iata ?? profile.home_airport;
   if (!origin) throw new AgentError("origin_missing");
   const dated = { ...intent, depart_date: intent.depart_date, return_date: intent.return_date };
 

@@ -221,6 +221,7 @@ export const darijaLatn: Dictionary = {
   "chip.noDates": "Khtar tawarikh",
   "chip.noDestination": "Khtar blasa",
   "chip.origin": "{city} · {code}",
+  "chip.originAll": "{city} · ga3 l-matarat",
   "chip.noOrigin": "Départ",
   "chip.originProfile": "men lprofil dyalek",
   "chip.budget": "{amount} DH",

@@ -9,6 +9,7 @@ import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { profileTravellers, type Profile } from "@/lib/profile/schema";
 import { applyVisaPolicy } from "@/lib/visa/policy";
 import { coerceModelIntent } from "./coerce";
+import { resolveDeparture } from "./origin";
 import { applyLocks } from "./edits";
 import { spokenBudgetMad, travellerNamedMoney } from "./spoken-budget";
 import {
@@ -44,7 +45,7 @@ const LANG_NAMES: Record<Lang, string> = {
 };
 
 /** Translation is a separate, parallel call. The model must not spend tokens on it. */
-const ModelIntentSchema = IntentSchema.omit({ translation_en: true });
+const ModelIntentSchema = IntentSchema.omit({ translation_en: true, origin_city: true });
 /** An Arabic interface also needs the question and its options in Modern Standard Arabic. */
 const ModelIntentSchemaAr = ModelIntentSchema.extend({ question: QuestionSchemaAr.nullable() });
 type ModelIntent = z.infer<typeof ModelIntentSchema>;
@@ -105,7 +106,7 @@ const SYSTEM_PROMPT = `You are the understanding step of BonSafar, a travel agen
 
 Rules:
 1. destination: the city to visit, its country in English and its main airport IATA code. If no precise city is named (only a wish like "somewhere with the sea"), use null.
-2. origin_iata: the profile home airport, unless the traveller names another departure city.
+2. origin_iata: the profile home airport, unless the traveller names a departure. If they name an airport ("Orly", "CDG"), use that airport. If they name a city, use that city's main airport and copy the city into an origin keyword. Do not choose an airport they did not name.
 3. Dates are always in the future, relative to today. "nouss"/"mi-"/"mid" a month = the 15th. "bdyat"/"début"/"early" = the 1st. "lekher"/"fin"/"late" = the 24th. A month alone = the 15th. "chi semaine"/"une semaine"/"1 semaine"/"a week"/"one week" = 7 nights; "weekend" = Friday to Sunday. With a start and a length, return_date = depart_date + nights. A season alone ("f l'été", "summer") or nothing at all is too vague: dates and nights null.
 4. adults and children: only from the words ("m3a rajli" = with my husband = 2 adults, "m3a benti" = with my daughter = 1 adult and 1 child). If the transcript does not say who is travelling, copy the profile. If the profile does not say either, 1 adult and 0 children. Never assume 2.
 5. Money, only if the traveller says an amount in dirhams (dh, dirham, "alf" = thousand). Never guess. The amount goes only in budget_mad or budget_per_night_mad, never in a sentence: it is the traveller's own figure, not a price. Spoken amounts count, in darija, Arabic or French. "خمستاش الاف درهم" = 15000, "عشرين ألف درهم" = 20000, "تسعة الاف درهم" = 9000, "البودجي ديالي ماكسيمال هو تسعة الاف درهم" = 9000, "khamstach alf" = 15000, "15 alf dh" = 15000, "quinze mille dirhams" = 15000. A cap per night ("la nuit", "par nuit", "l lila", "per night", "لليلة") goes in budget_per_night_mad and budget_mad stays null. A total for the trip goes in budget_mad and budget_per_night_mad stays null. If they say neither, both are null. A star rating ("4 étoiles"), a calendar day, a duration or a number of travellers is not an amount.
@@ -222,7 +223,13 @@ function enforce(
     return [{ ...keyword, text }];
   });
 
-  if (!intent.origin_iata && profile.home_airport) intent.origin_iata = profile.home_airport;
+  const departure = resolveDeparture({
+    originIata: intent.origin_iata,
+    homeAirport: profile.home_airport,
+    originKeywords: intent.keywords.filter((keyword) => keyword.slot === "origin").map((keyword) => keyword.text),
+  });
+  intent.origin_iata = departure.iata;
+  intent.origin_city = departure.city;
 
   if (intent.depart_date && intent.return_date) {
     const nights = daysBetween(intent.depart_date, intent.return_date);
@@ -390,7 +397,7 @@ export async function understand({
       }
       if (parsed.success) {
         return enforce(
-          { ...parsed.data, translation_en: "" },
+          { ...parsed.data, translation_en: "", origin_city: null },
           transcript,
           answers,
           profile,

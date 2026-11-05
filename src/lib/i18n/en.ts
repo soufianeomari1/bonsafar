@@ -238,6 +238,7 @@ export const en = {
   "chip.noDates": "Dates to choose",
   "chip.noDestination": "Destination to choose",
   "chip.origin": "{city} · {code}",
+  "chip.originAll": "{city} · all airports",
   "chip.noOrigin": "Departure",
   "chip.originProfile": "from your profile",
   "chip.budget": "{amount} DH",

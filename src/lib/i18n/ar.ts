@@ -219,6 +219,7 @@ export const ar: Dictionary = {
   "chip.noDates": "اختر التواريخ",
   "chip.noDestination": "اختر الوجهة",
   "chip.origin": "{city} · {code}",
+  "chip.originAll": "{city} · جميع المطارات",
   "chip.noOrigin": "المغادرة",
   "chip.originProfile": "حسب ملفك",
   "chip.budget": "{amount} درهم",

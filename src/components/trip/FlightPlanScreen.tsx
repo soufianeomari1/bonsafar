@@ -148,7 +148,7 @@ export function FlightPlanScreen() {
   }, [run.result, run.run?.run_id, run.skipped, fatal, reduced, router]);
 
   const kicker = useMemo(() => {
-    const origin = trip?.intent?.origin_iata ?? "";
+    const origin = trip?.intent?.origin_city ?? trip?.intent?.origin_iata ?? "";
     const dest = run.result?.destination.iata ?? trip?.intent?.destination?.iata ?? "";
     const depart = trip?.intent?.depart_date;
     const back = trip?.intent?.return_date;

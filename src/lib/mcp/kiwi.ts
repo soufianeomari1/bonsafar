@@ -157,7 +157,10 @@ export type KiwiSearch = {
 };
 
 export type FlightSearchParams = {
-  /** IATA code, city or airport name, resolved by Kiwi.com. */
+  /**
+   * IATA code, or the English city name. A city name makes Kiwi.com search
+   * every airport of that city; a code searches only that airport.
+   */
   from: string;
   to: string;
   depart_date: string;

@@ -66,6 +66,11 @@ export const IntentSchema = z.object({
     })
     .nullable(),
   origin_iata: z.string().regex(/^[A-Z]{3}$/).nullable(),
+  /**
+   * English city name when the traveller named a city and not one airport.
+   * Null keeps a single IATA code (the profile airport, or Orly, CDG, …).
+   */
+  origin_city: z.string().min(1).max(80).nullable().default(null),
   depart_date: IsoDate.nullable(),
   return_date: IsoDate.nullable(),
   nights: z.number().int().min(1).max(60).nullable(),

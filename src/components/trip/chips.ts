@@ -65,7 +65,9 @@ export function chipsFor(
     kind: "origin",
     slot: "origin",
     label: origin
-      ? t("chip.origin", { city: placeName(origin, lang), code: origin })
+      ? intent.origin_city
+        ? t("chip.originAll", { city: placeName(origin, lang, intent.origin_city) })
+        : t("chip.origin", { city: placeName(origin, lang), code: origin })
       : t("chip.noOrigin"),
     icon: AirplaneTakeoff,
     tone: "bg-green-soft text-green",

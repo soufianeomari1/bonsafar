@@ -32,6 +32,7 @@ export const FATIMA: Profile = {
 
 const BASE = {
   origin_iata: "CMN",
+  origin_city: null,
   depart_date: "2026-12-15",
   return_date: "2026-12-22",
   nights: 7,

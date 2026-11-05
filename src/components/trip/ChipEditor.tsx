@@ -263,7 +263,7 @@ function OriginSearch({ intent, onClose }: { intent: Intent; onClose: () => void
           type="button"
           onClick={() => {
             haptic("select");
-            patchIntent({ origin_iata: airport.iata });
+            patchIntent({ origin_iata: airport.iata, origin_city: null });
             onClose();
           }}
           className="flex min-h-11 items-center justify-between rounded-[14px] bg-card px-3.5 text-start text-[15px]"

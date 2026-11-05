@@ -197,6 +197,7 @@ export class AgentContext {
       try {
         const locale = this.jury || this.lang === "en" ? "en" : "fr";
         const base: FlightSearchParams = {
+          // A city name searches every airport of that city. An IATA code does not.
           from: this.origin,
           to: city,
           depart_date: this.intent.depart_date,

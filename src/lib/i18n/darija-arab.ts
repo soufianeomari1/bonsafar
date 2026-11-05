@@ -220,6 +220,7 @@ export const darijaArab: Dictionary = {
   "chip.noDates": "ختار التواريخ",
   "chip.noDestination": "ختار البلاصة",
   "chip.origin": "{city} · {code}",
+  "chip.originAll": "{city} · كاع المطارات",
   "chip.noOrigin": "الانطلاق",
   "chip.originProfile": "من البروفيل ديالك",
   "chip.budget": "{amount} درهم",

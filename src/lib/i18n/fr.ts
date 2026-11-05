@@ -228,6 +228,7 @@ export const fr: Dictionary = {
   "chip.noDates": "Dates à choisir",
   "chip.noDestination": "Destination à choisir",
   "chip.origin": "{city} · {code}",
+  "chip.originAll": "{city} · tous les aéroports",
   "chip.noOrigin": "Départ",
   "chip.originProfile": "d'après ton profil",
   "chip.budget": "{amount} DH",
