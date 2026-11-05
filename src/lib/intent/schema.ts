@@ -10,6 +10,7 @@ export const WISH_KINDS = [
   "sea",
   "pool",
   "city_center",
+  "near_landmark",
   "accessibility",
   "family",
   "other",
@@ -74,7 +75,7 @@ export const IntentSchema = z.object({
   /** Cap per hotel night, in dirhams. Null when the traveller gave a total, or no budget. */
   budget_per_night_mad: z.number().positive().max(10_000_000).nullable().default(null),
   wishes: z
-    .array(z.object({ kind: z.enum(WISH_KINDS), label: z.string().min(1).max(40) }))
+    .array(z.object({ kind: z.enum(WISH_KINDS), label: z.string().min(1).max(80) }))
     .max(6),
   keywords: z
     .array(z.object({ text: z.string().min(1).max(60), slot: z.enum(KEYWORD_SLOTS) }))

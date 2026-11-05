@@ -8,8 +8,9 @@ import { airportCity } from "@/lib/airports";
 import { SCRIPT_RULES } from "@/lib/ai/script-rules";
 import { profileTravellers, type Profile } from "@/lib/profile/schema";
 import { applyVisaPolicy } from "@/lib/visa/policy";
+import { coerceModelIntent } from "./coerce";
 import { applyLocks } from "./edits";
-import { spokenBudgetMad } from "./spoken-budget";
+import { spokenBudgetMad, travellerNamedMoney } from "./spoken-budget";
 import {
   IntentSchema,
   QuestionSchemaAr,
@@ -107,8 +108,8 @@ Rules:
 2. origin_iata: the profile home airport, unless the traveller names another departure city.
 3. Dates are always in the future, relative to today. "nouss"/"mi-"/"mid" a month = the 15th. "bdyat"/"début"/"early" = the 1st. "lekher"/"fin"/"late" = the 24th. A month alone = the 15th. "chi semaine"/"une semaine"/"1 semaine"/"a week"/"one week" = 7 nights; "weekend" = Friday to Sunday. With a start and a length, return_date = depart_date + nights. A season alone ("f l'été", "summer") or nothing at all is too vague: dates and nights null.
 4. adults and children: only from the words ("m3a rajli" = with my husband = 2 adults, "m3a benti" = with my daughter = 1 adult and 1 child). If the transcript does not say who is travelling, copy the profile. If the profile does not say either, 1 adult and 0 children. Never assume 2.
-5. Money, only if the traveller says an amount in dirhams (dh, dirham, "alf" = thousand). Never guess. The amount goes only in budget_mad or budget_per_night_mad, never in a sentence: it is the traveller's own figure, not a price. Spoken amounts count, in darija, Arabic or French. "خمستاش الاف درهم" = 15000, "عشرين ألف درهم" = 20000, "تسعة الاف درهم" = 9000, "البودجي ديالي ماكسيمال هو تسعة الاف درهم" = 9000, "khamstach alf" = 15000, "15 alf dh" = 15000, "quinze mille dirhams" = 15000. A cap per night ("la nuit", "par nuit", "l lila", "per night", "لليلة") goes in budget_per_night_mad and budget_mad stays null. A total for the trip goes in budget_mad and budget_per_night_mad stays null. If they say neither, both are null.
-6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). label: 1 to 3 words in the label language.
+5. Money, only if the traveller says an amount in dirhams (dh, dirham, "alf" = thousand). Never guess. The amount goes only in budget_mad or budget_per_night_mad, never in a sentence: it is the traveller's own figure, not a price. Spoken amounts count, in darija, Arabic or French. "خمستاش الاف درهم" = 15000, "عشرين ألف درهم" = 20000, "تسعة الاف درهم" = 9000, "البودجي ديالي ماكسيمال هو تسعة الاف درهم" = 9000, "khamstach alf" = 15000, "15 alf dh" = 15000, "quinze mille dirhams" = 15000. A cap per night ("la nuit", "par nuit", "l lila", "per night", "لليلة") goes in budget_per_night_mad and budget_mad stays null. A total for the trip goes in budget_mad and budget_per_night_mad stays null. If they say neither, both are null. A star rating ("4 étoiles"), a calendar day, a duration or a number of travellers is not an amount.
+6. wishes: what they ask for (breakfast "b ftour", direct flight, halal, sea, pool...). A monument, landmark or neighbourhood ("à côté de l'horloge", a square, a district) is kind near_landmark and the label is the place name. Hotel stars ("4 étoiles") are kind other, never a budget. label: a few words in the label language.
 7. keywords: EXACT substrings copied from the transcript (same spelling, accents and case) that carry each extracted fact, with the slot they fill. At most 2 per slot, most telling first.
 8. Do not translate the transcript and do not write an English gloss of it. Another call does that.
 9. question: null when the destination and the dates are both precise enough to search. If the city, the dates, or both are missing, ask ONE short, friendly question and never a second one. Each quick answer must by itself fill every missing fact: the city, the departure day, and the return day or the number of nights. Do not split that across two questions, and do not ask again once an answer gave them. For "somewhere by the sea this summer" with a Moroccan passport, offer for example "Agadir · 1 week in early July", "Tangier · 1 week in mid-July", "Hammamet · 1 week in August" (darija, French and English; each language complete on its own). Set field to destination when the city is missing, otherwise to dates. Never ask about the departure city, travellers or papers. 2 to 4 options. Latin digits only. No amounts of money anywhere. Modern Standard Arabic in "ar" (fusha, never darija) only when the user message asks for it.
@@ -144,8 +145,6 @@ function daysBetween(from: string, to: string): number {
     (Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / 86_400_000
   );
 }
-
-const SPOKEN_NUMBER = /\d|mille|alf|alaf|ألف|آلاف|الف|الاف|million|mlyoun|thousand/i;
 
 /** The transcript names who is travelling. A silent note does not mean two adults. */
 const PARTY_MENTION =
@@ -240,9 +239,9 @@ function enforce(
   }
 
   const spoken = [transcript, ...answers.map((answer) => answer.answer)].join("\n");
-  // The figure they said is theirs. Read it from the words; never let the price guardrail drop it.
+  // The figure they said is theirs. A date, a star rating or a headcount is not one.
   const said = spokenBudgetMad(spoken);
-  const mentioned = said != null || SPOKEN_NUMBER.test(spoken);
+  const mentioned = travellerNamedMoney(spoken);
   if (!mentioned) {
     intent.budget_mad = null;
     intent.budget_per_night_mad = null;
@@ -384,7 +383,11 @@ export async function understand({
 
     let issue: string;
     try {
-      const parsed = modelSchema.safeParse(JSON.parse(content));
+      const prepared = coerceModelIntent(JSON.parse(content));
+      let parsed = modelSchema.safeParse(prepared);
+      if (!parsed.success && prepared && typeof prepared === "object" && !Array.isArray(prepared)) {
+        parsed = modelSchema.safeParse({ ...(prepared as Record<string, unknown>), question: null });
+      }
       if (parsed.success) {
         return enforce(
           { ...parsed.data, translation_en: "" },

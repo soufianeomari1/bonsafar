@@ -1,3 +1,5 @@
+import { containsMoney } from "@/lib/prices/guardrail";
+
 /**
  * A budget the traveller said, in digits or in words. This is their data,
  * not a price written by a model, so the price guardrail never clears it.
@@ -143,4 +145,12 @@ function plainDirhams(text: string): number | null {
 export function spokenBudgetMad(text: string): number | null {
   const folded = fold(text);
   return timesThousand(folded) ?? plainDirhams(folded);
+}
+
+/**
+ * True only when the traveller named an amount of money.
+ * A star rating, a date, a duration or a headcount does not count.
+ */
+export function travellerNamedMoney(text: string): boolean {
+  return spokenBudgetMad(text) != null || containsMoney(text);
 }

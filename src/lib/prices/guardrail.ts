@@ -10,12 +10,16 @@ const CURRENCY =
   "(?:dh|dhs|mad|dirhams?|درهم|دراهم|eur|euros?|€|\\$|usd|dollars?)";
 const NUMBER = "(?:\\d[\\d\\s.,\\u202f\\u00a0]*\\d|\\d)";
 const WORD_NUMBER = "(?:mille|milles|thousand|alf|alaf|ألف|آلاف|million|mlyoun)";
+/** A price word next to a number. Star ratings, dates and durations are not in this list. */
+const PRICE_WORD = "(?:prix|price|co[uû]t|tarif)";
 
 const MONEY = new RegExp(
   [
     `${NUMBER}\\s*(?:k\\s*)?${CURRENCY}(?![\\p{L}])`,
     `${CURRENCY}\\s*${NUMBER}`,
     `${WORD_NUMBER}\\s+${CURRENCY}(?![\\p{L}])`,
+    `${NUMBER}\\s*${PRICE_WORD}(?![\\p{L}])`,
+    `${PRICE_WORD}\\s*${NUMBER}`,
   ].join("|"),
   "giu"
 );
