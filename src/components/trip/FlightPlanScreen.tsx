@@ -47,6 +47,7 @@ const ERROR_KEY: Record<string, TranslationKey> = {
   origin_missing: "plan.error.origin_missing",
   timeout: "plan.error.timeout",
   agent_invalid_output: "plan.error.agent_invalid_output",
+  no_flights: "plan.error.no_flights",
   agent_failed: "plan.error.agent_failed",
   replay_unavailable: "plan.error.replay_unavailable",
   interrupted: "plan.error.interrupted",

@@ -2,7 +2,7 @@ import type { ChatCompletionTool } from "openai/resources/chat/completions";
 import type { RunLog } from "@/lib/ai/events";
 import type { Lang } from "@/lib/i18n";
 import type { Intent } from "@/lib/intent/schema";
-import { mergeFlightSearches, searchFlights, type FlightSearchParams } from "@/lib/mcp/kiwi";
+import { mergeFlightSearches, searchFlights, type FlightSearchParams, type KiwiSearch } from "@/lib/mcp/kiwi";
 import { findPlace } from "@/lib/mcp/places";
 import { priceTrends, searchHotels, type HotelStars } from "@/lib/mcp/trivago";
 import type { Profile } from "@/lib/profile/schema";
@@ -17,7 +17,7 @@ import {
 import { totalStops } from "@/lib/prices/totals";
 import { checkEntryRequirements } from "./entry";
 import { isHomeCountry } from "./homecoming";
-import { wantsArabic, type AgentStep, type AgentStreamEvent, type EntryRequirements, type StepPhase } from "./schema";
+import { AgentError, wantsArabic, type AgentStep, type AgentStreamEvent, type EntryRequirements, type StepPhase } from "./schema";
 
 /**
  * Data tools for Muse Wonder. Searches for the requested city start as soon
@@ -32,7 +32,7 @@ export const WONDER_TOOLS: ChatCompletionTool[] = [
     function: {
       name: "search_flights",
       description:
-        "Live round-trip flights from Kiwi.com from the traveller's departure airport to a city, for the trip dates and travellers. Returns offer ids (F1...) with times, stops, route, airlines, baggage, price_rank (1 = cheapest) and price_index (cheapest = 100).",
+        "Live round-trip flights from Kiwi.com from the traveller's departure airport to a city, for the trip dates and travellers. Returns offer ids (F1...) with times, stops, route, airlines, baggage, price_rank (1 = cheapest) and price_index (cheapest = 100). An offer with protection \"reduced\" is a last resort (separate tickets, an airport change or an overnight stop may apply): choose it only when no protected flight exists.",
       parameters: {
         type: "object",
         properties: {
@@ -139,6 +139,8 @@ export class AgentContext {
   readonly destinationCountry = new Map<string, string>();
   /** Destinations searched, by city key, with the IATA code when known. */
   readonly destinations = new Map<string, { city: string; country: string; iata: string }>();
+  /** V5 offers: separate tickets, airport changes or overnight stops may apply. */
+  private readonly reducedProtection = new Set<string>();
   private readonly started: Promise<unknown>[] = [];
 
   /** Waits for every search started in this run, failed ones included. */
@@ -204,33 +206,88 @@ export class AgentContext {
           locale,
         };
         const variants: { label: string; max_sector_stopovers: number; sort: "price" | "quality" }[] = [
-          { label: "direct, price", max_sector_stopovers: 0, sort: "price" },
-          { label: "one stop, quality", max_sector_stopovers: 1, sort: "quality" },
-          { label: "one stop, price", max_sector_stopovers: 1, sort: "price" },
+          { label: "V1 direct, price", max_sector_stopovers: 0, sort: "price" },
+          { label: "V2 one stop, quality", max_sector_stopovers: 1, sort: "quality" },
+          { label: "V3 one stop, price", max_sector_stopovers: 1, sort: "price" },
         ];
+        const runSearch = async (label: string, params: FlightSearchParams): Promise<KiwiSearch | null> => {
+          try {
+            return await searchFlights(params, this.log);
+          } catch (error) {
+            this.log.add({
+              step: "flights",
+              model: "code",
+              latency_ms: 0,
+              status: "error",
+              note: `${label} search failed (${errorCode(error)}); keeping the other results`,
+            });
+            return null;
+          }
+        };
         const settled = await Promise.all(
-          variants.map(async (variant) => {
-            try {
-              return await searchFlights(
-                { ...base, max_sector_stopovers: variant.max_sector_stopovers, sort: variant.sort },
-                this.log,
-              );
-            } catch (error) {
-              this.log.add({
-                step: "flights",
-                model: "code",
-                latency_ms: 0,
-                status: "error",
-                note: `${variant.label} search failed (${errorCode(error)}); keeping the other results`,
-              });
-              return null;
-            }
-          }),
+          variants.map((variant) =>
+            runSearch(variant.label, {
+              ...base,
+              max_sector_stopovers: variant.max_sector_stopovers,
+              sort: variant.sort,
+            }),
+          ),
         );
         const found = settled.flatMap((search) => (search ? [search] : []));
-        if (!found.length) throw new Error("All three flight searches failed.");
-        const search = mergeFlightSearches(found);
+        let merged = found.length ? mergeFlightSearches(found) : null;
+        let attempts = found.length;
+
+        if ((merged?.itineraries.length ?? 0) < 3) {
+          const before = merged?.itineraries.length ?? 0;
+          const v4 = await runSearch("V4 two stops, price", {
+            ...base,
+            max_sector_stopovers: 2,
+            sort: "price",
+          });
+          if (v4) {
+            attempts += 1;
+            merged = merged ? mergeFlightSearches([merged, v4]) : v4;
+          }
+          this.log.add({
+            step: "flights",
+            model: "code",
+            latency_ms: 0,
+            status: "fallback",
+            note: `V4 fallback: max_sector_stopovers 2 with the same exclusions, because V1+V2+V3 returned ${before} flights → ${merged?.itineraries.length ?? 0} flights`,
+          });
+        }
+
+        let reduced = false;
+        if ((merged?.itineraries.length ?? 0) === 0) {
+          const v5 = await runSearch("V5 reduced protection, price", {
+            ...base,
+            max_sector_stopovers: 1,
+            sort: "price",
+            exclude_risky_connections: false,
+          });
+          if (v5) {
+            attempts += 1;
+            merged = merged ? mergeFlightSearches([merged, v5]) : v5;
+            reduced = merged.itineraries.length > 0;
+          }
+          this.log.add({
+            step: "flights",
+            model: "code",
+            latency_ms: 0,
+            status: "fallback",
+            note: reduced
+              ? `V5 fallback: original parameters (max_sector_stopovers 1, without self-transfer, airport-change or overnight exclusions) → ${merged?.itineraries.length ?? 0} flights marked reduced protection`
+              : "V5 fallback: original parameters (max_sector_stopovers 1, without self-transfer, airport-change or overnight exclusions) → 0 flights",
+          });
+        }
+
+        if (!merged || merged.itineraries.length === 0) {
+          if (attempts === 0) throw new Error("All flight searches failed.");
+          throw new AgentError("no_flights", "No flights found for these dates.");
+        }
+        const search = merged;
         const offers = this.store.addFlights(search, city, new Date().toISOString());
+        if (reduced) for (const offer of offers) this.reducedProtection.add(offer.id);
         this.publish(offers);
         const top = [...offers].sort((a, b) => a.price - b.price).slice(0, 3);
         this.step("flights", "progress", city, {
@@ -250,7 +307,8 @@ export class AgentContext {
         this.step("flights", "done", city, { count: offers.length, passengers: search.passengers });
         return offers;
       } catch (error) {
-        this.step("flights", "error", city, { code: "flights_failed", detail: errorCode(error) });
+        const code = error instanceof AgentError && error.code === "no_flights" ? "no_flights" : "flights_failed";
+        this.step("flights", "error", city, { code, detail: errorCode(error) });
         throw error;
       }
     })();
@@ -460,13 +518,17 @@ export class AgentContext {
     const byPrice = [...offers].sort((a, b) => a.price_mad - b.price_mad);
     const byTime = [...offers].sort((a, b) => a.attrs.total_duration_min - b.attrs.total_duration_min);
     const direct = byPrice.filter((o) => totalStops(o) === 0);
-    const picked = [...new Set([...byPrice.slice(0, 6), ...byTime.slice(0, 2), ...direct.slice(0, 2)])].slice(0, 10);
+    const picked = [...new Set([...byPrice.slice(0, 6), ...byTime.slice(0, 2), ...direct.slice(0, 2)])]
+      .sort((a, b) => Number(this.reducedProtection.has(a.id)) - Number(this.reducedProtection.has(b.id)))
+      .slice(0, 10);
     return picked.map((o) => {
+      const reduced = this.reducedProtection.has(o.id);
       const out = o.attrs.outbound;
       const back = o.attrs.inbound;
       return {
         id: o.id,
         ...ranks.get(o.id),
+        ...(reduced ? { protection: "reduced" as const } : {}),
         outbound: {
           route: out.route.join("-"),
           depart: clock(out.departure),
@@ -594,11 +656,18 @@ export class AgentContext {
         if (!lockedCity) return JSON.stringify({ error: "city_required" });
         const offers = await this.flightsFor(lockedCity, lockedCountry, lockedIata);
         const first = offers[0];
+        const reduced = offers.some((o) => this.reducedProtection.has(o.id));
         result = {
           city: lockedCity,
           passengers: first?.attrs.passengers ?? null,
           count: offers.length,
           direct_count: offers.filter((o) => totalStops(o) === 0).length,
+          ...(reduced
+            ? {
+                protection: "reduced" as const,
+                note: "Last resort only. These flights have reduced protection: separate tickets, an airport change or an overnight stop may apply. Choose one because no protected flight was found.",
+              }
+            : {}),
           offers: this.flightView(offers),
         };
       } else if (name === "search_hotels") {
@@ -650,6 +719,7 @@ export class AgentContext {
       return JSON.stringify(result);
     } catch (error) {
       logCall("error", errorCode(error));
+      if (error instanceof AgentError) throw error;
       return JSON.stringify({ error: "tool_failed", detail: errorCode(error) });
     }
   }

@@ -284,6 +284,7 @@ export const fr: Dictionary = {
   "plan.error.origin_missing": "Je ne sais pas de quel aéroport tu pars.",
   "plan.error.timeout": "La recherche a pris trop de temps. Réessaie.",
   "plan.error.agent_invalid_output": "Le forfait est revenu incomplet. Réessaie.",
+  "plan.error.no_flights": "Aucun vol trouvé pour ces dates. Essaie d'autres dates.",
   "plan.error.agent_failed": "La recherche s'est arrêtée. Réessaie.",
   "plan.error.replay_unavailable": "Aucun voyage enregistré à rejouer.",
   "plan.error.interrupted": "La recherche a été interrompue. Réessaie.",

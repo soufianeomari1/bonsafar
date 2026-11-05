@@ -276,6 +276,7 @@ export const darijaArab: Dictionary = {
   "plan.error.origin_missing": "ما عرفتش من إينا مطار غادي تسافر.",
   "plan.error.timeout": "البحث طوّل بزاف. عاود.",
   "plan.error.agent_invalid_output": "الفورفي رجع ناقص. عاود.",
+  "plan.error.no_flights": "ما لقينا حتى طيارة ف هاد التواريخ. جرب تواريخ خرين.",
   "plan.error.agent_failed": "البحث وقف. عاود.",
   "plan.error.replay_unavailable": "ما كاينش سفر مسجّل.",
   "plan.error.interrupted": "البحث تقطع. عاود.",

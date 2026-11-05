@@ -277,6 +277,7 @@ export const darijaLatn: Dictionary = {
   "plan.error.origin_missing": "Ma 3reftch men ina matar ghadi tsafer.",
   "plan.error.timeout": "Lb7ath tewwel bzaf. 3awed.",
   "plan.error.agent_invalid_output": "Lforfait rje3 na9es. 3awed.",
+  "plan.error.no_flights": "Ma l9ina hta tiyara f had tawarikh. Jreb tawarikh khrin.",
   "plan.error.agent_failed": "Lb7ath w9ef. 3awed.",
   "plan.error.replay_unavailable": "Ma kaynch safar msajjal.",
   "plan.error.interrupted": "Lb7ath t9te3. 3awed.",

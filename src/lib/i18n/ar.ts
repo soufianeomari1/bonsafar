@@ -275,6 +275,7 @@ export const ar: Dictionary = {
   "plan.error.origin_missing": "لا أعرف من أي مطار تنطلق.",
   "plan.error.timeout": "استغرق البحث وقتًا طويلًا. أعد المحاولة.",
   "plan.error.agent_invalid_output": "عادت الباقة ناقصة. أعد المحاولة.",
+  "plan.error.no_flights": "لم نجد رحلات في هذه التواريخ. جرّب تواريخ أخرى.",
   "plan.error.agent_failed": "توقف البحث. أعد المحاولة.",
   "plan.error.replay_unavailable": "لا توجد رحلة محفوظة لإعادتها.",
   "plan.error.interrupted": "انقطع البحث. أعد المحاولة.",

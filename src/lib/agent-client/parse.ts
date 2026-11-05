@@ -85,6 +85,7 @@ const EventSchema = z.discriminatedUnion("type", [
       "origin_missing",
       "timeout",
       "agent_invalid_output",
+      "no_flights",
       "agent_failed",
       "replay_unavailable",
     ]),

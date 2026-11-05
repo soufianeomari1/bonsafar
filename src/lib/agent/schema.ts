@@ -44,8 +44,19 @@ export type AgentErrorCode =
   | "origin_missing"
   | "timeout"
   | "agent_invalid_output"
+  | "no_flights"
   | "agent_failed"
   | "replay_unavailable";
+
+export class AgentError extends Error {
+  constructor(
+    readonly code: AgentErrorCode,
+    detail?: string,
+  ) {
+    super(detail ?? code);
+    this.name = "AgentError";
+  }
+}
 
 const Trilingual = z.object({
   darija: z.string().min(1).max(280),

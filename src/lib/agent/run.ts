@@ -13,8 +13,8 @@ import { wonderContext, WONDER_SYSTEM_PROMPT } from "./prompt";
 import {
   WonderOutputSchema,
   WonderOutputSchemaAr,
+  AgentError,
   wantsArabic,
-  type AgentErrorCode,
   type AgentNotice,
   type AgentPackage,
   type AgentRequestSchema,
@@ -26,15 +26,7 @@ import {
 } from "./schema";
 import { AgentContext, WONDER_TOOLS } from "./tools";
 
-export class AgentError extends Error {
-  constructor(
-    readonly code: AgentErrorCode,
-    detail?: string,
-  ) {
-    super(detail ?? code);
-    this.name = "AgentError";
-  }
-}
+export { AgentError } from "./schema";
 
 function jsonSchema(schema: z.ZodType): Record<string, unknown> {
   const json = z.toJSONSchema(schema) as Record<string, unknown>;
@@ -211,6 +203,17 @@ export async function runAgent({
   const ctx = new AgentContext(dated, profile, lang, jury, origin, store, log, emit);
   ctx.prefetch(destination);
 
+  /** An empty flight search is "no flights", never a generic incomplete package. */
+  const failIncomplete = async (detail?: string): Promise<never> => {
+    try {
+      const offers = await ctx.flightsFor(destination.city, destination.country, destination.iata);
+      if (offers.length === 0) throw new AgentError("no_flights", "No flights found for these dates.");
+    } catch (error) {
+      if (error instanceof AgentError && error.code === "no_flights") throw error;
+    }
+    throw new AgentError("agent_invalid_output", detail);
+  };
+
   emit({ type: "step", step: "package", phase: "start", destination: destination.city });
 
   const arabic = wantsArabic(lang);
@@ -289,7 +292,7 @@ export async function runAgent({
         },
       });
       if (functionCalls(answered.completion.choices[0]?.message).length > 0) {
-        throw new AgentError("agent_invalid_output", "The planner called a tool instead of returning the package.");
+        await failIncomplete("The planner called a tool instead of returning the package.");
       }
     }
     return answered;
@@ -353,7 +356,7 @@ export async function runAgent({
         scrubbed = final !== candidate;
         break;
       }
-      throw new AgentError("agent_invalid_output", issues.join(" ").slice(0, 300));
+      await failIncomplete(issues.join(" ").slice(0, 300));
     }
 
     repairs += 1;
@@ -367,13 +370,20 @@ export async function runAgent({
     );
   }
 
-  if (!final) throw new AgentError("agent_invalid_output", "No package after the last turn.");
+  if (!final) {
+    await failIncomplete("No package after the last turn.");
+    throw new AgentError("agent_invalid_output", "No package after the last turn.");
+  }
 
   await ctx.settle();
 
   const recFlight = store.flight(final.recommended.flight_id);
-  if (!recFlight) throw new AgentError("agent_invalid_output");
+  if (!recFlight) {
+    await failIncomplete();
+    throw new AgentError("agent_invalid_output");
+  }
   if (cityKey(recFlight.destination) !== cityKey(destination.city)) {
+    await failIncomplete("The package left the requested city.");
     throw new AgentError("agent_invalid_output", "The package left the requested city.");
   }
   const requestedEntry = ctx.entryForCity(destination.city);

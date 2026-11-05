@@ -168,6 +168,11 @@ export type FlightSearchParams = {
   /** Connections allowed on each sector. Direct searches pass 0. */
   max_sector_stopovers?: number;
   sort?: "price" | "duration" | "quality" | "date" | "popularity";
+  /**
+   * Default true: no separate tickets, no airport change, no overnight stop.
+   * False is the original Kiwi.com search, used only as a last resort.
+   */
+  exclude_risky_connections?: boolean;
 };
 
 /** One list for the price store: the same Kiwi.com itinerary id is kept once. */
@@ -229,10 +234,12 @@ export async function searchFlights(params: FlightSearchParams, log: RunLog): Pr
     locale: params.locale,
     sort: params.sort ?? "price",
     max_sector_stopovers: params.max_sector_stopovers ?? 1,
-    allow_self_transfer: false,
-    allow_diff_airport_connection: false,
-    allow_overnight_stopovers: false,
   };
+  if (params.exclude_risky_connections !== false) {
+    args.allow_self_transfer = false;
+    args.allow_diff_airport_connection = false;
+    args.allow_overnight_stopovers = false;
+  }
   if (params.return_date) args.returnDate = kiwiDate(params.return_date);
 
   const result = await callMcpTool({

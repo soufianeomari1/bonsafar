@@ -296,6 +296,7 @@ export const en = {
   "plan.error.origin_missing": "I don't know which airport you leave from.",
   "plan.error.timeout": "This search took too long. Try again.",
   "plan.error.agent_invalid_output": "The package came back incomplete. Try again.",
+  "plan.error.no_flights": "No flights found for these dates. Try other dates.",
   "plan.error.agent_failed": "The search stopped. Try again.",
   "plan.error.replay_unavailable": "No saved trip to replay.",
   "plan.error.interrupted": "The search was interrupted. Try again.",

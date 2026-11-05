@@ -56,6 +56,7 @@ export type AgentRunError = {
     | "origin_missing"
     | "timeout"
     | "agent_invalid_output"
+    | "no_flights"
     | "agent_failed"
     | "replay_unavailable"
     | "interrupted"
