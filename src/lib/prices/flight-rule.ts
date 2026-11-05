@@ -17,10 +17,16 @@ function cheapest(flights: FlightOffer[]): FlightOffer | null {
   return best;
 }
 
+/** Adults and children pay a fare. Infants do not raise the direct-flight cap. */
+function payingTravellers(flight: FlightOffer): number {
+  const people = flight.attrs.passengers;
+  return Math.max(1, (people?.adults ?? 0) + (people?.children ?? 0));
+}
+
 /**
  * Recommend the cheapest direct flight unless it costs both more than
- * DIRECT_MAX_EXTRA_RATIO and more than DIRECT_MAX_EXTRA_MAD above the
- * cheapest flight that has a stop. Searches already cap each sector at one stop.
+ * DIRECT_MAX_EXTRA_RATIO and more than DIRECT_MAX_EXTRA_MAD per paying
+ * traveller above the cheapest flight that has a stop.
  */
 export function applyFlightRule(chosenId: string, flights: FlightOffer[]): FlightRuleDecision {
   const chosen = flights.find((flight) => flight.id === chosenId) ?? null;
@@ -33,7 +39,9 @@ export function applyFlightRule(chosenId: string, flights: FlightOffer[]): Fligh
   let note = "kept: the choice already follows the direct-flight rule";
   if (direct && oneStop) {
     const extra = direct.price_mad - oneStop.price_mad;
-    const tooDear = extra > DIRECT_MAX_EXTRA_MAD && extra / oneStop.price_mad > DIRECT_MAX_EXTRA_RATIO;
+    const people = payingTravellers(direct);
+    const tooDear =
+      extra > DIRECT_MAX_EXTRA_MAD * people && extra / oneStop.price_mad > DIRECT_MAX_EXTRA_RATIO;
     pick = tooDear ? oneStop : direct;
     note = tooDear
       ? `replaced ${chosenId} with ${pick.id}: the direct flight exceeds both thresholds`
